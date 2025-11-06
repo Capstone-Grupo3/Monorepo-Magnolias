@@ -14,7 +14,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "axios": "^1.6.5",
-    "zustand": "^4.4.7",
+    "zustand": "^5.0.8",
     "framer-motion": "^10.16.16",
     "react-hook-form": "^7.49.2",
     "zod": "^3.22.4",
