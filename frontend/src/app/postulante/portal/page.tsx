@@ -5,7 +5,6 @@ import {
   User,
   Briefcase,
   FileText,
-  LogOut,
   Search,
   MapPin,
   Clock,
@@ -21,6 +20,13 @@ import { usePostulantePortal } from "@/hooks/usePostulantePortal";
 
 // Importar utilidades
 import { formatDate, getEstadoColor, formatCurrency } from "@/lib/formatters";
+
+// Importar componentes compartidos
+import {
+  DashboardHeader,
+  LoadingSpinner,
+  LogoutButton
+} from "@/components/shared";
 
 export default function PortalCandidatoPage() {
   // Usar hook personalizado para toda la lógica
@@ -109,43 +115,17 @@ export default function PortalCandidatoPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-      {/* Header */}
-      <header className="bg-white shadow-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-xl shadow-lg">
-                <Briefcase className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">
-                  Portal de Postulante
-                </h1>
-                <p className="text-sm text-slate-600">{postulante?.nombre}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg transition-all shadow-sm"
-            >
-              <LogOut size={20} />
-              Cerrar Sesión
-            </button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        icon={Briefcase}
+        title="Portal de Postulante"
+        subtitle={postulante?.nombre}
+        actions={<LogoutButton onLogout={handleLogout} />}
+      />
 
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-slate-200 shadow-sm">
