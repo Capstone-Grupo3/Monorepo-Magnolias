@@ -272,7 +272,7 @@ export default function DashboardEmpresaPage() {
               title="Pendientes"
               value={postulacionesPendientes}
               icon={Clock}
-              color="orange"
+              color="yellow"
             />
             <StatCard
               title="Aprobadas"
