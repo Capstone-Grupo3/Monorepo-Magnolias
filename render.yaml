@@ -22,21 +22,12 @@ services:
         value: "true"
       - key: EXECUTIONS_DATA_PRUNE_MAX_COUNT
         value: "10000"
-      # Database Connection
+      # Database Connection - usar connectionString de PostgreSQL
       - key: DB_TYPE
         value: postgresdb
-      - key: DB_POSTGRESDB_HOST
+      - key: DB_POSTGRESDB_CONNECTION_STRING
         fromService:
           name: n8n-postgres
-          property: host
-      - key: DB_POSTGRESDB_PORT
-        value: "5432"
-      - key: DB_POSTGRESDB_USER
-        fromService:
-          name: n8n-postgres
-          property: user
-      - key: DB_POSTGRESDB_PASSWORD
-        fromService:
-          name: n8n-postgres
-          property: password
+          type: pserv
+          property: connectionString
     pullRequestPreviewsEnabled: false
