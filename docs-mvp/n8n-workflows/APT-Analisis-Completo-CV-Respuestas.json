@@ -1,0 +1,480 @@
+{
+  "name": "APT - Análisis Completo CV + Respuestas (MVP Producción)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "analizar-postulacion",
+        "method": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "🎯 Trigger: Nueva Postulación",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 460],
+      "webhookId": "apt-nueva-postulacion"
+    },
+    {
+      "parameters": {
+        "url": "=http://apt-backend:3000/postulaciones/{{ $json.postulacionId }}",
+        "authentication": "none",
+        "requestMethod": "GET",
+        "options": {}
+      },
+      "id": "get-postulacion",
+      "name": "📄 Obtener Postulación",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 460]
+    },
+    {
+      "parameters": {
+        "url": "=http://apt-backend:3000/vacantes/{{ $json.idVacante }}",
+        "authentication": "none",
+        "requestMethod": "GET",
+        "options": {}
+      },
+      "id": "get-vacante",
+      "name": "💼 Obtener Vacante",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 360]
+    },
+    {
+      "parameters": {
+        "url": "=http://apt-backend:3000/candidatos/{{ $('📄 Obtener Postulación').item.json.idCandidato }}",
+        "authentication": "none",
+        "requestMethod": "GET",
+        "options": {}
+      },
+      "id": "get-candidato",
+      "name": "👤 Obtener Candidato",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 560]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =====================================================\n// PREPARAR DATOS PARA ANÁLISIS DE IA\n// =====================================================\n\nconst postulacion = $('📄 Obtener Postulación').item.json;\nconst vacante = $('💼 Obtener Vacante').item.json;\nconst candidato = $('👤 Obtener Candidato').item.json;\n\n// Extraer respuestas del formulario\nconst respuestasJson = postulacion.respuestasJson || {};\nconst preguntasJson = vacante.preguntasJson || [];\n\n// Combinar preguntas con respuestas\nlet preguntasYRespuestas = [];\n\nif (Array.isArray(preguntasJson) && preguntasJson.length > 0) {\n  preguntasYRespuestas = preguntasJson.map((p, index) => {\n    const preguntaTexto = typeof p === 'string' ? p : (p.pregunta || `Pregunta ${index + 1}`);\n    const respuestaKey = `pregunta_${index + 1}`;\n    const respuesta = respuestasJson[respuestaKey] || respuestasJson[index] || 'Sin respuesta';\n    \n    return {\n      pregunta: preguntaTexto,\n      respuesta: respuesta\n    };\n  });\n}\n\n// URL del CV en Supabase\nconst cvUrl = candidato.cvUrl || postulacion.cvUrl || '';\n\n// Información del candidato\nconst infoCandidato = {\n  id: candidato.id,\n  nombre: candidato.nombre || 'Sin nombre',\n  correo: candidato.correo || '',\n  experienciaAnios: candidato.experienciaAnios || 0,\n  skills: candidato.skillsJson || [],\n  linkedinUrl: candidato.linkedinUrl || ''\n};\n\n// Información de la vacante\nconst infoVacante = {\n  id: vacante.id,\n  titulo: vacante.titulo || 'Sin título',\n  descripcion: vacante.descripcion || '',\n  requisitos: vacante.requisitos || 'No especificados',\n  modalidad: vacante.modalidad || 'No especificado',\n  ubicacion: vacante.ubicacion || 'No especificado',\n  tipoContrato: vacante.tipoContrato || 'No especificado',\n  salarioEstimado: vacante.salarioEstimado || 0\n};\n\n// Output consolidado\nreturn {\n  json: {\n    postulacionId: postulacion.id,\n    cvUrl: cvUrl,\n    preguntasYRespuestas: preguntasYRespuestas,\n    candidato: infoCandidato,\n    vacante: infoVacante,\n    hayCv: !!cvUrl && cvUrl.length > 0,\n    hayRespuestas: preguntasYRespuestas.length > 0,\n    hayPreguntas: preguntasJson.length > 0\n  }\n};"
+      },
+      "id": "preparar-datos",
+      "name": "🔧 Preparar Datos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 460]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-cv-condition",
+              "leftValue": "={{ $json.hayCv }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-cv",
+      "name": "❓ ¿Tiene CV?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 460]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.cvUrl }}",
+        "authentication": "none",
+        "requestMethod": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-cv",
+      "name": "⬇️ Descargar CV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1340, 360]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =====================================================\n// EXTRACCIÓN DE TEXTO DEL CV (SIMULACIÓN)\n// =====================================================\n// NOTA: En producción, usar servicio de OCR real\n// Opciones: Google Cloud Vision, AWS Textract, pdf-parse\n// =====================================================\n\nconst datosCandidato = $('🔧 Preparar Datos').item.json.candidato;\nconst infoVacante = $('🔧 Preparar Datos').item.json.vacante;\n\n// Por ahora usamos información estructurada del candidato\n// En producción, esto vendría del parsing del PDF\n\nconst textoCV = `\nCURRÍCULUM VITAE\n================\n\nNOMBRE: ${datosCandidato.nombre}\nCORREO: ${datosCandidato.correo}\nLINKEDIN: ${datosCandidato.linkedinUrl || 'No proporcionado'}\nAÑOS DE EXPERIENCIA: ${datosCandidato.experienciaAnios || 0} años\n\nHABILIDADES Y COMPETENCIAS:\n${JSON.stringify(datosCandidato.skills, null, 2)}\n\n---\nNOTA: Este es un CV simulado basado en la información del perfil.\nEn producción, este texto vendría de la extracción real del PDF/DOCX.\n`;\n\nreturn {\n  json: {\n    textoExtraidoCV: textoCV,\n    largoTexto: textoCV.length,\n    extraccionExitosa: true,\n    metodoParseo: 'MOCK - Datos estructurados del candidato'\n  }\n};"
+      },
+      "id": "extract-cv-text",
+      "name": "📝 Extraer Texto CV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 360]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sin CV disponible\nreturn {\n  json: {\n    textoExtraidoCV: '[SIN CV SUBIDO - Análisis basado únicamente en respuestas del formulario]',\n    largoTexto: 0,\n    extraccionExitosa: false,\n    metodoParseo: 'N/A'\n  }\n};"
+      },
+      "id": "sin-cv",
+      "name": "❌ Sin CV",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 560]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-cv-data",
+      "name": "🔀 Merge Datos CV",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1780, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "// =====================================================\n// COMBINAR TODOS LOS DATOS PARA OPENAI\n// =====================================================\n\nconst datosPreparados = $('🔧 Preparar Datos').item.json;\nconst cvData = $input.item.json;\n\nconst promptData = {\n  // Datos del candidato\n  candidato: {\n    nombre: datosPreparados.candidato.nombre,\n    experienciaAnios: datosPreparados.candidato.experienciaAnios,\n    skills: datosPreparados.candidato.skills,\n    linkedinUrl: datosPreparados.candidato.linkedinUrl\n  },\n  \n  // Datos de la vacante\n  vacante: {\n    titulo: datosPreparados.vacante.titulo,\n    descripcion: datosPreparados.vacante.descripcion,\n    requisitos: datosPreparados.vacante.requisitos,\n    modalidad: datosPreparados.vacante.modalidad,\n    ubicacion: datosPreparados.vacante.ubicacion,\n    tipoContrato: datosPreparados.vacante.tipoContrato\n  },\n  \n  // Preguntas y respuestas del formulario\n  preguntasYRespuestas: datosPreparados.preguntasYRespuestas,\n  \n  // Texto extraído del CV\n  textoCV: cvData.textoExtraidoCV,\n  \n  // Metadata\n  tieneCV: cvData.extraccionExitosa,\n  hayPreguntas: datosPreparados.hayPreguntas,\n  postulacionId: datosPreparados.postulacionId\n};\n\nreturn { json: promptData };"
+      },
+      "id": "combine-data",
+      "name": "📦 Combinar Datos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 460]
+    },
+    {
+      "parameters": {
+        "resource": "text",
+        "operation": "message",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres un experto reclutador y analista de talento con 15 años de experiencia en tecnología y recursos humanos.\n\nTu tarea es analizar postulaciones laborales comparando:\n1. El CV del candidato (experiencia, habilidades, educación, proyectos)\n2. Las respuestas del candidato a preguntas clave formuladas por el empleador\n3. Los requisitos y descripción de la vacante\n\nOBJETIVOS PRINCIPALES:\n✓ VALIDAR LA VERACIDAD: Detectar discrepancias entre lo que el candidato dice en sus respuestas y lo que su CV demuestra\n✓ EVALUAR COMPATIBILIDAD: Determinar qué tan bien el candidato encaja con los requisitos de la vacante\n✓ PROPORCIONAR INSIGHTS: Identificar fortalezas, debilidades y áreas de preocupación\n\n⚠️ IMPORTANTE: Debes responder EXCLUSIVAMENTE en formato JSON válido, sin texto adicional antes o después.\n\nFORMATO DE RESPUESTA (JSON estricto):\n{\n  \"scoreCompatibilidad\": [0-100],\n  \"scoreVeracidad\": [0-100],\n  \"scoreFinal\": [0-100],\n  \"fortalezas\": [\"fortaleza 1\", \"fortaleza 2\", \"...\"],\n  \"debilidades\": [\"debilidad 1\", \"debilidad 2\", \"...\"],\n  \"discrepancias\": [\"discrepancia 1 con explicación\", \"...\"],\n  \"analisisDetallado\": \"Análisis completo en 3-4 párrafos explicando la evaluación\",\n  \"recomendacion\": \"RECOMENDAR\" | \"REVISAR\" | \"NO_RECOMENDAR\"\n}\n\nCRITERIOS DE SCORING:\n\n1. scoreCompatibilidad (0-100):\n   - 90-100: Excelente match, cumple todos los requisitos y más\n   - 75-89: Buen match, cumple la mayoría de requisitos\n   - 60-74: Match aceptable, cumple requisitos mínimos\n   - 40-59: Match parcial, le faltan algunas competencias clave\n   - 0-39: Match bajo, no cumple requisitos principales\n\n2. scoreVeracidad (0-100):\n   - 90-100: Total coherencia entre CV y respuestas\n   - 75-89: Pequeñas inconsistencias menores\n   - 60-74: Algunas discrepancias detectadas\n   - 40-59: Varias discrepancias importantes\n   - 0-39: Múltiples inconsistencias graves, posibles falsedades\n\n3. scoreFinal = (scoreCompatibilidad × 0.6) + (scoreVeracidad × 0.4)\n\n4. recomendacion:\n   - \"RECOMENDAR\": scoreFinal >= 75 y scoreVeracidad >= 70\n   - \"REVISAR\": scoreFinal 50-74 o scoreVeracidad 50-69\n   - \"NO_RECOMENDAR\": scoreFinal < 50 o scoreVeracidad < 50\n\nRECUERDA: Responde SOLO con JSON válido, sin markdown, sin explicaciones adicionales."
+            },
+            {
+              "role": "user",
+              "content": "=ANALIZA LA SIGUIENTE POSTULACIÓN:\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 INFORMACIÓN DE LA VACANTE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n• TÍTULO: {{ $json.vacante.titulo }}\n• MODALIDAD: {{ $json.vacante.modalidad }}\n• UBICACIÓN: {{ $json.vacante.ubicacion }}\n• TIPO DE CONTRATO: {{ $json.vacante.tipoContrato }}\n\nDESCRIPCIÓN:\n{{ $json.vacante.descripcion }}\n\nREQUISITOS:\n{{ $json.vacante.requisitos }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 INFORMACIÓN DEL CANDIDATO\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n• NOMBRE: {{ $json.candidato.nombre }}\n• AÑOS DE EXPERIENCIA DECLARADOS: {{ $json.candidato.experienciaAnios }} años\n• LINKEDIN: {{ $json.candidato.linkedinUrl || 'No proporcionado' }}\n• HABILIDADES REGISTRADAS: {{ JSON.stringify($json.candidato.skills) }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💬 RESPUESTAS DEL CANDIDATO A PREGUNTAS CLAVE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n{{ $json.preguntasYRespuestas.length === 0 ? 'No hay preguntas específicas para esta vacante.' : $json.preguntasYRespuestas.map((item, i) => `\n${i+1}. PREGUNTA: ${item.pregunta}\n   RESPUESTA: ${item.respuesta}\n`).join('\\n') }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📄 CONTENIDO DEL CV\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n{{ $json.textoCV }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🎯 INSTRUCCIONES DE ANÁLISIS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. VALIDACIÓN CRUZADA:\n   ✓ Compara las respuestas del formulario con la información del CV\n   ✓ Identifica discrepancias específicas (años de experiencia, proyectos mencionados, habilidades, logros)\n   ✓ Evalúa si las competencias declaradas tienen evidencia en el CV\n\n2. EVALUACIÓN DE COMPATIBILIDAD:\n   ✓ Analiza qué tan bien el candidato cumple con los requisitos de la vacante\n   ✓ Considera experiencia, habilidades técnicas, modalidad de trabajo, ubicación\n   ✓ Identifica fortalezas que lo hacen destacar\n   ✓ Identifica gaps o áreas de mejora\n\n3. CÁLCULO DE SCORES:\n   ✓ scoreCompatibilidad: Basado en match con requisitos\n   ✓ scoreVeracidad: Basado en coherencia CV vs respuestas\n   ✓ scoreFinal: Promedio ponderado (60% compatibilidad + 40% veracidad)\n\n4. RECOMENDACIÓN FINAL:\n   ✓ RECOMENDAR: Excelente candidato, pasar a entrevista\n   ✓ REVISAR: Candidato prometedor pero requiere validación adicional\n   ✓ NO_RECOMENDAR: No cumple requisitos mínimos o hay inconsistencias graves\n\n⚠️ IMPORTANTE: Responde ÚNICAMENTE con el JSON, sin texto adicional."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 2000
+        }
+      },
+      "id": "openai-analysis",
+      "name": "🤖 Análisis IA (OpenAI)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.3,
+      "position": [2220, 460],
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// =====================================================\n// PROCESAR RESPUESTA DE OPENAI\n// =====================================================\n\nconst respuestaOpenAI = $input.item.json.message?.content || $input.item.json.choices?.[0]?.message?.content || '';\n\nlet analisis;\n\ntry {\n  // Limpiar posible markdown o texto extra\n  let jsonText = respuestaOpenAI.trim();\n  \n  // Remover markdown code blocks si existen\n  jsonText = jsonText.replace(/^```json\\s*/i, '').replace(/^```\\s*/i, '').replace(/\\s*```$/i, '');\n  \n  // Parsear JSON\n  analisis = JSON.parse(jsonText);\n  \n  // Validar campos requeridos\n  if (!analisis.scoreCompatibilidad || !analisis.scoreVeracidad || !analisis.scoreFinal) {\n    throw new Error('JSON incompleto: faltan campos de scores');\n  }\n  \n  // Asegurar que los arrays existen\n  analisis.fortalezas = analisis.fortalezas || [];\n  analisis.debilidades = analisis.debilidades || [];\n  analisis.discrepancias = analisis.discrepancias || [];\n  analisis.analisisDetallado = analisis.analisisDetallado || 'Sin análisis detallado';\n  analisis.recomendacion = analisis.recomendacion || 'REVISAR';\n  \n} catch (error) {\n  // Si falla el parsing, crear respuesta por defecto\n  console.error('Error al parsear respuesta de OpenAI:', error.message);\n  console.error('Respuesta recibida:', respuestaOpenAI);\n  \n  analisis = {\n    scoreCompatibilidad: 50,\n    scoreVeracidad: 50,\n    scoreFinal: 50,\n    fortalezas: [\n      'Postulación recibida correctamente'\n    ],\n    debilidades: [\n      'Error al procesar análisis de IA - Se requiere revisión manual'\n    ],\n    discrepancias: [\n      `Error de parsing: ${error.message}`\n    ],\n    analisisDetallado: `No se pudo completar el análisis automático. Error técnico: ${error.message}. La postulación requiere revisión manual por parte del equipo de reclutamiento.`,\n    recomendacion: 'REVISAR',\n    _error: true,\n    _errorMessage: error.message,\n    _respuestaRaw: respuestaOpenAI.substring(0, 500) // Primeros 500 chars para debug\n  };\n}\n\n// Asegurar rangos de scores (0-100)\nanalisis.scoreCompatibilidad = Math.max(0, Math.min(100, Number(analisis.scoreCompatibilidad) || 50));\nanalisis.scoreVeracidad = Math.max(0, Math.min(100, Number(analisis.scoreVeracidad) || 50));\nanalisis.scoreFinal = Math.max(0, Math.min(100, Number(analisis.scoreFinal) || 50));\n\n// Preparar datos para actualizar postulación\nconst postulacionId = $('📦 Combinar Datos').item.json.postulacionId;\n\n// Crear feedback en formato texto limpio para la BD\nconst feedbackTexto = `\n=== ANÁLISIS DE POSTULACIÓN ===\n\nSCORE FINAL: ${analisis.scoreFinal}/100\n• Compatibilidad: ${analisis.scoreCompatibilidad}/100\n• Veracidad: ${analisis.scoreVeracidad}/100\n\nRECOMENDACIÓN: ${analisis.recomendacion}\n\n--- FORTALEZAS ---\n${analisis.fortalezas.map((f, i) => `${i+1}. ${f}`).join('\\n')}\n\n--- DEBILIDADES ---\n${analisis.debilidades.map((d, i) => `${i+1}. ${d}`).join('\\n')}\n\n${analisis.discrepancias.length > 0 ? `--- DISCREPANCIAS DETECTADAS ---\\n${analisis.discrepancias.map((d, i) => `${i+1}. ${d}`).join('\\n')}\\n` : ''}\n--- ANÁLISIS DETALLADO ---\n${analisis.analisisDetallado}\n`;\n\nreturn {\n  json: {\n    postulacionId: postulacionId,\n    puntajeIa: analisis.scoreFinal,\n    feedbackIa: feedbackTexto,\n    analisisCompleto: analisis, // JSON completo para respuesta del webhook\n    estadoNuevo: analisis.scoreFinal >= 75 ? 'EVALUADO' : analisis.scoreFinal >= 50 ? 'EN_REVISION' : 'EVALUADO'\n  }\n};"
+      },
+      "id": "process-ia-result",
+      "name": "⚙️ Procesar Resultado IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 460]
+    },
+    {
+      "parameters": {
+        "url": "=http://apt-backend:3000/postulaciones/{{ $json.postulacionId }}",
+        "authentication": "none",
+        "requestMethod": "PATCH",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "values": [
+            {
+              "name": "puntajeIa",
+              "value": "={{ $json.puntajeIa }}"
+            },
+            {
+              "name": "feedbackIa",
+              "value": "={{ $json.feedbackIa }}"
+            },
+            {
+              "name": "estado",
+              "value": "={{ $json.estadoNuevo }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "update-postulacion",
+      "name": "💾 Actualizar Postulación",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2660, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  success: true,\n  postulacionId: $('⚙️ Procesar Resultado IA').item.json.postulacionId,\n  analisis: $('⚙️ Procesar Resultado IA').item.json.analisisCompleto,\n  message: 'Análisis completado exitosamente'\n}, null, 2) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-webhook",
+      "name": "✅ Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2880, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log de error para debugging\nconst error = $input.item?.error || 'Error desconocido';\nconsole.error('❌ Error en workflow:', error);\n\nreturn {\n  json: {\n    success: false,\n    error: error.message || error,\n    postulacionId: $('🎯 Trigger: Nueva Postulación').item?.json?.postulacionId || 'unknown',\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "error-handler",
+      "name": "🚨 Manejador de Errores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 660]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json, null, 2) }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "respond-error",
+      "name": "❌ Responder Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2660, 660]
+    }
+  ],
+  "connections": {
+    "🎯 Trigger: Nueva Postulación": {
+      "main": [
+        [
+          {
+            "node": "📄 Obtener Postulación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Obtener Postulación": {
+      "main": [
+        [
+          {
+            "node": "💼 Obtener Vacante",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "👤 Obtener Candidato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💼 Obtener Vacante": {
+      "main": [
+        [
+          {
+            "node": "🔧 Preparar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "👤 Obtener Candidato": {
+      "main": [
+        [
+          {
+            "node": "🔧 Preparar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Preparar Datos": {
+      "main": [
+        [
+          {
+            "node": "❓ ¿Tiene CV?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❓ ¿Tiene CV?": {
+      "main": [
+        [
+          {
+            "node": "⬇️ Descargar CV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Sin CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⬇️ Descargar CV": {
+      "main": [
+        [
+          {
+            "node": "📝 Extraer Texto CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Extraer Texto CV": {
+      "main": [
+        [
+          {
+            "node": "🔀 Merge Datos CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❌ Sin CV": {
+      "main": [
+        [
+          {
+            "node": "🔀 Merge Datos CV",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "🔀 Merge Datos CV": {
+      "main": [
+        [
+          {
+            "node": "📦 Combinar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📦 Combinar Datos": {
+      "main": [
+        [
+          {
+            "node": "🤖 Análisis IA (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 Análisis IA (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Procesar Resultado IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Procesar Resultado IA": {
+      "main": [
+        [
+          {
+            "node": "💾 Actualizar Postulación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Actualizar Postulación": {
+      "main": [
+        [
+          {
+            "node": "✅ Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "1.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "apt-mvp-production"
+  },
+  "id": "apt-analisis-completo",
+  "tags": [
+    {
+      "id": "apt",
+      "name": "APT"
+    },
+    {
+      "id": "reclutamiento",
+      "name": "Reclutamiento"
+    },
+    {
+      "id": "ia",
+      "name": "Inteligencia Artificial"
+    },
+    {
+      "id": "mvp",
+      "name": "MVP"
+    }
+  ]
+}

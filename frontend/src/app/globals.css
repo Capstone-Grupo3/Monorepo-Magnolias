@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: theme("colors.gray.200");
+  }
+
+  body {
+    margin: 0;
+    font-family: theme("fontFamily.sans");
+  }
+}

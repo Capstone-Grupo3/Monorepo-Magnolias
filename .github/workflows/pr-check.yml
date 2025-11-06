@@ -1,0 +1,163 @@
+﻿name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # ValidaciÃ³n de cÃ³digo
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check for merge conflicts
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }} | grep -q "<<<<<<"; then
+            echo "âŒ Merge conflicts detected"
+            exit 1
+          fi
+
+      - name: Check commit messages
+        run: |
+          echo "Validating commit messages..."
+          git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" | while read msg; do
+            if [[ ! $msg =~ ^(feat|fix|docs|style|refactor|test|chore|perf)(\(.+\))?: ]]; then
+              echo "âš ï¸ Commit message doesn't follow conventional commits: $msg"
+            fi
+          done
+
+  # AnÃ¡lisis de cambios en Backend
+  backend-changes:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'backend/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        run: npm ci
+
+      - name: Check for breaking changes in API
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        run: |
+          echo "Checking for breaking changes..."
+          # AquÃ­ podrÃ­as agregar herramientas como OpenAPI diff
+          npx prisma validate
+
+      - name: Run type checking
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        run: npx tsc --noEmit
+
+      - name: Check Prisma schema
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        run: npx prisma format --check
+
+  # AnÃ¡lisis de cambios en Frontend
+  frontend-changes:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'frontend/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        run: npm ci --legacy-peer-deps
+
+      - name: Run type checking
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        run: npx tsc --noEmit
+
+      - name: Check for unused dependencies
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        run: npx depcheck
+        continue-on-error: true
+
+  # AnÃ¡lisis de tamaÃ±o de bundle
+  bundle-size:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'frontend/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        run: npm ci --legacy-peer-deps
+
+      - name: Build and analyze
+        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        run: |
+          npm run build
+          du -sh .next/ || echo "Could not measure bundle size"
+
+      - name: Comment bundle size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'ðŸ“¦ Bundle build completed. Check the logs for size information.'
+            });
+
+  # Resumen de PR
+  pr-summary:
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    if: always()
+    
+    steps:
+      - name: PR Summary Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ needs.code-quality.result }}' === 'success' ? 'âœ…' : 'âŒ';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ${status} Pull Request Check Summary\n\n` +
+                    `**Status:** ${status}\n` +
+                    `**Commit:** ${context.sha.substring(0, 7)}\n` +
+                    `**Author:** @${context.actor}\n\n` +
+                    `---\n` +
+                    `All automated checks have been completed. Please review the details above.`
+            });
+
