@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend/**'
+      - 'frontend/**'
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
             --exclude='.next' \
             --exclude='.env.local' \
             --exclude='.env*.local' \
-            "monorepo/Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend/" \
+            monorepo/frontend/ \
             frontend-deployment/
           
           echo "✅ Files synced successfully"
@@ -56,7 +56,7 @@ jobs:
             git add .
             
             # Obtener el último commit message del monorepo relacionado con frontend
-            COMMIT_MSG=$(cd ../monorepo && git log -1 --pretty=%B -- "Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend")
+            COMMIT_MSG=$(cd ../monorepo && git log -1 --pretty=%B -- "frontend")
             
             # Crear commit con mensaje multi-línea
             git commit -m "chore: sync from monorepo" -m "${COMMIT_MSG}" -m "Synced from monorepo commit: ${{ github.sha }}"
@@ -74,9 +74,9 @@ jobs:
         run: |
           echo "## 📦 Frontend Sync Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Source:** Capstone-Grupo3/2025_2_MA_CAPSTONE_708D_GRUPO_3" >> $GITHUB_STEP_SUMMARY
+          echo "**Source:** Capstone-Grupo3/Monorepo-Magnolias" >> $GITHUB_STEP_SUMMARY
           echo "**Target:** SebitaxGod/Frontend-Magnolias" >> $GITHUB_STEP_SUMMARY
-          echo "**Path:** \`Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend/\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Path:** \`frontend/\`" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🚀 **Vercel Deployment:** Changes will be automatically deployed" >> $GITHUB_STEP_SUMMARY

@@ -35,29 +35,29 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        working-directory: backend
         run: npm ci
 
       - name: Generate Prisma Client
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        working-directory: backend
         run: npx prisma generate
 
       - name: Run Prisma migrations
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        working-directory: backend
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db?schema=public
         run: npx prisma migrate deploy
 
       - name: Run linter
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        working-directory: backend
         run: npm run lint || echo "Linter completed with warnings"
         continue-on-error: true
 
       - name: Run tests
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        working-directory: backend
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db?schema=public
           JWT_SECRET: test-secret-key-for-ci
@@ -67,14 +67,14 @@ jobs:
         continue-on-error: true
 
       - name: Build
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend
+        working-directory: backend
         run: npm run build
 
       - name: Upload backend build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: backend-build
-          path: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend/dist
+          path: backend/dist
           retention-days: 1
 
   # Frontend Tests and Build
@@ -90,19 +90,19 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
-        run: npm ci --legacy-peer-deps
+        working-directory: frontend
+        run: npm ci
 
       - name: Run linter
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        working-directory: frontend
         run: npm run lint || echo "Linter completed with warnings"
         continue-on-error: true
 
       - name: Build
-        working-directory: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend
+        working-directory: frontend
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3000
         run: npm run build
@@ -111,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend/.next
+          path: frontend/.next
           retention-days: 1
 
   # Security Scan
@@ -128,7 +128,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: 'Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/backend'
+          scan-ref: 'backend'
           format: 'sarif'
           output: 'trivy-backend-results.sarif'
         continue-on-error: true
@@ -137,7 +137,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: 'Fase 2/Evidencias Proyecto/Evidencias de sistema/APT/frontend'
+          scan-ref: 'frontend'
           format: 'sarif'
           output: 'trivy-frontend-results.sarif'
         continue-on-error: true
