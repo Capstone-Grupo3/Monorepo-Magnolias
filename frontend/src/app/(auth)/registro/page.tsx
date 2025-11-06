@@ -140,7 +140,7 @@ export default function RegistroPage() {
 
           {error && (
             <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
-              <span className="text-red-500 font-bold"></span>
+              <span className="text-red-500 font-bold">⚠</span>
               <span>{error}</span>
             </div>
           )}
