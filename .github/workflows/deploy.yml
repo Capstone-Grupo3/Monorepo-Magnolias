@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ValidaciÃ³n y creaciÃ³n de release
   create-release:
     runs-on: ubuntu-latest
     
