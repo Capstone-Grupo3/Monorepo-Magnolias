@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 
 interface LoginFormProps {
