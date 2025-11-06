@@ -5,9 +5,7 @@ import {
   Building2,
   Briefcase,
   Users,
-  LogOut,
   Plus,
-  Edit,
   Trash2,
   CheckCircle,
   XCircle,
@@ -15,8 +13,6 @@ import {
   MapPin,
   DollarSign,
   TrendingUp,
-  Search,
-  Filter,
 } from "lucide-react";
 
 // Importar tipos centralizados
@@ -26,12 +22,15 @@ import { PostulacionDetalle } from "@/types";
 import { useEmpresaDashboard } from "@/hooks/useEmpresaDashboard";
 
 // Importar utilidades
+import { getEstadoColor } from "@/lib/formatters";
+
+// Importar componentes compartidos
 import {
-  formatDate,
-  formatCurrency,
-  getEstadoColor,
-  getTipoContratoLabel,
-} from "@/lib/formatters";
+  DashboardHeader,
+  StatCard,
+  LoadingSpinner,
+  LogoutButton,
+} from "@/components/shared";
 
 export default function DashboardEmpresaPage() {
   // Usar hook personalizado para toda la lógica de datos
@@ -239,14 +238,7 @@ export default function DashboardEmpresaPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const postulacionesPendientes = postulaciones.filter(
@@ -259,99 +251,41 @@ export default function DashboardEmpresaPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
-      {/* Header */}
-      <header className="bg-white shadow-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2.5 rounded-xl shadow-lg">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">
-                  Portal de Empresa
-                </h1>
-                <p className="text-sm text-slate-600">{empresa?.nombre}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg transition-all shadow-sm"
-            >
-              <LogOut size={20} />
-              Cerrar Sesión
-            </button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        icon={Building2}
+        title="Portal de Empresa"
+        subtitle={empresa?.nombre}
+        actions={<LogoutButton onLogout={handleLogout} />}
+      />
 
       {/* Stats Cards */}
       <div className="bg-white border-b border-slate-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-5 border border-orange-200 shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-orange-700 mb-1">
-                    Cargos Activos
-                  </p>
-                  <p className="text-4xl font-bold text-orange-900">
-                    {cargosActivos}
-                  </p>
-                </div>
-                <div className="bg-white/70 p-3 rounded-xl">
-                  <Briefcase className="w-8 h-8 text-orange-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-5 border border-yellow-200 shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-yellow-700 mb-1">
-                    Pendientes
-                  </p>
-                  <p className="text-4xl font-bold text-yellow-900">
-                    {postulacionesPendientes}
-                  </p>
-                </div>
-                <div className="bg-white/70 p-3 rounded-xl">
-                  <Clock className="w-8 h-8 text-yellow-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-5 border border-green-200 shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-green-700 mb-1">
-                    Aprobadas
-                  </p>
-                  <p className="text-4xl font-bold text-green-900">
-                    {postulacionesAprobadas}
-                  </p>
-                </div>
-                <div className="bg-white/70 p-3 rounded-xl">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-5 border border-blue-200 shadow-sm hover:shadow-md transition-all">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-blue-700 mb-1">
-                    Total Postulaciones
-                  </p>
-                  <p className="text-4xl font-bold text-blue-900">
-                    {postulaciones.length}
-                  </p>
-                </div>
-                <div className="bg-white/70 p-3 rounded-xl">
-                  <Users className="w-8 h-8 text-blue-600" />
-                </div>
-              </div>
-            </div>
+            <StatCard
+              title="Cargos Activos"
+              value={cargosActivos}
+              icon={Briefcase}
+              color="orange"
+            />
+            <StatCard
+              title="Pendientes"
+              value={postulacionesPendientes}
+              icon={Clock}
+              color="orange"
+            />
+            <StatCard
+              title="Aprobadas"
+              value={postulacionesAprobadas}
+              icon={CheckCircle}
+              color="green"
+            />
+            <StatCard
+              title="Total Postulaciones"
+              value={postulaciones.length}
+              icon={Users}
+              color="blue"
+            />
           </div>
         </div>
       </div>
