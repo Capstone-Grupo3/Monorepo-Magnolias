@@ -3,8 +3,8 @@ services:
   - type: pserv
     name: n8n-postgres
     plan: standard
-    postgres:
-      version: 15
+    database: n8n
+    user: n8nuser
 
   # Web service para n8n
   - type: web
