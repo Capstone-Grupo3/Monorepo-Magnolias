@@ -2,12 +2,9 @@ services:
   # Database PostgreSQL para n8n
   - type: pserv
     name: n8n-postgres
-    ipAddress: private
     plan: standard
-    postgresVersion: 15
-    initialDatabase: n8n
-    user: n8nuser
-    passwordFromEnv: DATABASE_PASSWORD
+    postgres:
+      version: 15
 
   # Web service para n8n
   - type: web
@@ -18,17 +15,19 @@ services:
     autoDeploy: true
     envVars:
       - key: N8N_HOST
-        scope: build,runtime
-        value: ${RENDER_EXTERNAL_URL}
+        fromService:
+          name: n8n
+          property: host
       - key: N8N_PORT
-        value: 5678
+        value: "5678"
       - key: N8N_PROTOCOL
         value: https
       - key: N8N_SECURE_COOKIE
         value: "true"
       - key: WEBHOOK_URL
-        scope: build,runtime
-        value: ${RENDER_EXTERNAL_URL}/
+        fromService:
+          name: n8n
+          property: url
       - key: EXECUTIONS_DATA_PRUNE
         value: "true"
       - key: EXECUTIONS_DATA_PRUNE_MAX_COUNT
@@ -39,21 +38,17 @@ services:
       - key: DB_POSTGRESDB_HOST
         fromService:
           name: n8n-postgres
-          property: hostname
+          property: host
       - key: DB_POSTGRESDB_PORT
         value: "5432"
       - key: DB_POSTGRESDB_DATABASE
         value: n8n
       - key: DB_POSTGRESDB_USER
-        value: n8nuser
+        fromService:
+          name: n8n-postgres
+          property: user
       - key: DB_POSTGRESDB_PASSWORD
-        fromEnv: DATABASE_PASSWORD
-      # Email Configuration (opcional)
-      - key: N8N_EMAIL_MODE
-        value: "smtp"
-    serviceIdleTimeoutMinutes: 30
+        fromService:
+          name: n8n-postgres
+          property: password
     pullRequestPreviewsEnabled: false
-
-envVars:
-  - key: DATABASE_PASSWORD
-    generateValue: true
