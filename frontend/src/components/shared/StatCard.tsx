@@ -4,7 +4,7 @@ interface StatCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  color?: "orange" | "blue" | "green" | "purple";
+  color?: "orange" | "blue" | "green" | "purple" | "yellow";
 }
 
 const colorClasses = {
@@ -39,6 +39,14 @@ const colorClasses = {
     valueText: "text-purple-900",
     iconBg: "bg-purple-500/20",
     iconText: "text-purple-600"
+  },
+  yellow: {
+    bg: "from-yellow-50 to-yellow-100",
+    border: "border-yellow-200",
+    text: "text-yellow-700",
+    valueText: "text-yellow-900",
+    iconBg: "bg-yellow-500/20",
+    iconText: "text-yellow-600"
   }
 };
 
