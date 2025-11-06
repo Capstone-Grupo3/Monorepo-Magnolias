@@ -16,13 +16,13 @@ jobs:
     
     steps:
       - name: Checkout Monorepo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           path: monorepo
 
       - name: Checkout Frontend-Magnolias
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: SebitaxGod/Frontend-Magnolias
           token: ${{ secrets.FRONTEND_DEPLOY_TOKEN }}
