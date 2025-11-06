@@ -45,7 +45,6 @@ jobs:
   # Análisis de cambios en Backend
   backend-changes:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'backend/')
     
     steps:
       - name: Checkout code
@@ -80,7 +79,6 @@ jobs:
   # Análisis de cambios en Frontend
   frontend-changes:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'frontend/')
     
     steps:
       - name: Checkout code
@@ -109,7 +107,6 @@ jobs:
   # Análisis de tamaño de bundle
   bundle-size:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'frontend/')
     
     steps:
       - name: Checkout code
