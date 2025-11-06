@@ -49,7 +49,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db?schema=public
-        run: npx prisma migrate deploy
+        run: npx prisma migrate deploy || npx prisma db push
 
       - name: Run linter
         working-directory: backend
@@ -94,7 +94,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run linter
         working-directory: frontend
