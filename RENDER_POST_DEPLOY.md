@@ -2,60 +2,83 @@
 
 Después de que Render termine el deploy automático, sigue estos pasos manuales.
 
-## ✅ Paso 1: Configurar la Base de Datos
+## ✅ Paso 1: Verificar el Deploy
 
-1. Ve a tu servicio **n8n-postgres** en Render
-2. Copia los siguientes datos de la pestaña **"Info"**:
-   - **Internal Database URL**
-   - **Database Name**
-   - **Username**
-   - **Password**
+1. Ve a tu grupo de servicios en Render (n8n-production)
+2. Deberías ver 2 servicios:
+   - `n8n-postgres` (Estado: Live)
+   - `n8n` (Estado: Live o Building)
 
-Guarda estos valores, los usarás en el paso siguiente.
+Espera a que ambos estén en estado **"Live"** (verde)
 
-## ✅ Paso 2: Agregar Variables de Entorno a n8n
+## ✅ Paso 2: Verificar Logs de n8n
 
-1. Ve a tu servicio **n8n** en Render
-2. Click en la pestaña **"Environment"**
-3. Agrega estas variables (reemplaza los valores con los de tu BD):
+1. Click en el servicio **n8n**
+2. Ve a la pestaña **"Logs"**
+3. Si ves errores como "Could not connect to database", espera 2-3 minutos más
+4. Deberías ver eventualmente:
+   ```
+   n8n ready on 0.0.0.0, port 5678
+   ```
+
+## ✅ Paso 3: Configurar Variables de Entorno Adicionales
+
+1. Click en el servicio **n8n**
+2. Ve a la pestaña **"Environment"**
+3. Agrega estas variables:
 
 ```
-DB_POSTGRESDB_HOST=<host_de_tu_base_de_datos>
-DB_POSTGRESDB_PORT=5432
-DB_POSTGRESDB_DATABASE=render
-DB_POSTGRESDB_USER=<tu_usuario>
-DB_POSTGRESDB_PASSWORD=<tu_contraseña>
 N8N_BASIC_AUTH_ACTIVE=true
 N8N_BASIC_AUTH_USER=admin
 N8N_BASIC_AUTH_PASSWORD=TuContraseñaFuerte123!
-N8N_HOST=tu-n8n.onrender.com
-WEBHOOK_URL=https://tu-n8n.onrender.com/
 ```
 
 4. Click en **"Save"**
 5. Render redesplegará automáticamente
 
-## ✅ Paso 3: Verificar que n8n Inicie Correctamente
-
-1. Ve a la pestaña **"Logs"** de tu servicio n8n
-2. Espera a que veas este mensaje:
-   ```
-   n8n ready on 0.0.0.0, port 5678
-   ```
-3. Si ves errores de conexión a la BD, revisa que los datos sean correctos
-
 ## ✅ Paso 4: Acceder a n8n
 
-1. Copia la URL de tu servicio n8n (ej: `https://n8n-xxxxx.onrender.com`)
-2. Abre en tu navegador
-3. Inicia sesión con:
+1. Ve al servicio **n8n** en Render
+2. En la parte superior, copia la URL (ej: `https://n8n-xxxxx.onrender.com`)
+3. Abre en tu navegador
+4. Inicia sesión con:
    - **Usuario**: admin
    - **Contraseña**: TuContraseñaFuerte123!
 
 ¡Listo! n8n está operativo.
 
-## 📝 Notas Importantes
+## � Conectar con tu Backend
 
-- **BD automática**: Render crea automáticamente un usuario y BD para PostgreSQL
-- **Contraseña segura**: Guarda tu contraseña de n8n en un lugar seguro
-- **Cambiar contraseña**: Una vez dentro de n8n, ve a Settings para cambiarla
+En tu archivo `backend/.env`, agrega:
+
+```env
+N8N_API_URL=https://n8n-xxxxx.onrender.com
+N8N_WEBHOOK_URL=https://n8n-xxxxx.onrender.com/webhook
+```
+
+Luego genera una API Key en n8n:
+1. Inicia sesión en n8n
+2. Ve a **Settings** (rueda de engranaje)
+3. En la pestaña **API**, copia tu **API Key**
+4. Agrega a tu backend:
+```env
+N8N_API_KEY=tu_clave_copiada
+```
+
+## 🐛 Troubleshooting
+
+### n8n no inicia o se reinicia constantemente
+- Revisa los logs en Render
+- Espera 3-5 minutos después del deploy
+- Si persiste, intenta un manual redeploy
+
+### Error de conexión a base de datos
+- Verifica que ambos servicios estén "Live"
+- Revisa los logs del servicio n8n
+- El connection string se genera automáticamente
+
+### No puedo acceder a n8n
+- Verifica que hayas esperado a que sea "Live"
+- Intenta recargar la página
+- Limpia caché del navegador
+
