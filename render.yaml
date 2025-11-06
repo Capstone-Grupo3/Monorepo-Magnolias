@@ -3,8 +3,6 @@ services:
   - type: pserv
     name: n8n-postgres
     plan: standard
-    database: n8n
-    user: n8nuser
 
   # Web service para n8n
   - type: web
@@ -14,20 +12,12 @@ services:
     plan: standard
     autoDeploy: true
     envVars:
-      - key: N8N_HOST
-        fromService:
-          name: n8n
-          property: host
       - key: N8N_PORT
         value: "5678"
       - key: N8N_PROTOCOL
         value: https
       - key: N8N_SECURE_COOKIE
         value: "true"
-      - key: WEBHOOK_URL
-        fromService:
-          name: n8n
-          property: url
       - key: EXECUTIONS_DATA_PRUNE
         value: "true"
       - key: EXECUTIONS_DATA_PRUNE_MAX_COUNT
@@ -41,8 +31,6 @@ services:
           property: host
       - key: DB_POSTGRESDB_PORT
         value: "5432"
-      - key: DB_POSTGRESDB_DATABASE
-        value: n8n
       - key: DB_POSTGRESDB_USER
         fromService:
           name: n8n-postgres
