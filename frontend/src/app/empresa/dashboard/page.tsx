@@ -250,7 +250,7 @@ export default function DashboardEmpresaPage() {
   const cargosActivos = cargos.filter((c) => c.activo).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-orange-50">
       <DashboardHeader
         icon={Building2}
         title="Portal de Empresa"
@@ -259,7 +259,7 @@ export default function DashboardEmpresaPage() {
       />
 
       {/* Stats Cards */}
-      <div className="bg-white border-b border-slate-100 shadow-sm">
+      <div className="bg-white border-b border-slate-100 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <StatCard
@@ -291,7 +291,7 @@ export default function DashboardEmpresaPage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
+      <div className="bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <button
@@ -372,7 +372,7 @@ export default function DashboardEmpresaPage() {
               {cargos.map((cargo) => (
                 <div
                   key={cargo.id}
-                  className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all"
+                  className="bg-white rounded-xl shadow-xs border p-6 hover:shadow-sm transition-all"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -483,7 +483,7 @@ export default function DashboardEmpresaPage() {
               {(postulacionesFiltradas.length > 0 ? postulacionesFiltradas : postulaciones).map((postulacion) => (
                 <div
                   key={postulacion.id}
-                  className="bg-white rounded-xl shadow-sm border p-6"
+                  className="bg-white rounded-xl shadow-xs border p-6"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
@@ -599,7 +599,7 @@ export default function DashboardEmpresaPage() {
 
             <form
               onSubmit={handleCrearCargo}
-              className="bg-white rounded-xl shadow-sm border p-6 space-y-6"
+              className="bg-white rounded-xl shadow-xs border p-6 space-y-6"
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -828,7 +828,7 @@ export default function DashboardEmpresaPage() {
               Perfil de la Empresa
             </h2>
 
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-white rounded-xl shadow-xs border p-6">
               <div className="flex items-start gap-6 mb-6">
                 <div className="w-24 h-24 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Building2 className="w-12 h-12 text-blue-600" />

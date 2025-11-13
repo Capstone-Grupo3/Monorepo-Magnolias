@@ -3,10 +3,10 @@ import { Briefcase } from "lucide-react";
 
 export function Header() {
   return (
-    <header className="border-b border-gray-100 bg-white fixed w-full z-50 shadow-sm">
+    <header className="border-b border-gray-100 bg-white fixed w-full z-50 shadow-xs">
       <nav className="container mx-auto flex items-center justify-between px-6 py-4">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
+          <div className="bg-linear-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
             <Briefcase className="h-6 w-6 text-white" />
           </div>
           <span className="text-2xl font-bold text-slate-900">APT</span>
@@ -26,7 +26,7 @@ export function Header() {
           </Link>
           <Link
             href="/registro"
-            className="rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-2.5 text-white font-semibold hover:from-orange-600 hover:to-orange-700 transition-all"
+            className="rounded-lg bg-linear-to-r from-orange-500 to-orange-600 px-6 py-2.5 text-white font-semibold hover:from-orange-600 hover:to-orange-700 transition-all"
           >
             Agendar demo
           </Link>
