@@ -3,10 +3,10 @@ import { Briefcase, CheckCircle } from "lucide-react";
 
 export function RegistroBrandingSection() {
   return (
-    <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-12 flex-col justify-between">
+    <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-slate-900 via-blue-950 to-slate-900 p-12 flex-col justify-between">
       <div>
         <Link href="/" className="flex items-center space-x-3 mb-12">
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
+          <div className="bg-linear-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
             <Briefcase className="h-6 w-6 text-white" />
           </div>
           <span className="text-2xl font-bold text-white">APT</span>

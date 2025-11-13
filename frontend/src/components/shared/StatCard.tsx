@@ -54,7 +54,7 @@ export function StatCard({ title, value, icon: Icon, color = "orange" }: StatCar
   const colors = colorClasses[color];
 
   return (
-    <div className={`bg-gradient-to-br ${colors.bg} rounded-2xl p-5 border ${colors.border} shadow-sm hover:shadow-md transition-all`}>
+    <div className={`bg-linear-to-br ${colors.bg} rounded-2xl p-5 border ${colors.border} shadow-xs hover:shadow-sm transition-all`}>
       <div className="flex items-center justify-between">
         <div>
           <p className={`text-sm font-semibold ${colors.text} mb-1`}>

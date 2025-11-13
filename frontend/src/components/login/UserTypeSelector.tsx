@@ -13,7 +13,7 @@ export function UserTypeSelector({ tipoUsuario, onTipoChange }: UserTypeSelector
         onClick={() => onTipoChange("postulante")}
         className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
           tipoUsuario === "postulante"
-            ? "bg-white text-orange-600 shadow-sm border border-orange-100"
+            ? "bg-white text-orange-600 shadow-xs border border-orange-100"
             : "text-slate-600 hover:text-slate-800"
         }`}
       >
@@ -25,7 +25,7 @@ export function UserTypeSelector({ tipoUsuario, onTipoChange }: UserTypeSelector
         onClick={() => onTipoChange("empresa")}
         className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
           tipoUsuario === "empresa"
-            ? "bg-white text-orange-600 shadow-sm border border-orange-100"
+            ? "bg-white text-orange-600 shadow-xs border border-orange-100"
             : "text-slate-600 hover:text-slate-800"
         }`}
       >

@@ -74,7 +74,7 @@ export function FeaturesSection() {
           </div>
 
           {/* Feature 4 - IA Highlight */}
-          <div className="flex flex-col lg:flex-row-reverse items-center gap-12 bg-gradient-to-br from-slate-900 to-blue-950 rounded-3xl p-12">
+          <div className="flex flex-col lg:flex-row-reverse items-center gap-12 bg-linear-to-br from-slate-900 to-blue-950 rounded-3xl p-12">
             <div className="flex-1">
               <div className="inline-block bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold text-sm mb-4">
                 🤖 Inteligencia Artificial
@@ -87,15 +87,15 @@ export function FeaturesSection() {
               </p>
               <ul className="space-y-3 text-blue-100">
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-1" />
+                  <CheckCircle className="w-5 h-5 text-orange-500 shrink-0 mt-1" />
                   <span>Generación de descripción y preguntas de vacante.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-1" />
+                  <CheckCircle className="w-5 h-5 text-orange-500 shrink-0 mt-1" />
                   <span>Análisis automático de CVs y respuestas.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-1" />
+                  <CheckCircle className="w-5 h-5 text-orange-500 shrink-0 mt-1" />
                   <span>Destaque de postulantes recomendados con ranking inteligente.</span>
                 </li>
               </ul>
