@@ -4,15 +4,8 @@ import { useState, useEffect } from "react";
 import {
   Search,
   Download,
-  Filter,
   User,
   Building2,
-  Calendar,
-  Mail,
-  Phone,
-  Hash,
-  CheckCircle,
-  XCircle,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
