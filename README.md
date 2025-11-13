@@ -1,10 +1,12 @@
-# 🚀 APT - Advanced People Tracking
+# 🚀 Plataforma de Reclutamiento Inteligente - Asesorías Magnolia
 
 Portal de empleo inteligente con IA para optimizar el proceso de reclutamiento y selección de personal en MiPyMEs.
 
+Proyecto desarrollado para **Asesorías Magnolia**, una PyME chilena que inspiró la creación de esta solución innovadora.
+
 ## 📋 Descripción
 
-APT es un sistema integral que conecta empresas con candidatos, utilizando inteligencia artificial para evaluar automáticamente la compatibilidad entre el perfil del candidato y los requisitos de la vacante.
+Esta plataforma es un sistema integral que conecta empresas con candidatos, utilizando inteligencia artificial para evaluar automáticamente la compatibilidad entre el perfil del candidato y los requisitos de la vacante. Fue diseñada especialmente para satisfacer las necesidades de reclutamiento de PyMEs como Asesorías Magnolia.
 
 ## ⚡ Inicio Rápido con Docker
 
@@ -13,7 +15,7 @@ APT es un sistema integral que conecta empresas con candidatos, utilizando intel
 ```powershell
 # 1. Clonar el repositorio
 git clone <url-repo>
-cd APT
+cd Monorepo-Magnolias
 
 # 2. Configurar variables de entorno
 # Copia los archivos .env.example y configúralos:
@@ -72,7 +74,7 @@ cp frontend/.env.example frontend/.env.local
 ## 🏗 Arquitectura
 
 ```
-APT/
+Monorepo-Magnolias/
 ├── backend/                    # NestJS API
 │   ├── src/
 │   │   ├── modules/           # Módulos de dominio
@@ -362,9 +364,13 @@ GitHub Actions configurado para:
 
 Este proyecto es parte del Capstone Grupo 3 - 2025.
 
-## 👥 Equipo
+## 👥 Equipo y Cliente
 
-Proyecto desarrollado por el equipo de Magnolias Asesorías.
+**Cliente inspirador del proyecto**: Asesorías Magnolia - PyME chilena dedicada a asesorías empresariales.
+
+**Equipo de desarrollo**: Capstone Grupo 3 - 2025
+
+**Agradecimientos especiales**: A Asesorías Magnolia por compartir sus necesidades y ser el catalizador para esta solución innovadora de reclutamiento inteligente.
 
 ## 📞 Contacto
 
