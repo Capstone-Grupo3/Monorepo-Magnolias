@@ -409,15 +409,13 @@ export class AdminService {
           },
         },
       },
-      orderBy: {
-        postulaciones: {
-          _count: 'desc',
-        },
-      },
       take: limit,
     });
 
-    return cargos.map(c => ({
+    // Ordenar manualmente por cantidad de postulaciones
+    const sortedCargos = cargos.sort((a, b) => b._count.postulaciones - a._count.postulaciones);
+
+    return sortedCargos.map(c => ({
       id: c.id,
       titulo: c.titulo,
       empresa: c.empresa.nombre,
