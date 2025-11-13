@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id             Int      @id @default(autoincrement())
+  nombre         String   @db.VarChar(150)
+  correo         String   @unique @db.VarChar(150)
+  contrasenaHash String   @db.VarChar(255)
+  fechaCreacion  DateTime @default(now())
+  estado         Boolean  @default(true)
+
+  @@index([correo])
+  @@map("admins")
+}
+
 model Empresa {
   id             Int           @id @default(autoincrement())
   rut            String        @unique @db.VarChar(12)
