@@ -38,7 +38,7 @@ async function createInitialAdmin() {
         nombre: 'Administrador Principal',
         correo: adminEmail,
         contrasenaHash: hashedPassword,
-        estado: 'activo',
+        estado: true,
       },
     });
 
