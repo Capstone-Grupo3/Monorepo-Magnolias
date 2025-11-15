@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  Ip,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,18 +20,54 @@ import { EmpresasService } from './empresas.service';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RateLimitGuard } from '../auth/guards/rate-limit.guard';
+import { EmailService } from '../auth/services/email.service';
+import { VerificationService } from '../auth/services/verification.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @ApiTags('empresas')
 @Controller('empresas')
 export class EmpresasController {
-  constructor(private readonly empresasService: EmpresasService) {}
+  constructor(
+    private readonly empresasService: EmpresasService,
+    private readonly emailService: EmailService,
+    private readonly verificationService: VerificationService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Post()
+  @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Registrar una nueva empresa' })
   @ApiResponse({ status: 201, description: 'Empresa creada exitosamente' })
-  @ApiResponse({ status: 409, description: 'El correo ya está registrado' })
-  create(@Body() createEmpresaDto: CreateEmpresaDto) {
-    return this.empresasService.create(createEmpresaDto);
+  @ApiResponse({ status: 409, description: 'El correo o RUT ya está registrado' })
+  @ApiResponse({ status: 429, description: 'Demasiados intentos de registro' })
+  async create(@Body() createEmpresaDto: CreateEmpresaDto, @Ip() ip: string) {
+    const empresa = await this.empresasService.create(createEmpresaDto, ip);
+
+    // Generar token de verificación
+    const token = this.verificationService.generarToken();
+    const expiracion = this.verificationService.calcularExpiracion();
+
+    await this.prisma.empresa.update({
+      where: { id: empresa.id },
+      data: {
+        tokenVerificacion: token,
+        tokenExpiracion: expiracion,
+      },
+    });
+
+    // Enviar email de verificación
+    await this.emailService.enviarEmailVerificacion(
+      empresa.correo,
+      empresa.nombre,
+      token,
+      'empresa',
+    );
+
+    return {
+      ...empresa,
+      mensaje: 'Empresa registrada. Por favor verifica tu correo electrónico.',
+    };
   }
 
   @Get('me')

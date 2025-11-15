@@ -20,41 +20,62 @@ model Admin {
 }
 
 model Empresa {
-  id             Int           @id @default(autoincrement())
-  rut            String        @unique @db.VarChar(12)
-  nombre         String        @db.VarChar(150)
-  correo         String        @unique @db.VarChar(150)
-  contrasenaHash String        @db.VarChar(255)
-  descripcion    String?
-  logoUrl        String?       @db.VarChar(255)
-  fechaCreacion  DateTime      @default(now())
-  estado         EstadoEmpresa @default(ACTIVO)
-  cargos         Cargo[]
+  id                  Int           @id @default(autoincrement())
+  rut                 String        @unique @db.VarChar(12)
+  nombre              String        @db.VarChar(150)
+  correo              String        @unique @db.VarChar(150)
+  contrasenaHash      String?       @db.VarChar(255)
+  descripcion         String?
+  logoUrl             String?       @db.VarChar(255)
+  fechaCreacion       DateTime      @default(now())
+  estado              EstadoEmpresa @default(ACTIVO)
+  emailVerificado     Boolean       @default(false)
+  tokenVerificacion   String?       @unique @db.VarChar(255)
+  tokenExpiracion     DateTime?
+  linkedinId          String?       @unique @db.VarChar(255)
+  googleId            String?       @unique @db.VarChar(255)
+  intentosRegistro    Int           @default(0)
+  ultimoIntentoIp     String?       @db.VarChar(45)
+  fechaUltimoIntento  DateTime?
+  cargos              Cargo[]
 
   @@index([correo])
   @@index([rut])
   @@index([estado])
+  @@index([linkedinId])
+  @@index([googleId])
   @@map("empresas")
 }
 
 model Postulante {
-  id               Int             @id @default(autoincrement())
-  rut              String          @unique @db.VarChar(12)
-  nombre           String          @db.VarChar(150)
-  correo           String          @unique @db.VarChar(150)
-  contrasenaHash   String          @db.VarChar(255)
-  telefono         String?         @db.VarChar(20)
-  cvUrl            String?         @db.VarChar(500)
-  linkedinUrl      String?         @db.VarChar(255)
-  skillsJson       Json?
-  experienciaAnios Int?
-  fechaRegistro    DateTime          @default(now())
-  estado           EstadoPostulante  @default(ACTIVO)
-  postulaciones    Postulacion[]
+  id                  Int               @id @default(autoincrement())
+  rut                 String            @unique @db.VarChar(12)
+  nombre              String            @db.VarChar(150)
+  correo              String            @unique @db.VarChar(150)
+  contrasenaHash      String?           @db.VarChar(255)
+  telefono            String?           @db.VarChar(20)
+  cvUrl               String?           @db.VarChar(500)
+  linkedinUrl         String?           @db.VarChar(255)
+  skillsJson          Json?
+  experienciaAnios    Int?
+  fechaRegistro       DateTime          @default(now())
+  estado              EstadoPostulante  @default(ACTIVO)
+  emailVerificado     Boolean           @default(false)
+  tokenVerificacion   String?           @unique @db.VarChar(255)
+  tokenExpiracion     DateTime?
+  linkedinId          String?           @unique @db.VarChar(255)
+  googleId            String?           @unique @db.VarChar(255)
+  conexionesLinkedin  Int?
+  intentosRegistro    Int               @default(0)
+  ultimoIntentoIp     String?           @db.VarChar(45)
+  fechaUltimoIntento  DateTime?
+  postulaciones       Postulacion[]
 
   @@index([correo])
   @@index([rut])
   @@index([estado])
+  @@index([linkedinId])
+  @@index([googleId])
   @@map("postulantes")
 }
 

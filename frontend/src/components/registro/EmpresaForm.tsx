@@ -1,4 +1,6 @@
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { validarRut, formatearRutInput, obtenerMensajeErrorRut } from "@/lib/rut-validator";
 
 interface EmpresaFormData {
   rut: string;
@@ -26,6 +28,32 @@ export function EmpresaForm({
   onShowPasswordToggle,
   onSubmit
 }: EmpresaFormProps) {
+  const [rutError, setRutError] = useState("");
+  const [rutTouched, setRutTouched] = useState(false);
+
+  useEffect(() => {
+    if (rutTouched && formData.rut) {
+      const error = obtenerMensajeErrorRut(formData.rut);
+      setRutError(error);
+    }
+  }, [formData.rut, rutTouched]);
+
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = e.target.value;
+    const rutFormateado = formatearRutInput(valor);
+    onFormChange({ ...formData, rut: rutFormateado });
+  };
+
+  const handleRutBlur = () => {
+    setRutTouched(true);
+    if (formData.rut) {
+      const error = obtenerMensajeErrorRut(formData.rut);
+      setRutError(error);
+    }
+  };
+
+  const isRutValid = formData.rut && validarRut(formData.rut);
+
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       <div>
@@ -36,10 +64,23 @@ export function EmpresaForm({
           type="text"
           required
           value={formData.rut}
-          onChange={(e) => onFormChange({ ...formData, rut: e.target.value })}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+          onChange={handleRutChange}
+          onBlur={handleRutBlur}
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all ${
+            rutTouched && rutError
+              ? "border-red-500"
+              : isRutValid
+              ? "border-green-500"
+              : "border-slate-300"
+          }`}
           placeholder="76.123.456-7"
         />
+        {rutTouched && rutError && (
+          <p className="text-xs text-red-600 mt-1">{rutError}</p>
+        )}
+        {isRutValid && (
+          <p className="text-xs text-green-600 mt-1">✓ RUT válido</p>
+        )}
       </div>
 
       <div>

@@ -25,6 +25,13 @@ export function useAuth() {
       try {
         const response = await authService.loginEmpresa(credentials);
         authService.saveAuth(response.access_token, "empresa");
+        
+        // Guardar estado de verificación de email
+        if (typeof window !== "undefined") {
+          localStorage.setItem("emailVerificado", String(response.user?.emailVerificado || false));
+          localStorage.setItem("userEmail", response.user?.correo || credentials.correo);
+        }
+        
         router.push("/empresa/dashboard");
         return true;
       } catch (err: any) {
@@ -48,6 +55,13 @@ export function useAuth() {
       try {
         const response = await authService.loginPostulante(credentials);
         authService.saveAuth(response.access_token, "postulante");
+        
+        // Guardar estado de verificación de email
+        if (typeof window !== "undefined") {
+          localStorage.setItem("emailVerificado", String(response.user?.emailVerificado || false));
+          localStorage.setItem("userEmail", response.user?.correo || credentials.correo);
+        }
+        
         router.push("/postulante/portal");
         return true;
       } catch (err: any) {

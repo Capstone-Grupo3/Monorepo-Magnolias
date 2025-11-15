@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Briefcase,
@@ -10,6 +10,9 @@ import {
   Clock,
   DollarSign,
   TrendingUp,
+  Edit2,
+  Save,
+  X,
 } from "lucide-react";
 
 // Importar tipos centralizados
@@ -18,8 +21,12 @@ import { Cargo } from "@/types";
 // Importar hook personalizado
 import { usePostulantePortal } from "@/hooks/usePostulantePortal";
 
+// Importar servicios
+import { postulanteService } from "@/services/postulante.service";
+
 // Importar utilidades
 import { formatDate, getEstadoColor, formatCurrency } from "@/lib/formatters";
+import { validarRUT, formatearRUT } from "@/lib/validators";
 
 // Importar componentes compartidos
 import {
@@ -27,11 +34,26 @@ import {
   LoadingSpinner,
   LogoutButton
 } from "@/components/shared";
+import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
 
 export default function PortalCandidatoPage() {
+  // Estado para verificación de email
+  const [emailVerificado, setEmailVerificado] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
+
   // Usar hook personalizado para toda la lógica
   const { postulante, cargos, postulaciones, loading, crearPostulacion, logout } =
     usePostulantePortal();
+
+  // Verificar estado de email al cargar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const verificado = localStorage.getItem("emailVerificado") === "true";
+      const email = localStorage.getItem("userEmail") || "";
+      setEmailVerificado(verificado);
+      setUserEmail(email);
+    }
+  }, []);
 
   // Estados locales de UI
   const [activeTab, setActiveTab] = useState<
@@ -44,8 +66,88 @@ export default function PortalCandidatoPage() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvPreview, setCvPreview] = useState<string>("");
 
+  // Estados para edición de perfil
+  const [editandoPerfil, setEditandoPerfil] = useState(false);
+  const [perfilEditado, setPerfilEditado] = useState({
+    rut: "",
+    telefono: "",
+    experienciaAnios: 0,
+    linkedinUrl: "",
+  });
+  const [errorRut, setErrorRut] = useState("");
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+
+  // Inicializar datos de perfil cuando cargue el postulante
+  useEffect(() => {
+    if (postulante) {
+      setPerfilEditado({
+        rut: postulante.rut || "",
+        telefono: postulante.telefono || "",
+        experienciaAnios: postulante.experienciaAnios || 0,
+        linkedinUrl: postulante.linkedinUrl || "",
+      });
+    }
+  }, [postulante]);
+
   const handleLogout = () => {
     logout();
+  };
+
+  const handleEditarPerfil = () => {
+    setEditandoPerfil(true);
+    setErrorRut("");
+  };
+
+  const handleCancelarEdicion = () => {
+    setEditandoPerfil(false);
+    setErrorRut("");
+    // Restaurar valores originales
+    if (postulante) {
+      setPerfilEditado({
+        rut: postulante.rut || "",
+        telefono: postulante.telefono || "",
+        experienciaAnios: postulante.experienciaAnios || 0,
+        linkedinUrl: postulante.linkedinUrl || "",
+      });
+    }
+  };
+
+  const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rutFormateado = formatearRUT(e.target.value);
+    setPerfilEditado({ ...perfilEditado, rut: rutFormateado });
+    
+    if (rutFormateado && !validarRUT(rutFormateado)) {
+      setErrorRut("RUT inválido");
+    } else {
+      setErrorRut("");
+    }
+  };
+
+  const handleGuardarPerfil = async () => {
+    if (!postulante) return;
+
+    // Validar RUT si está presente
+    if (perfilEditado.rut && !validarRUT(perfilEditado.rut)) {
+      setErrorRut("Por favor ingresa un RUT válido");
+      return;
+    }
+
+    setGuardandoPerfil(true);
+    try {
+      await postulanteService.updatePostulante(postulante.id, perfilEditado);
+      
+      // Actualizar localStorage si es necesario
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      localStorage.setItem("user", JSON.stringify({ ...userData, ...perfilEditado }));
+      
+      // Recargar página para actualizar datos
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al guardar perfil:", error);
+      alert("Error al guardar el perfil. Intenta nuevamente.");
+    } finally {
+      setGuardandoPerfil(false);
+    }
   };
 
   const handlePostular = (cargo: Cargo) => {
@@ -127,6 +229,13 @@ export default function PortalCandidatoPage() {
         actions={<LogoutButton onLogout={handleLogout} />}
       />
 
+      {/* Email Verification Banner */}
+      {!emailVerificado && userEmail && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <EmailVerificationBanner userEmail={userEmail} userType="postulante" />
+        </div>
+      )}
+
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -141,7 +250,7 @@ export default function PortalCandidatoPage() {
             >
               <div className="flex items-center gap-2">
                 <Search size={20} />
-                cargos Disponibles
+                Cargos Disponibles
               </div>
             </button>
             <button
@@ -341,7 +450,37 @@ export default function PortalCandidatoPage() {
         {/* Perfil Tab */}
         {activeTab === "perfil" && postulante && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Mi Perfil</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">Mi Perfil</h2>
+              {!editandoPerfil ? (
+                <button
+                  onClick={handleEditarPerfil}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                >
+                  <Edit2 className="w-4 h-4" />
+                  Editar Perfil
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCancelarEdicion}
+                    disabled={guardandoPerfil}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleGuardarPerfil}
+                    disabled={guardandoPerfil || !!errorRut}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    {guardandoPerfil ? "Guardando..." : "Guardar"}
+                  </button>
+                </div>
+              )}
+            </div>
 
             <div className="bg-white rounded-xl shadow-xs border p-6">
               <div className="grid md:grid-cols-2 gap-6">
@@ -350,6 +489,7 @@ export default function PortalCandidatoPage() {
                     Nombre Completo
                   </label>
                   <p className="text-lg text-gray-800">{postulante.nombre}</p>
+                  <p className="text-xs text-gray-500 mt-1">No editable</p>
                 </div>
 
                 <div>
@@ -357,35 +497,98 @@ export default function PortalCandidatoPage() {
                     Correo Electrónico
                   </label>
                   <p className="text-lg text-gray-800">{postulante.correo}</p>
+                  <p className="text-xs text-gray-500 mt-1">No editable</p>
                 </div>
 
-                {postulante.telefono && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Teléfono
-                    </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    RUT <span className="text-red-500">*</span>
+                  </label>
+                  {editandoPerfil ? (
+                    <div>
+                      <input
+                        type="text"
+                        value={perfilEditado.rut}
+                        onChange={handleRutChange}
+                        placeholder="12.345.678-9"
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                          errorRut ? "border-red-500" : "border-gray-300"
+                        }`}
+                      />
+                      {errorRut && (
+                        <p className="text-sm text-red-600 mt-1">{errorRut}</p>
+                      )}
+                    </div>
+                  ) : (
                     <p className="text-lg text-gray-800">
-                      {postulante.telefono}
+                      {postulante.rut || <span className="text-gray-400 italic">No especificado</span>}
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {postulante.experienciaAnios !== undefined && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Años de Experiencia
-                    </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  {editandoPerfil ? (
+                    <input
+                      type="tel"
+                      value={perfilEditado.telefono}
+                      onChange={(e) =>
+                        setPerfilEditado({ ...perfilEditado, telefono: e.target.value })
+                      }
+                      placeholder="+56 9 1234 5678"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  ) : (
                     <p className="text-lg text-gray-800">
-                      {postulante.experienciaAnios} años
+                      {postulante.telefono || <span className="text-gray-400 italic">No especificado</span>}
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {postulante.linkedinUrl && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Perfil de LinkedIn
-                    </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Años de Experiencia
+                  </label>
+                  {editandoPerfil ? (
+                    <input
+                      type="number"
+                      min="0"
+                      max="50"
+                      value={perfilEditado.experienciaAnios}
+                      onChange={(e) =>
+                        setPerfilEditado({
+                          ...perfilEditado,
+                          experienciaAnios: parseInt(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  ) : (
+                    <p className="text-lg text-gray-800">
+                      {postulante.experienciaAnios !== undefined
+                        ? `${postulante.experienciaAnios} años`
+                        : <span className="text-gray-400 italic">No especificado</span>}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Perfil de LinkedIn
+                  </label>
+                  {editandoPerfil ? (
+                    <input
+                      type="url"
+                      value={perfilEditado.linkedinUrl}
+                      onChange={(e) =>
+                        setPerfilEditado({ ...perfilEditado, linkedinUrl: e.target.value })
+                      }
+                      placeholder="https://www.linkedin.com/in/tu-perfil"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  ) : postulante.linkedinUrl ? (
                     <a
                       href={postulante.linkedinUrl}
                       target="_blank"
@@ -394,8 +597,10 @@ export default function PortalCandidatoPage() {
                     >
                       {postulante.linkedinUrl}
                     </a>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-gray-400 italic">No especificado</p>
+                  )}
+                </div>
               </div>
 
               <div className="mt-6 pt-6 border-t">

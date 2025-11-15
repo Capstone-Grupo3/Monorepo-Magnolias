@@ -8,6 +8,9 @@ export interface Empresa {
   correo: string;
   descripcion?: string;
   logoUrl?: string;
+  emailVerificado?: boolean;
+  linkedinId?: string;
+  googleId?: string;
 }
 
 export interface EmpresaDetalle extends Empresa {
@@ -16,4 +19,10 @@ export interface EmpresaDetalle extends Empresa {
   direccion?: string;
   telefono?: string;
   sitioWeb?: string;
+  tokenVerificacion?: string;
+  tokenExpiracion?: Date;
+  conexionesLinkedin?: number;
+  intentosRegistro?: number;
+  ultimoIntentoIp?: string;
+  fechaUltimoIntento?: Date;
 }

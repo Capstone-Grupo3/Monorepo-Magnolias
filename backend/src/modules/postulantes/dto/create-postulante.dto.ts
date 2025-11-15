@@ -10,11 +10,13 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsValidRut } from '../../../common/decorators/is-valid-rut.decorator';
 
 export class CreatePostulanteDto {
-  @ApiProperty({ example: '12345678-9' })
+  @ApiProperty({ example: '12.345.678-9' })
   @IsString()
   @IsNotEmpty()
+  @IsValidRut()
   rut: string;
 
   @ApiProperty({ example: 'Juan Pérez' })
@@ -27,11 +29,11 @@ export class CreatePostulanteDto {
   @IsNotEmpty()
   correo: string;
 
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: 'password123', required: false })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(6)
-  contrasena: string;
+  contrasena?: string;
 
   @ApiProperty({ example: '+569 1234 5678', required: false })
   @IsString()
@@ -59,4 +61,20 @@ export class CreatePostulanteDto {
   @Min(0)
   @IsOptional()
   experienciaAnios?: number;
+
+  @ApiProperty({ required: false, description: 'ID de LinkedIn para OAuth' })
+  @IsString()
+  @IsOptional()
+  linkedinId?: string;
+
+  @ApiProperty({ required: false, description: 'ID de Google para OAuth' })
+  @IsString()
+  @IsOptional()
+  googleId?: string;
+
+  @ApiProperty({ required: false, description: 'Número de conexiones de LinkedIn' })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  conexionesLinkedin?: number;
 }

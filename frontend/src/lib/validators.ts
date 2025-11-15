@@ -106,3 +106,38 @@ export function validateSalaryRange(min?: number, max?: number): boolean {
   if (min && max && min > max) return false;
   return true;
 }
+
+/**
+ * Formatea un RUT chileno con puntos y guión
+ * Ejemplo: 12345678-9 -> 12.345.678-9
+ */
+export function formatearRUT(rut: string): string {
+  // Eliminar todo lo que no sea número o K
+  const cleanRut = rut.replace(/[^0-9kK]/g, "");
+  
+  if (cleanRut.length < 2) return cleanRut;
+  
+  // Separar cuerpo y dígito verificador
+  const cuerpo = cleanRut.slice(0, -1);
+  const dv = cleanRut.slice(-1).toUpperCase();
+  
+  // Formatear cuerpo con puntos (de derecha a izquierda)
+  let cuerpoFormateado = "";
+  let contador = 0;
+  
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    if (contador === 3) {
+      cuerpoFormateado = "." + cuerpoFormateado;
+      contador = 0;
+    }
+    cuerpoFormateado = cuerpo[i] + cuerpoFormateado;
+    contador++;
+  }
+  
+  return `${cuerpoFormateado}-${dv}`;
+}
+
+/**
+ * Alias de validateRut para compatibilidad
+ */
+export const validarRUT = validateRut;
