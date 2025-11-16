@@ -106,7 +106,7 @@ export default function AdminDashboardPage() {
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
                 }`}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-5 h-5 shrink-0" />
                 {sidebarOpen && <span className="font-medium">{tab.label}</span>}
               </button>
             );
@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
             onClick={logout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition-colors"
           >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <LogOut className="w-5 h-5 shrink-0" />
             {sidebarOpen && <span className="font-medium">Cerrar sesión</span>}
           </button>
         </div>

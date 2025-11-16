@@ -11,7 +11,7 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
   return (
     <div className="space-y-6">
       {/* Header con información */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-lg p-8 text-white">
+      <div className="bg-linear-to-r from-purple-600 to-indigo-600 rounded-lg shadow-lg p-8 text-white">
         <div className="flex items-center gap-3 mb-2">
           <Trophy className="w-8 h-8" />
           <h2 className="text-2xl font-bold">Ranking Global de Candidatos</h2>

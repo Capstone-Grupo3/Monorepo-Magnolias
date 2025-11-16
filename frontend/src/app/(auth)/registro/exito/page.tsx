@@ -48,7 +48,7 @@ function ExitoRegistroContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-r from-green-50 via-white to-orange-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-green-100">
           {/* Icono de éxito */}
@@ -82,7 +82,7 @@ function ExitoRegistroContent() {
             </h2>
             <ol className="space-y-3 text-gray-700">
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <span className="shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                   1
                 </span>
                 <span>
@@ -90,13 +90,13 @@ function ExitoRegistroContent() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <span className="shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                   2
                 </span>
                 <span>Haz clic en el enlace de verificación del correo</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <span className="shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                   3
                 </span>
                 <span>Una vez verificado, podrás iniciar sesión en la plataforma</span>
