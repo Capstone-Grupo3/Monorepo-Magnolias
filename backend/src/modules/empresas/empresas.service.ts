@@ -2,40 +2,85 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { RutValidator } from '../../common/validators/rut.validator';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class EmpresasService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createEmpresaDto: CreateEmpresaDto) {
-    const existente = await this.prisma.empresa.findUnique({
+  async create(createEmpresaDto: CreateEmpresaDto, ip?: string) {
+    // Validar RUT
+    const rutLimpio = RutValidator.limpiar(createEmpresaDto.rut);
+
+    // Verificar RUT duplicado
+    const rutExistente = await this.prisma.empresa.findUnique({
+      where: { rut: rutLimpio },
+    });
+
+    if (rutExistente) {
+      throw new ConflictException('El RUT ya está registrado');
+    }
+
+    // Verificar correo duplicado
+    const correoExistente = await this.prisma.empresa.findUnique({
       where: { correo: createEmpresaDto.correo },
     });
 
-    if (existente) {
+    if (correoExistente) {
       throw new ConflictException('El correo ya está registrado');
     }
 
-    const hashedPassword = await bcrypt.hash(createEmpresaDto.contrasena, 10);
+    // Verificar LinkedIn/Google ID duplicado si se proporciona
+    if (createEmpresaDto.linkedinId) {
+      const linkedinExistente = await this.prisma.empresa.findUnique({
+        where: { linkedinId: createEmpresaDto.linkedinId },
+      });
+
+      if (linkedinExistente) {
+        throw new ConflictException('Esta cuenta de LinkedIn ya está registrada');
+      }
+    }
+
+    if (createEmpresaDto.googleId) {
+      const googleExistente = await this.prisma.empresa.findUnique({
+        where: { googleId: createEmpresaDto.googleId },
+      });
+
+      if (googleExistente) {
+        throw new ConflictException('Esta cuenta de Google ya está registrada');
+      }
+    }
+
+    // Hash de contraseña solo si se proporciona
+    let hashedPassword = null;
+    if (createEmpresaDto.contrasena) {
+      hashedPassword = await bcrypt.hash(createEmpresaDto.contrasena, 10);
+    }
 
     const empresa = await this.prisma.empresa.create({
       data: {
-        rut: createEmpresaDto.rut,
+        rut: rutLimpio,
         nombre: createEmpresaDto.nombre,
         correo: createEmpresaDto.correo,
         contrasenaHash: hashedPassword,
         descripcion: createEmpresaDto.descripcion,
         logoUrl: createEmpresaDto.logoUrl,
+        linkedinId: createEmpresaDto.linkedinId,
+        googleId: createEmpresaDto.googleId,
+        ultimoIntentoIp: ip,
+        fechaUltimoIntento: new Date(),
+        intentosRegistro: 1,
       },
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { contrasenaHash, ...result } = empresa;
+    const { contrasenaHash, tokenVerificacion, ...result } = empresa;
     return result;
   }
 

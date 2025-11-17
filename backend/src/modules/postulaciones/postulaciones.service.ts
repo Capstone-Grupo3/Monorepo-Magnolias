@@ -49,13 +49,10 @@ export class PostulacionesService {
 
     // Subir CV si se proporciona
     let cvUrl: string | null = null;
-    console.log(`🔍 Verificando CV adjunto...`);
-    console.log(`📎 cvFile recibido:`, cvFile ? `Sí (${cvFile.originalname}, ${cvFile.size} bytes)` : 'No');
     
     if (cvFile) {
       try {
         cvUrl = await this.storageService.uploadCV(cvFile, candidatoId);
-        console.log(`✅ CV subido exitosamente a Supabase: ${cvUrl}`);
       } catch (error) {
         console.error('❌ Error al subir CV:', error.message);
         // Continuar sin CV si falla la subida

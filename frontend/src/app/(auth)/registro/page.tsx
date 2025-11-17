@@ -10,6 +10,8 @@ import {
   RegistroFooter,
   UserTypeSelector
 } from "@/components/registro";
+import { OAuthSection } from "@/components/shared/OAuthButtons";
+import { authService } from "@/services/auth.service";
 
 export default function RegistroPage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function RegistroPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [empresaForm, setEmpresaForm] = useState({
     rut: "",
@@ -37,9 +40,34 @@ export default function RegistroPage() {
     experienciaAnios: 0,
   });
 
+  const handleLinkedInLogin = async () => {
+    try {
+      if (tipoUsuario === "empresa") {
+        await authService.loginLinkedInEmpresa();
+      } else {
+        await authService.loginLinkedInPostulante();
+      }
+    } catch (error) {
+      console.error('Error OAuth LinkedIn:', error);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      if (tipoUsuario === "empresa") {
+        await authService.loginGoogleEmpresa();
+      } else {
+        await authService.loginGooglePostulante();
+      }
+    } catch (error) {
+      console.error('Error OAuth Google:', error);
+    }
+  };
+
   const handleSubmitEmpresa = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setLoading(true);
 
     if (!empresaForm.rut.trim()) {
@@ -72,9 +100,20 @@ export default function RegistroPage() {
         throw new Error(errorData.message || "Error al registrar empresa");
       }
 
-      router.push("/login?registered=true");
+      setSuccessMessage(
+        "¡Registro exitoso! Revisa tu correo electrónico para verificar tu cuenta."
+      );
+      
+      // Redirigir a página de éxito después de 2 segundos
+      setTimeout(() => {
+        router.push(`/registro/exito?tipo=empresa&correo=${encodeURIComponent(empresaForm.correo)}`);
+      }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al registrar");
+      if (err instanceof Error && err.message.includes("429")) {
+        setError("Demasiados intentos de registro. Por favor, intenta más tarde.");
+      } else {
+        setError(err instanceof Error ? err.message : "Error al registrar");
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +122,7 @@ export default function RegistroPage() {
   const handleSubmitPostulante = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setLoading(true);
 
     if (!postulanteForm.rut.trim()) {
@@ -116,9 +156,20 @@ export default function RegistroPage() {
         throw new Error(errorData.message || "Error al registrar postulante");
       }
 
-      router.push("/login?registered=true");
+      setSuccessMessage(
+        "¡Registro exitoso! Revisa tu correo electrónico para verificar tu cuenta."
+      );
+      
+      // Redirigir a página de éxito después de 2 segundos
+      setTimeout(() => {
+        router.push(`/registro/exito?tipo=postulante&correo=${encodeURIComponent(postulanteForm.correo)}`);
+      }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al registrar");
+      if (err instanceof Error && err.message.includes("429")) {
+        setError("Demasiados intentos de registro. Por favor, intenta más tarde.");
+      } else {
+        setError(err instanceof Error ? err.message : "Error al registrar");
+      }
     } finally {
       setLoading(false);
     }
@@ -138,6 +189,13 @@ export default function RegistroPage() {
             onTipoChange={setTipoUsuario}
           />
 
+          {successMessage && (
+            <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
+              <span className="text-green-500 font-bold">✓</span>
+              <span>{successMessage}</span>
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
               <span className="text-red-500 font-bold">⚠</span>
@@ -145,6 +203,15 @@ export default function RegistroPage() {
             </div>
           )}
 
+          {/* Botones OAuth */}
+          <OAuthSection
+            userType={tipoUsuario}
+            onLinkedInClick={handleLinkedInLogin}
+            onGoogleClick={handleGoogleLogin}
+            disabled={loading}
+          />
+
+          {/* Formularios de registro */}
           {tipoUsuario === "postulante" ? (
             <PostulanteForm
               formData={postulanteForm}

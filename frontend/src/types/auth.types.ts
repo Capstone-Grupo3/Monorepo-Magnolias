@@ -12,6 +12,13 @@ export interface LoginCredentials {
 export interface LoginResponse {
   access_token: string;
   userType?: UserType;
+  user?: {
+    id: number;
+    nombre: string;
+    correo: string;
+    tipo: UserType;
+    emailVerificado: boolean;
+  };
 }
 
 export interface RegisterEmpresaDTO {
@@ -38,4 +45,5 @@ export interface AuthUser {
   nombre: string;
   correo: string;
   tipo: UserType;
+  emailVerificado: boolean;
 }

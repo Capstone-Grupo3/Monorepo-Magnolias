@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Request,
+  Ip,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,18 +21,54 @@ import { PostulantesService } from './postulantes.service';
 import { CreatePostulanteDto } from './dto/create-postulante.dto';
 import { UpdatePostulanteDto } from './dto/update-postulante.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RateLimitGuard } from '../auth/guards/rate-limit.guard';
+import { EmailService } from '../auth/services/email.service';
+import { VerificationService } from '../auth/services/verification.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @ApiTags('Postulantes')
 @Controller('Postulantes')
 export class PostulantesController {
-  constructor(private readonly PostulantesService: PostulantesService) {}
+  constructor(
+    private readonly PostulantesService: PostulantesService,
+    private readonly emailService: EmailService,
+    private readonly verificationService: VerificationService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Post()
+  @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Registrar un nuevo postulante' })
-  @ApiResponse({ status: 201, description: 'postulante creado exitosamente' })
-  @ApiResponse({ status: 409, description: 'El correo ya está registrado' })
-  create(@Body() createPostulanteDto: CreatePostulanteDto) {
-    return this.PostulantesService.create(createPostulanteDto);
+  @ApiResponse({ status: 201, description: 'Postulante creado exitosamente' })
+  @ApiResponse({ status: 409, description: 'El correo o RUT ya está registrado' })
+  @ApiResponse({ status: 429, description: 'Demasiados intentos de registro' })
+  async create(@Body() createPostulanteDto: CreatePostulanteDto, @Ip() ip: string) {
+    const postulante = await this.PostulantesService.create(createPostulanteDto, ip);
+
+    // Generar token de verificación
+    const token = this.verificationService.generarToken();
+    const expiracion = this.verificationService.calcularExpiracion();
+
+    await this.prisma.postulante.update({
+      where: { id: postulante.id },
+      data: {
+        tokenVerificacion: token,
+        tokenExpiracion: expiracion,
+      },
+    });
+
+    // Enviar email de verificación
+    await this.emailService.enviarEmailVerificacion(
+      postulante.correo,
+      postulante.nombre,
+      token,
+      'postulante',
+    );
+
+    return {
+      ...postulante,
+      mensaje: 'Postulante registrado. Por favor verifica tu correo electrónico.',
+    };
   }
 
   @Get('me')
@@ -67,7 +105,12 @@ export class PostulantesController {
   update(
     @Param('id') id: string,
     @Body() updatePostulanteDto: UpdatePostulanteDto,
+    @Request() req,
   ) {
+    // Validar que solo pueda actualizar su propio perfil
+    if (+id !== req.user.userId) {
+      throw new BadRequestException('No puedes actualizar el perfil de otro usuario');
+    }
     return this.PostulantesService.update(+id, updatePostulanteDto);
   }
 

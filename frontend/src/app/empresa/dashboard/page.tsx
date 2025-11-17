@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   Briefcase,
@@ -31,8 +31,13 @@ import {
   LoadingSpinner,
   LogoutButton,
 } from "@/components/shared";
+import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
 
 export default function DashboardEmpresaPage() {
+  // Estado para verificación de email
+  const [emailVerificado, setEmailVerificado] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
+
   // Usar hook personalizado para toda la lógica de datos
   const {
     empresa,
@@ -44,6 +49,16 @@ export default function DashboardEmpresaPage() {
     toggleCargoStatus,
     refresh,
   } = useEmpresaDashboard();
+
+  // Verificar estado de email al cargar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const verificado = localStorage.getItem("emailVerificado") === "true";
+      const email = localStorage.getItem("userEmail") || "";
+      setEmailVerificado(verificado);
+      setUserEmail(email);
+    }
+  }, []);
 
   // Estados locales de UI
   const [activeTab, setActiveTab] = useState<
@@ -257,6 +272,13 @@ export default function DashboardEmpresaPage() {
         subtitle={empresa?.nombre}
         actions={<LogoutButton onLogout={handleLogout} />}
       />
+
+      {/* Email Verification Banner */}
+      {!emailVerificado && userEmail && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <EmailVerificationBanner userEmail={userEmail} userType="empresa" />
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="bg-white border-b border-slate-100 shadow-xs">
