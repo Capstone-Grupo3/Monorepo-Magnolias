@@ -27,6 +27,7 @@ model Empresa {
   contrasenaHash      String?       @db.VarChar(255)
   descripcion         String?
   logoUrl             String?       @db.VarChar(255)
+  linkedinUrl         String?       @db.VarChar(255)
   fechaCreacion       DateTime      @default(now())
   estado              EstadoEmpresa @default(ACTIVO)
   emailVerificado     Boolean       @default(false)
