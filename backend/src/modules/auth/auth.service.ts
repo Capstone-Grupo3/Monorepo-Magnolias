@@ -440,9 +440,10 @@ export class AuthService {
           data: {
             nombre: oauthUser.nombre,
             correo: oauthUser.email,
-            rut: '', // Se puede pedir después
+            rut: null, // Se puede pedir después
             linkedinId: oauthUser.linkedinId,
             googleId: oauthUser.googleId,
+            linkedinUrl: oauthUser.linkedinUrl, // URL del perfil de LinkedIn
             emailVerificado: true,
           },
         });
@@ -453,6 +454,7 @@ export class AuthService {
           data: {
             linkedinId: oauthUser.linkedinId || usuario.linkedinId,
             googleId: oauthUser.googleId || usuario.googleId,
+            linkedinUrl: oauthUser.linkedinUrl || usuario.linkedinUrl, // Actualizar URL si existe
             emailVerificado: true,
           },
         });
@@ -481,9 +483,10 @@ export class AuthService {
           data: {
             nombre: oauthUser.nombre,
             correo: oauthUser.email,
-            rut: '', // Se puede pedir después
+            rut: null, // Se puede pedir después
             linkedinId: oauthUser.linkedinId,
             googleId: oauthUser.googleId,
+            linkedinUrl: oauthUser.linkedinUrl, // URL del perfil de LinkedIn
             emailVerificado: true,
           },
         });
@@ -494,6 +497,7 @@ export class AuthService {
           data: {
             linkedinId: oauthUser.linkedinId || usuario.linkedinId,
             googleId: oauthUser.googleId || usuario.googleId,
+            linkedinUrl: oauthUser.linkedinUrl || usuario.linkedinUrl, // Actualizar URL si existe
             emailVerificado: true,
           },
         });

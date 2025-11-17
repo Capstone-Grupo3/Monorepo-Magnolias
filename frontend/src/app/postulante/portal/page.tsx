@@ -69,6 +69,7 @@ export default function PortalCandidatoPage() {
   // Estados para edición de perfil
   const [editandoPerfil, setEditandoPerfil] = useState(false);
   const [perfilEditado, setPerfilEditado] = useState({
+    nombre: "",
     rut: "",
     telefono: "",
     experienciaAnios: 0,
@@ -81,6 +82,7 @@ export default function PortalCandidatoPage() {
   useEffect(() => {
     if (postulante) {
       setPerfilEditado({
+        nombre: postulante.nombre || "",
         rut: postulante.rut || "",
         telefono: postulante.telefono || "",
         experienciaAnios: postulante.experienciaAnios || 0,
@@ -104,6 +106,7 @@ export default function PortalCandidatoPage() {
     // Restaurar valores originales
     if (postulante) {
       setPerfilEditado({
+        nombre: postulante.nombre || "",
         rut: postulante.rut || "",
         telefono: postulante.telefono || "",
         experienciaAnios: postulante.experienciaAnios || 0,
@@ -488,8 +491,18 @@ export default function PortalCandidatoPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nombre Completo
                   </label>
-                  <p className="text-lg text-gray-800">{postulante.nombre}</p>
-                  <p className="text-xs text-gray-500 mt-1">No editable</p>
+                  {editandoPerfil ? (
+                    <input
+                      type="text"
+                      value={perfilEditado.nombre}
+                      onChange={(e) =>
+                        setPerfilEditado({ ...perfilEditado, nombre: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  ) : (
+                    <p className="text-lg text-gray-800">{postulante.nombre}</p>
+                  )}
                 </div>
 
                 <div>
@@ -567,7 +580,7 @@ export default function PortalCandidatoPage() {
                     />
                   ) : (
                     <p className="text-lg text-gray-800">
-                      {postulante.experienciaAnios !== undefined
+                      {postulante.experienciaAnios && postulante.experienciaAnios > 0
                         ? `${postulante.experienciaAnios} años`
                         : <span className="text-gray-400 italic">No especificado</span>}
                     </p>
@@ -643,7 +656,7 @@ export default function PortalCandidatoPage() {
 
       {/* Modal de Postulación */}
       {showModal && cargoSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full my-8">
             <div className="bg-white border-b px-6 py-4 flex justify-between items-center rounded-t-xl">
               <h3 className="text-2xl font-bold text-gray-800">

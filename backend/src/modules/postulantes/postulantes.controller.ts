@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   Ip,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -104,7 +105,12 @@ export class PostulantesController {
   update(
     @Param('id') id: string,
     @Body() updatePostulanteDto: UpdatePostulanteDto,
+    @Request() req,
   ) {
+    // Validar que solo pueda actualizar su propio perfil
+    if (+id !== req.user.userId) {
+      throw new BadRequestException('No puedes actualizar el perfil de otro usuario');
+    }
     return this.PostulantesService.update(+id, updatePostulanteDto);
   }
 

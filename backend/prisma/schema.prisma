@@ -21,7 +21,7 @@ model Admin {
 
 model Empresa {
   id                  Int           @id @default(autoincrement())
-  rut                 String        @unique @db.VarChar(12)
+  rut                 String?       @unique @db.VarChar(12)
   nombre              String        @db.VarChar(150)
   correo              String        @unique @db.VarChar(150)
   contrasenaHash      String?       @db.VarChar(255)
@@ -49,7 +49,7 @@ model Empresa {
 
 model Postulante {
   id                  Int               @id @default(autoincrement())
-  rut                 String            @unique @db.VarChar(12)
+  rut                 String?           @unique @db.VarChar(12)
   nombre              String            @db.VarChar(150)
   correo              String            @unique @db.VarChar(150)
   contrasenaHash      String?           @db.VarChar(255)

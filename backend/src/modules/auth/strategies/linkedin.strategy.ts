@@ -21,7 +21,7 @@ export class LinkedInStrategy extends PassportStrategy(OAuth2Strategy, 'linkedin
       clientID,
       clientSecret,
       callbackURL,
-      scope: ['openid', 'profile', 'email'],
+      scope: ['openid', 'profile', 'email', 'w_member_social'],
     });
 
     // Verificar si OAuth está configurado
@@ -50,6 +50,26 @@ export class LinkedInStrategy extends PassportStrategy(OAuth2Strategy, 'linkedin
 
       const userData = response.data;
 
+      // Intentar obtener el perfil público (vanity name)
+      let linkedinUrl = null;
+      try {
+        const profileResponse = await firstValueFrom(
+          this.httpService.get('https://api.linkedin.com/v2/me', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          })
+        );
+        
+        // Si hay vanityName, construir la URL personalizada
+        const vanityName = profileResponse.data.vanityName;
+        if (vanityName) {
+          linkedinUrl = `https://www.linkedin.com/in/${vanityName}`;
+        }
+      } catch (error) {
+        console.log('No se pudo obtener vanityName de LinkedIn:', error.message);
+      }
+
       // LinkedIn OpenID Connect devuelve los datos en formato estándar
       const user = {
         provider: 'linkedin',
@@ -61,6 +81,7 @@ export class LinkedInStrategy extends PassportStrategy(OAuth2Strategy, 'linkedin
         photo: userData.picture,
         emailVerificado: userData.email_verified || true,
         conexionesLinkedin: 0, // OpenID Connect básico no incluye conexiones
+        linkedinUrl: linkedinUrl, // URL del perfil de LinkedIn
       };
 
       done(null, user);
