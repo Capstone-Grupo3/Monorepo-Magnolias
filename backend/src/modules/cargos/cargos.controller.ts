@@ -20,6 +20,7 @@ import {
 import { CargoService } from './cargos.service';
 import { CreateCargoDto } from './dto/create-cargo.dto';
 import { UpdateCargoDto } from './dto/update-cargo.dto';
+import { UpdateCargoIaDto } from './dto/update-cargo-ia.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('cargos')
@@ -69,6 +70,13 @@ export class CargoController {
     @Request() req,
   ) {
     return this.cargosService.update(+id, updateCargoDto, req.user.userId);
+  }
+
+  @Patch(':id/ia')
+  @ApiOperation({ summary: 'Endpoint para recibir resultados IA (n8n callback)' })
+  // Nota: considerar proteger con token si lo necesitas
+  updateIa(@Param('id') id: string, @Body() payload: UpdateCargoIaDto) {
+    return this.cargosService.updateIa(+id, payload);
   }
 
   @Delete(':id')

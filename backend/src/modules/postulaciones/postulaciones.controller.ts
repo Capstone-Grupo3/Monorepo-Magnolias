@@ -9,6 +9,7 @@ import {
   Request,
   UseInterceptors,
   UploadedFile,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -29,6 +30,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class PostulacionesController {
   constructor(private readonly postulacionesService: PostulacionesService) {}
 
+  // =====================================================
+  // POST /postulaciones  -> crear postulación + CV opcional
+  // =====================================================
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -70,52 +74,128 @@ export class PostulacionesController {
     );
   }
 
+  // =====================================================
+  // GET /postulaciones/postulante/:id
+  // =====================================================
   @Get('postulante/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener postulaciones de un postulante' })
-  @ApiResponse({ status: 200, description: 'Lista de postulaciones del postulante' })
-  findByPostulante(@Param('id') postulanteId: string) {
-    return this.postulacionesService.findByPostulante(+postulanteId);
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de postulaciones del postulante',
+  })
+  findByPostulante(@Param('id', ParseIntPipe) postulanteId: number) {
+    return this.postulacionesService.findByPostulante(postulanteId);
   }
 
+  // =====================================================
+  // GET /postulaciones/cargo/:cargoId
+  // =====================================================
   @Get('cargo/:cargoId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener postulaciones de un cargo específico' })
-  @ApiResponse({ status: 200, description: 'Lista de postulaciones para el cargo' })
-  findByCargo(@Param('cargoId') cargoId: string) {
-    return this.postulacionesService.findByCargo(+cargoId);
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de postulaciones para el cargo',
+  })
+  findByCargo(@Param('cargoId', ParseIntPipe) cargoId: number) {
+    return this.postulacionesService.findByCargo(cargoId);
   }
 
+  // =====================================================
+  // GET /postulaciones/empresa/:empresaId
+  // =====================================================
   @Get('empresa/:empresaId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener postulaciones recibidas por una empresa' })
-  findByEmpresa(@Param('empresaId') empresaId: string) {
-    return this.postulacionesService.findByEmpresa(+empresaId);
+  findByEmpresa(@Param('empresaId', ParseIntPipe) empresaId: number) {
+    return this.postulacionesService.findByEmpresa(empresaId);
   }
 
+  // =====================================================
+  // GET /postulaciones/:id
+  // =====================================================
   @Get(':id')
   @ApiOperation({ summary: 'Obtener una postulación por ID' })
-  findOne(@Param('id') id: string) {
-    return this.postulacionesService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.postulacionesService.findOne(id);
   }
 
+  // =====================================================
+  // PATCH /postulaciones/:id
+  //  -> usado por n8n para actualizar puntajeIa, feedbackIa y estado
+  // =====================================================
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar postulación (incluye estado)' })
-  update(@Param('id') id: string, @Body() updateEstadoDto: any) {
-    return this.postulacionesService.update(+id, updateEstadoDto);
+  @ApiOperation({ summary: 'Actualizar postulación (incluye estado y puntajes IA)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        puntajeIa: {
+          type: 'number',
+          example: 78,
+          description: 'Puntaje global IA (0-100)',
+        },
+        feedbackIa: {
+          type: 'string',
+          example: '=== ANÁLISIS DE POSTULACIÓN === ...',
+          description: 'Feedback consolidado de la IA',
+        },
+        estado: {
+          type: 'string',
+          example: 'EVALUADO',
+          description:
+            'Nuevo estado de la postulación (PENDIENTE | EN_REVISION | EVALUADO | RECHAZADO | SELECCIONADO)',
+        },
+        respuestasJson: {
+          type: 'object',
+          description: 'Opcional: respuestas actualizadas del formulario',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Postulación actualizada' })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: any,
+  ) {
+    // n8n a veces puede mandar el body como string crudo (raw),
+    // así que aquí lo normalizamos para que SIEMPRE sea un objeto.
+    let data: any = body;
+
+    if (typeof body === 'string') {
+      try {
+        data = JSON.parse(body);
+      } catch (e) {
+        console.warn(
+          '⚠️ PATCH /postulaciones/:id recibió un string que no es JSON. Se ignora el body.',
+        );
+        data = {};
+      }
+    }
+
+    if (!data || typeof data !== 'object') {
+      data = {};
+    }
+
+    return this.postulacionesService.update(id, data);
   }
 
+  // =====================================================
+  // PATCH /postulaciones/:id/estado
+  //  -> usado desde el frontend para cambiar solo el estado
+  // =====================================================
   @Patch(':id/estado')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar estado de una postulación' })
   updateEstado(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateEstadoDto: UpdateEstadoDto,
   ) {
-    return this.postulacionesService.updateEstado(+id, updateEstadoDto.estado);
+    return this.postulacionesService.updateEstado(id, updateEstadoDto.estado);
   }
 }

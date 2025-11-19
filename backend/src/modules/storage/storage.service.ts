@@ -19,7 +19,6 @@ export class StorageService {
 
     this.supabase = createClient(supabaseUrl, supabaseKey);
     this.isConfigured = true;
-    console.log('✅ Supabase Storage configured successfully');
   }
 
   async uploadCV(

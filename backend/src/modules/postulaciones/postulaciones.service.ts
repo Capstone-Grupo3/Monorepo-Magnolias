@@ -13,7 +13,6 @@ import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class PostulacionesService {
-  private readonly n8nWebhookUrl: string;
 
   constructor(
     private prisma: PrismaService,
@@ -22,10 +21,7 @@ export class PostulacionesService {
     private configService: ConfigService,
     private storageService: StorageService,
   ) {
-    // Obtener URL de n8n desde variables de entorno
-    this.n8nWebhookUrl =
-      this.configService.get<string>('N8N_WEBHOOK_URL') ||
-      'http://localhost:5678/webhook/analizar-postulacion';
+    
   }
 
   async create(
@@ -49,13 +45,10 @@ export class PostulacionesService {
 
     // Subir CV si se proporciona
     let cvUrl: string | null = null;
-    console.log(`🔍 Verificando CV adjunto...`);
-    console.log(`📎 cvFile recibido:`, cvFile ? `Sí (${cvFile.originalname}, ${cvFile.size} bytes)` : 'No');
     
     if (cvFile) {
       try {
         cvUrl = await this.storageService.uploadCV(cvFile, candidatoId);
-        console.log(`✅ CV subido exitosamente a Supabase: ${cvUrl}`);
       } catch (error) {
         console.error('❌ Error al subir CV:', error.message);
         // Continuar sin CV si falla la subida
@@ -64,7 +57,6 @@ export class PostulacionesService {
 
     // Si no hay CV adjunto, usar el del perfil del postulante
     if (!cvUrl && createPostulacionDto.cvUrl) {
-      console.log(`📋 Usando cvUrl del DTO: ${createPostulacionDto.cvUrl}`);
       cvUrl = createPostulacionDto.cvUrl;
     }
 
@@ -75,10 +67,7 @@ export class PostulacionesService {
         select: { cvUrl: true },
       });
       cvUrl = postulante?.cvUrl || null;
-      console.log(`👤 CV del perfil del postulante: ${cvUrl || 'No tiene'}`);
     }
-
-    console.log(`📦 cvUrl final que se guardará en BD: ${cvUrl || 'null'}`);
 
     // Crear postulación
     const postulacion = await this.prisma.postulacion.create({
@@ -111,25 +100,15 @@ export class PostulacionesService {
       },
     });
 
-    console.log(`✅ Postulación creada con ID: ${postulacion.id}`);
-    console.log(`📋 Datos guardados:`, {
-      idPostulante: postulacion.idPostulante,
-      idCargo: postulacion.idCargo,
-      cvUrl: postulacion.cvUrl,
-      tieneRespuestas: !!postulacion.respuestasJson,
-    });
+
 
     // ========================================
     // 🚀 TRIGGER WORKFLOW DE N8N
     // ========================================
-    // Llamar al webhook de n8n para análisis avanzado con CV + Respuestas
     this.triggerAnalisisN8n(postulacion.id).catch((err) => {
       console.error('❌ Error al triggear workflow de n8n:', err.message);
-      // No bloqueamos la postulación si n8n falla
-      // Fallback: usar evaluación con IA antigua
-      this.evaluarConIA(postulacion.id).catch((iaErr) => {
-        console.error('❌ Error en fallback de IA:', iaErr.message);
-      });
+      // Por ahora NO hacemos fallback automático.
+      // La postulación se queda en estado PENDIENTE si algo falla.
     });
 
     return postulacion;
@@ -160,7 +139,7 @@ export class PostulacionesService {
         data: {
           puntajeIa: resultado.puntaje_ia,
           feedbackIa: resultado.feedback,
-          estado: 'EVALUADO',
+          estado: 'PENDIENTE',
         },
       });
     } catch (error) {
@@ -177,46 +156,42 @@ export class PostulacionesService {
    * - Calcula scores de compatibilidad y veracidad
    * - Actualiza la postulación con feedback detallado
    */
-  private async triggerAnalisisN8n(postulacionId: number): Promise<void> {
-    try {
-      console.log(
-        `🔔 Triggereando workflow n8n para postulación ID: ${postulacionId}`,
-      );
-      console.log(`📡 Webhook URL: ${this.n8nWebhookUrl}`);
+  // 🔹 Llama a n8n para que analice la postulación y actualice la BD
+    private async triggerAnalisisN8n(postulacionId: number): Promise<void> {
+      try {
 
-      // Llamar al webhook de n8n con el ID de la postulación
-      const response = await firstValueFrom(
-        this.httpService.post(
-          this.n8nWebhookUrl,
-          { postulacionId },
-          {
-            timeout: 30000, // 30 segundos timeout
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
-        ),
-      );
+        // 1) Traer la postulación completa desde la BD
+        const postulacion = await this.prisma.postulacion.findUnique({
+          where: { id: postulacionId },
+        });
 
-      console.log(
-        `✅ Workflow n8n ejecutado exitosamente para postulación ${postulacionId}`,
-      );
-      console.log(
-        `📊 Score final: ${response.data?.analisis?.scoreFinal || 'N/A'}`,
-      );
-      console.log(
-        `💡 Recomendación: ${response.data?.analisis?.recomendacion || 'N/A'}`,
-      );
-    } catch (error) {
-      console.error(
-        `❌ Error al llamar webhook de n8n para postulación ${postulacionId}:`,
-        error.message,
-      );
+        if (!postulacion) {
+          console.error(
+            `❌ No se encontró la postulación ${postulacionId} para enviar a n8n`,
+          );
+          return;
+        }
 
-      // Si n8n no está disponible o falla, el catch en create() llamará al fallback
-      throw error;
+        // 2) Construir el payload que espera n8n
+        const payload = {
+          idPostulacion: postulacion.id,
+          idCargo: postulacion.idCargo,
+          idPostulante: postulacion.idPostulante,
+        };
+
+        // 3) Llamar al webhook de n8n
+        const response = await firstValueFrom(
+          this.httpService.post(process.env.N8N_WEBHOOK_URL, payload, {
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
+
+
+      } catch (err) {
+        console.error('❌ Error llamando al webhook de n8n:', err);
+      }
     }
-  }
+
 
   async findByPostulante(postulanteId: number) {
     return this.prisma.postulacion.findMany({
@@ -329,8 +304,6 @@ export class PostulacionesService {
       throw new NotFoundException('Postulación no encontrada');
     }
 
-    console.log(`🔍 findOne - Postulación ID ${id} - cvUrl: ${postulacion.cvUrl || 'null'}`);
-
     return postulacion;
   }
 
@@ -346,9 +319,6 @@ export class PostulacionesService {
 
   async update(id: number, data: any) {
     try {
-      // LOG DEBUG: Ver qué datos llegan
-      console.log('🔍 UPDATE - ID:', id);
-      console.log('🔍 UPDATE - Data recibida:', JSON.stringify(data, null, 2));
 
       // Verificar que existe la postulación
       await this.findOne(id);
@@ -371,8 +341,6 @@ export class PostulacionesService {
         const validEstados = ['PENDIENTE', 'EN_REVISION', 'EVALUADO', 'RECHAZADO', 'SELECCIONADO'];
         if (validEstados.includes(data.estado)) {
           updateData.estado = data.estado;
-        } else {
-          console.warn(`⚠️ Estado inválido recibido: ${data.estado}, se omite`);
         }
       }
 
@@ -381,15 +349,10 @@ export class PostulacionesService {
         updateData.respuestasJson = data.respuestasJson;
       }
 
-      // LOG DEBUG: Ver qué datos se van a actualizar
-      console.log('✅ UPDATE - Datos preparados para Prisma:', JSON.stringify(updateData, null, 2));
-
       const resultado = await this.prisma.postulacion.update({
         where: { id },
         data: updateData,
       });
-
-      console.log('✅ UPDATE - Resultado de Prisma:', JSON.stringify(resultado, null, 2));
 
       return resultado;
     } catch (error) {
