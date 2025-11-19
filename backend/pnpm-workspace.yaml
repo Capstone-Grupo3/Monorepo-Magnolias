@@ -5,4 +5,5 @@ onlyBuiltDependencies:
   - '@scarf/scarf'
   - bcrypt
   - prisma
+  - puppeteer
   - unrs-resolver

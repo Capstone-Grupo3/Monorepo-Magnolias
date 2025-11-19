@@ -59,9 +59,8 @@ export class PostulacionesService {
       }
     }
 
-    // Si no hay CV adjunto, usar el del perfil del postulante
+    // Si no hay CV adjunto, usar el del DTO
     if (!cvUrl && createPostulacionDto.cvUrl) {
-      console.log(`📋 Usando cvUrl del DTO: ${createPostulacionDto.cvUrl}`);
       cvUrl = createPostulacionDto.cvUrl;
     }
 
@@ -72,10 +71,7 @@ export class PostulacionesService {
         select: { cvUrl: true },
       });
       cvUrl = postulante?.cvUrl || null;
-      console.log(`👤 CV del perfil del postulante: ${cvUrl || 'No tiene'}`);
     }
-
-    console.log(`📦 cvUrl final que se guardará en BD: ${cvUrl || 'null'}`);
 
     // Crear postulación
     const postulacion = await this.prisma.postulacion.create({
@@ -106,14 +102,6 @@ export class PostulacionesService {
           },
         },
       },
-    });
-
-    console.log(`✅ Postulación creada con ID: ${postulacion.id}`);
-    console.log(`📋 Datos guardados:`, {
-      idPostulante: postulacion.idPostulante,
-      idCargo: postulacion.idCargo,
-      cvUrl: postulacion.cvUrl,
-      tieneRespuestas: !!postulacion.respuestasJson,
     });
 
     // ========================================
@@ -176,11 +164,6 @@ export class PostulacionesService {
    */
   private async triggerAnalisisN8n(postulacionId: number): Promise<void> {
     try {
-      console.log(
-        `🔔 Triggereando workflow n8n para postulación ID: ${postulacionId}`,
-      );
-      console.log(`📡 Webhook URL: ${this.n8nWebhookUrl}`);
-
       // Llamar al webhook de n8n con el ID de la postulación
       const response = await firstValueFrom(
         this.httpService.post(
@@ -195,15 +178,6 @@ export class PostulacionesService {
         ),
       );
 
-      console.log(
-        `✅ Workflow n8n ejecutado exitosamente para postulación ${postulacionId}`,
-      );
-      console.log(
-        `📊 Score final: ${response.data?.analisis?.scoreFinal || 'N/A'}`,
-      );
-      console.log(
-        `💡 Recomendación: ${response.data?.analisis?.recomendacion || 'N/A'}`,
-      );
     } catch (error) {
       console.error(
         `❌ Error al llamar webhook de n8n para postulación ${postulacionId}:`,
@@ -326,8 +300,6 @@ export class PostulacionesService {
       throw new NotFoundException('Postulación no encontrada');
     }
 
-    console.log(`🔍 findOne - Postulación ID ${id} - cvUrl: ${postulacion.cvUrl || 'null'}`);
-
     return postulacion;
   }
 
@@ -343,10 +315,6 @@ export class PostulacionesService {
 
   async update(id: number, data: any) {
     try {
-      // LOG DEBUG: Ver qué datos llegan
-      console.log('🔍 UPDATE - ID:', id);
-      console.log('🔍 UPDATE - Data recibida:', JSON.stringify(data, null, 2));
-
       // Verificar que existe la postulación
       await this.findOne(id);
 
@@ -378,15 +346,10 @@ export class PostulacionesService {
         updateData.respuestasJson = data.respuestasJson;
       }
 
-      // LOG DEBUG: Ver qué datos se van a actualizar
-      console.log('✅ UPDATE - Datos preparados para Prisma:', JSON.stringify(updateData, null, 2));
-
       const resultado = await this.prisma.postulacion.update({
         where: { id },
         data: updateData,
       });
-
-      console.log('✅ UPDATE - Resultado de Prisma:', JSON.stringify(resultado, null, 2));
 
       return resultado;
     } catch (error) {
