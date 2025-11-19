@@ -55,7 +55,7 @@ export class PostulacionesService {
       }
     }
 
-    // Si no hay CV adjunto, usar el del perfil del postulante
+    // Si no hay CV adjunto, usar el del DTO
     if (!cvUrl && createPostulacionDto.cvUrl) {
       cvUrl = createPostulacionDto.cvUrl;
     }
@@ -99,8 +99,6 @@ export class PostulacionesService {
         },
       },
     });
-
-
 
     // ========================================
     // 🚀 TRIGGER WORKFLOW DE N8N
@@ -156,9 +154,27 @@ export class PostulacionesService {
    * - Calcula scores de compatibilidad y veracidad
    * - Actualiza la postulación con feedback detallado
    */
-  // 🔹 Llama a n8n para que analice la postulación y actualice la BD
-    private async triggerAnalisisN8n(postulacionId: number): Promise<void> {
-      try {
+  private async triggerAnalisisN8n(postulacionId: number): Promise<void> {
+    try {
+      // Llamar al webhook de n8n con el ID de la postulación
+      const response = await firstValueFrom(
+        this.httpService.post(
+          this.n8nWebhookUrl,
+          { postulacionId },
+          {
+            timeout: 30000, // 30 segundos timeout
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+
+    } catch (error) {
+      console.error(
+        `❌ Error al llamar webhook de n8n para postulación ${postulacionId}:`,
+        error.message,
+      );
 
         // 1) Traer la postulación completa desde la BD
         const postulacion = await this.prisma.postulacion.findUnique({
@@ -319,7 +335,6 @@ export class PostulacionesService {
 
   async update(id: number, data: any) {
     try {
-
       // Verificar que existe la postulación
       await this.findOne(id);
 

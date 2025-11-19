@@ -39,22 +39,17 @@ export function useEmpresaDashboard() {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const empresaId = payload.sub;
 
-      console.log("🔍 Cargando datos para empresa ID:", empresaId);
-
       // Cargar perfil
       const perfilData = await empresaService.getEmpresaProfile(empresaId);
-      console.log("🏢 Perfil empresa:", perfilData);
       setEmpresa(perfilData);
 
       // Cargar cargos de la empresa
       const cargosData = await cargoService.getCargosByEmpresa(empresaId);
-      console.log("💼 Cargos de la empresa:", cargosData.length);
       setCargos(cargosData);
 
       // Cargar todas las postulaciones de la empresa
       try {
         const postulacionesData = await postulacionService.getPostulacionesByEmpresa(empresaId);
-        console.log("📋 Postulaciones de la empresa:", postulacionesData.length);
         setPostulaciones(postulacionesData);
       } catch (postErr: any) {
         // Si el endpoint no existe aún, simplemente no cargar postulaciones

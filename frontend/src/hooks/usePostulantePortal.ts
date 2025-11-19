@@ -39,23 +39,18 @@ export function usePostulantePortal() {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const postulanteId = payload.sub;
 
-      console.log("🔍 Cargando datos para postulante ID:", postulanteId);
-
       // Cargar perfil
       const perfilData =
         await postulanteService.getPostulanteProfile(postulanteId);
-      console.log("👤 Perfil postulante:", perfilData);
       setPostulante(perfilData);
 
       // Cargar cargos activos
       const cargosData = await cargoService.getCargos();
-      console.log("💼 Cargos disponibles:", cargosData.length);
       setCargos(cargosData);
 
       // Cargar postulaciones del postulante
       const postulacionesData =
         await postulacionService.getPostulacionesByPostulante(postulanteId);
-      console.log("📋 Postulaciones del postulante:", postulacionesData.length);
       setPostulaciones(postulacionesData);
     } catch (err: any) {
       console.error("❌ Error cargando datos:", err);

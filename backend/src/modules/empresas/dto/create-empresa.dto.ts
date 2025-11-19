@@ -7,11 +7,13 @@ import {
   IsUrl,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsValidRut } from '../../../common/decorators/is-valid-rut.decorator';
 
 export class CreateEmpresaDto {
-  @ApiProperty({ example: '76123456-7' })
+  @ApiProperty({ example: '76.123.456-7' })
   @IsString()
   @IsNotEmpty()
+  @IsValidRut()
   rut: string;
 
   @ApiProperty({ example: 'Tech Solutions SA' })
@@ -24,11 +26,11 @@ export class CreateEmpresaDto {
   @IsNotEmpty()
   correo: string;
 
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: 'password123', required: false })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(6)
-  contrasena: string;
+  contrasena?: string;
 
   @ApiProperty({
     example: 'Empresa de tecnología e innovación',
@@ -42,4 +44,14 @@ export class CreateEmpresaDto {
   @IsOptional()
   @IsUrl()
   logoUrl?: string;
+
+  @ApiProperty({ required: false, description: 'ID de LinkedIn para OAuth' })
+  @IsString()
+  @IsOptional()
+  linkedinId?: string;
+
+  @ApiProperty({ required: false, description: 'ID de Google para OAuth' })
+  @IsString()
+  @IsOptional()
+  googleId?: string;
 }

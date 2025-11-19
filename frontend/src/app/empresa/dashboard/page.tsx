@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   Briefcase,
@@ -13,6 +13,8 @@ import {
   MapPin,
   DollarSign,
   TrendingUp,
+  Lock,
+  Unlock,
 } from "lucide-react";
 
 // Importar tipos centralizados
@@ -31,8 +33,14 @@ import {
   LoadingSpinner,
   LogoutButton,
 } from "@/components/shared";
+import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
+import GenerarReporteButton from "@/components/empresa/GenerarReporteButton";
 
 export default function DashboardEmpresaPage() {
+  // Estado para verificación de email
+  const [emailVerificado, setEmailVerificado] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
+
   // Usar hook personalizado para toda la lógica de datos
   const {
     empresa,
@@ -44,6 +52,16 @@ export default function DashboardEmpresaPage() {
     toggleCargoStatus,
     refresh,
   } = useEmpresaDashboard();
+
+  // Verificar estado de email al cargar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const verificado = localStorage.getItem("emailVerificado") === "true";
+      const email = localStorage.getItem("userEmail") || "";
+      setEmailVerificado(verificado);
+      setUserEmail(email);
+    }
+  }, []);
 
   // Estados locales de UI
   const [activeTab, setActiveTab] = useState<
@@ -82,6 +100,43 @@ export default function DashboardEmpresaPage() {
     const success = await toggleCargoStatus(cargoId, !activo);
     if (success) {
       alert(`Cargo ${!activo ? "activado" : "desactivado"} correctamente`);
+    }
+  };
+
+  const handleCerrarCargo = async (cargoId: number, estadoActual: string) => {
+    const nuevoEstado = estadoActual === "CERRADA" ? "ACTIVA" : "CERRADA";
+    const mensaje =
+      nuevoEstado === "CERRADA"
+        ? "¿Cerrar este cargo? No se recibirán más postulaciones y podrás generar el reporte final."
+        : "¿Reabrir este cargo? Se podrán recibir nuevas postulaciones.";
+
+    if (!confirm(mensaje)) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/cargos/${cargoId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ estado: nuevoEstado }),
+        }
+      );
+
+      if (response.ok) {
+        alert(
+          `Cargo ${nuevoEstado === "CERRADA" ? "cerrado" : "reabierto"} exitosamente`
+        );
+        refresh();
+      } else {
+        alert("Error al cambiar el estado del cargo");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al cambiar el estado del cargo");
     }
   };
 
@@ -258,6 +313,13 @@ export default function DashboardEmpresaPage() {
         actions={<LogoutButton onLogout={handleLogout} />}
       />
 
+      {/* Email Verification Banner */}
+      {!emailVerificado && userEmail && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <EmailVerificationBanner userEmail={userEmail} userType="empresa" />
+        </div>
+      )}
+
       {/* Stats Cards */}
       <div className="bg-white border-b border-slate-100 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -374,20 +436,37 @@ export default function DashboardEmpresaPage() {
                   key={cargo.id}
                   className="bg-white rounded-xl shadow-xs border p-6 hover:shadow-sm transition-all"
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-bold text-gray-800">
                           {cargo.titulo}
                         </h3>
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            cargo.activo
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
+                          className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
+                            cargo.estado === "CERRADA"
+                              ? "bg-red-100 text-red-800"
+                              : cargo.estado === "EN_PROCESO"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
                           }`}
                         >
-                          {cargo.activo ? "Activo" : "Inactivo"}
+                          {cargo.estado === "CERRADA" ? (
+                            <>
+                              <Lock size={12} />
+                              Cerrada
+                            </>
+                          ) : cargo.estado === "EN_PROCESO" ? (
+                            <>
+                              <Clock size={12} />
+                              En Proceso
+                            </>
+                          ) : (
+                            <>
+                              <Unlock size={12} />
+                              Activa
+                            </>
+                          )}
                         </span>
                       </div>
 
@@ -422,6 +501,28 @@ export default function DashboardEmpresaPage() {
                     </div>
 
                     <div className="flex gap-2 ml-4">
+                      {/* Botón para Cerrar/Abrir Cargo */}
+                      {(cargo._count?.postulaciones || 0) > 0 && (
+                        <button
+                          onClick={() => handleCerrarCargo(cargo.id, cargo.estado)}
+                          className={`p-2 rounded-lg transition-all ${
+                            cargo.estado === "CERRADA"
+                              ? "text-green-600 hover:bg-green-50"
+                              : "text-orange-600 hover:bg-orange-50"
+                          }`}
+                          title={
+                            cargo.estado === "CERRADA"
+                              ? "Reabrir cargo"
+                              : "Cerrar cargo para generar reporte"
+                          }
+                        >
+                          {cargo.estado === "CERRADA" ? (
+                            <Unlock size={20} />
+                          ) : (
+                            <Lock size={20} />
+                          )}
+                        </button>
+                      )}
                       <button
                         onClick={() => fetchPostulacionesByCargo(cargo.id)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
@@ -438,6 +539,18 @@ export default function DashboardEmpresaPage() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Sección de Reportes */}
+                  {(cargo._count?.postulaciones || 0) > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <GenerarReporteButton
+                        cargoId={cargo.id}
+                        cargoTitulo={cargo.titulo}
+                        estadoCargo={cargo.estado}
+                        onReporteGenerado={refresh}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
 

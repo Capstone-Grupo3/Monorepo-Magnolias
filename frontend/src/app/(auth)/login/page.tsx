@@ -12,13 +12,15 @@ import {
   LoginFooter,
   SuccessMessage
 } from "@/components/login";
+import { OAuthSection } from "@/components/shared/OAuthButtons";
+import { authService } from "@/services/auth.service";
 
 // Componente que maneja los parámetros de búsqueda
 function RegistrationSuccess({ onShow }: { onShow: (show: boolean) => void }) {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (searchParams?.get("registered") === "true") {
+    if (searchParams?.get("registered") === "true" || searchParams?.get("verified") === "true") {
       onShow(true);
       setTimeout(() => onShow(false), 5000);
     }
@@ -37,6 +39,8 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [emailNotVerifiedError, setEmailNotVerifiedError] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   // Cargar email guardado si existe
   useEffect(() => {
@@ -47,9 +51,84 @@ function LoginPageContent() {
     }
   }, []);
 
+  // Listener para recibir el token del OAuth callback
+  useEffect(() => {
+    const handleOAuthMessage = (event: MessageEvent) => {
+      // Verificar que el mensaje viene del backend
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      if (event.origin !== backendUrl) return;
+
+      const { access_token, user } = event.data;
+      
+      if (access_token && user) {
+        // Guardar token en localStorage
+        localStorage.setItem("token", access_token);
+        localStorage.setItem("user", JSON.stringify(user));
+        
+        // Redirigir al dashboard correspondiente
+        if (user.tipo === "empresa") {
+          window.location.href = "/empresa/dashboard";
+        } else {
+          window.location.href = "/postulante/portal";
+        }
+      }
+    };
+
+    window.addEventListener("message", handleOAuthMessage);
+    return () => window.removeEventListener("message", handleOAuthMessage);
+  }, []);
+
+  const handleLinkedInLogin = async () => {
+    try {
+      if (tipoUsuario === "empresa") {
+        await authService.loginLinkedInEmpresa();
+      } else {
+        await authService.loginLinkedInPostulante();
+      }
+    } catch (error) {
+      console.error('Error OAuth LinkedIn:', error);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      if (tipoUsuario === "empresa") {
+        await authService.loginGoogleEmpresa();
+      } else {
+        await authService.loginGooglePostulante();
+      }
+    } catch (error) {
+      console.error('Error OAuth Google:', error);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError("Ingresa tu correo electrónico");
+      return;
+    }
+
+    setResendingEmail(true);
+    try {
+      if (tipoUsuario === "empresa") {
+        await authService.reenviarVerificacionEmpresa(email);
+      } else {
+        await authService.reenviarVerificacionPostulante(email);
+      }
+      setError("");
+      setEmailNotVerifiedError(false);
+      alert("Se ha enviado un nuevo correo de verificación. Por favor, revisa tu bandeja de entrada.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Error al reenviar el correo de verificación");
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setEmailNotVerifiedError(false);
 
     if (!validateEmail(email)) {
       setError("Por favor ingresa un correo válido");
@@ -70,10 +149,25 @@ function LoginPageContent() {
 
     const credentials = { correo: email, contrasena: password };
 
-    if (tipoUsuario === "empresa") {
-      await loginEmpresa(credentials);
-    } else {
-      await loginPostulante(credentials);
+    try {
+      if (tipoUsuario === "empresa") {
+        await loginEmpresa(credentials);
+      } else {
+        await loginPostulante(credentials);
+      }
+    } catch (err: any) {
+      const errorMessage = err?.message || authError || "";
+      
+      // Detectar error de email no verificado
+      if (errorMessage.toLowerCase().includes("verificar") || 
+          errorMessage.toLowerCase().includes("verify")) {
+        setEmailNotVerifiedError(true);
+        setError("Tu correo electrónico no ha sido verificado. Por favor, revisa tu bandeja de entrada.");
+      } else if (errorMessage.includes("429") || errorMessage.toLowerCase().includes("intentos")) {
+        setError("Demasiados intentos de login. Por favor, intenta más tarde.");
+      } else {
+        setError(errorMessage);
+      }
     }
   };
 
@@ -105,6 +199,33 @@ function LoginPageContent() {
               tipoUsuario={tipoUsuario}
               onTipoChange={setTipoUsuario}
             />
+
+            {/* Botones OAuth */}
+            <div className="mb-6">
+              <OAuthSection
+                userType={tipoUsuario}
+                onLinkedInClick={handleLinkedInLogin}
+                onGoogleClick={handleGoogleLogin}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Mensaje de error de email no verificado */}
+            {emailNotVerifiedError && (
+              <div className="mb-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
+                <p className="text-sm text-yellow-800 mb-3">
+                  Tu correo electrónico no ha sido verificado. ¿No recibiste el correo de verificación?
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendingEmail}
+                  className="w-full bg-yellow-600 text-white py-2 rounded-lg font-semibold hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resendingEmail ? "Reenviando..." : "Reenviar correo de verificación"}
+                </button>
+              </div>
+            )}
 
             {/* Formulario de login */}
             <LoginForm

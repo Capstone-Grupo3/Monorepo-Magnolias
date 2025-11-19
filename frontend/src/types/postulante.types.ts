@@ -14,11 +14,20 @@ export interface Postulante {
   activo?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  emailVerificado?: boolean;
+  linkedinId?: string;
+  googleId?: string;
 }
 
 export interface PostulanteDetalle extends Postulante {
   // Campos adicionales para vista detallada
   contrasenaHash?: string; // No se debe exponer al frontend normalmente
+  tokenVerificacion?: string;
+  tokenExpiracion?: Date;
+  conexionesLinkedin?: number;
+  intentosRegistro?: number;
+  ultimoIntentoIp?: string;
+  fechaUltimoIntento?: Date;
 }
 
 export interface PostulanteRanking {

@@ -44,3 +44,14 @@ export type {
 
 // Common
 export type { ApiResponse, PaginatedResponse, ApiError } from "./common.types";
+
+// Reporte
+export type {
+  ReporteRanking,
+  CandidatoRanking,
+  ComparativaCandidatos,
+  ResumenEjecutivo,
+  EstadisticasReporte,
+  SolicitudReporteDTO,
+  RespuestaGeneracionReporte,
+} from "./reporte.types";
