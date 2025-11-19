@@ -178,6 +178,13 @@ package-lock.json.bak
 secrets.yml
 secrets.json
 
+# Scripts de seeding con credenciales
+**/seed-admin.*
+**/seed-*.ts
+**/seed-*.js
+# Excepto ejemplos
+!**/seed-*.example.*
+
 # ===================================
 # CI/CD Artifacts
 # ===================================

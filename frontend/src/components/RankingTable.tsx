@@ -39,7 +39,7 @@ export default function RankingTable({
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+      <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-4">
         <h2 className="text-xl font-bold text-white">Ranking de postulantes</h2>
         <p className="text-blue-100 text-sm mt-1">
           Evaluación automática por IA • {postulantes.length} postulaciones

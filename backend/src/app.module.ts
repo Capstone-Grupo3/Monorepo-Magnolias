@@ -8,6 +8,7 @@ import { CargoModule } from './modules/cargos/cargos.module';
 import { PostulacionesModule } from './modules/postulaciones/postulaciones.module';
 import { IaModule } from './modules/ia/ia.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { StorageModule } from './modules/storage/storage.module';
     PostulacionesModule,
     IaModule,
     StorageModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

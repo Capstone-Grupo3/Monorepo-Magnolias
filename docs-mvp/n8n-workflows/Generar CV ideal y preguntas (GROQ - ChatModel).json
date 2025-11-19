@@ -1,0 +1,269 @@
+{
+  "name": "Generar CV ideal y preguntas (GROQ - ChatModel)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generar-preguntas-cargo",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        336
+      ],
+      "id": "1c7dd7e2-23e1-49a5-b731-9804771fd020",
+      "webhookId": "fdeeeb87-2ae5-45f1-83b7-42f4ad382adf"
+    },
+    {
+      "parameters": {
+        "values": {
+          "boolean": [],
+          "number": [],
+          "string": [
+            {
+              "name": "backendHost",
+              "value": "={{ $json.body?.backendHost || $json[\"backendHost\"] || 'http://host.docker.internal:3000' }}"
+            },
+            {
+              "name": "cargoId",
+              "value": "={{ String($json.body?.id || $json.body?.cargoId || $json[\"id\"] || $json[\"cargoId\"] || '') }}"
+            }
+          ],
+          "json": []
+        },
+        "options": {}
+      },
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        336
+      ],
+      "id": "bf8a89a5-2d32-45de-a315-4878b7a13102"
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"backendHost\"] + '/cargos/' + $json[\"cargoId\"]}}",
+        "options": {}
+      },
+      "name": "Get Cargo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        336
+      ],
+      "id": "f4a1a0c6-f1d7-48b9-9ac3-806db61682b2"
+    },
+    {
+      "parameters": {
+        "functionCode": "// 1) Traemos el cargo desde el input\n//    (depende de cómo lo tengas, pero por lo que vimos, viene en $json)\nconst cargo = $json;\n\n// 2) Prompt de sistema: reglas y formato de salida\nconst systemPrompt = `\nEres un asistente especializado en recursos humanos y selección de personal.\n\nTu tarea, dado un CARGO, es:\n\n1. Generar un objeto \"cv_ideal\" que represente al candidato ideal para ese cargo.\n   - Debe incluir campos como: nombre, apellido, edad aproximada, género (opcional),\n     nivel_educativo, experiencia_laboral (en años), habilidades (array de strings),\n     conocimientos_técnicos, habilidades_blandas, idiomas, certificaciones.\n   - TODO debe estar alineado específicamente con el cargo descrito.\n\n2. Generar un array \"preguntas_entrevista\".\n   - Cada elemento debe ser un objeto con la forma:\n     { \"pregunta\": string, \"tipo\": \"Abierta\" }\n   - Las preguntas deben estar fuertemente relacionadas con:\n     - El título del cargo\n     - La descripción\n     - Los requisitos y responsabilidades\n   - Evita preguntas genéricas que puedan servir para cualquier puesto.\n   - Si comparas un Analista Contable y un Desarrollador Frontend,\n     las preguntas deben ser claramente diferentes y referirse a temas distintos.\n\nDebes responder **SOLO** con un JSON válido y nada de texto extra.\nEl formato de salida debe ser exactamente:\n\n{\n  \"cv_ideal\": { ... },\n  \"preguntas_entrevista\": [ ... ]\n}\n`;\n\n// 3) Prompt de usuario: contexto concreto del cargo\nconst userPrompt = `\nAnaliza el siguiente CARGO y genera el \"cv_ideal\" y \"preguntas_entrevista\" específicos.\n\nTítulo: ${cargo.titulo}\nDescripción: ${cargo.descripcion}\nTipo de contrato: ${cargo.tipoContrato}\nUbicación: ${cargo.ubicacion}\nModalidad: ${cargo.modalidad}\nSalario estimado: ${cargo.salarioEstimado ?? 'No especificado'}\nRequisitos adicionales: ${cargo.requisitos ?? 'No especificados'}\n`;\n\n// 4) Devolvemos system, user y el prompt combinado (que usas en Basic LLM Chain)\nreturn {\n  json: {\n    system: systemPrompt,\n    user: userPrompt,\n    prompt: `${systemPrompt}\\n\\n${userPrompt}`,\n  },\n};\n"
+      },
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        336
+      ],
+      "id": "78ea3c00-456d-41b1-9843-0ff92ea5d6d6"
+    },
+    {
+      "parameters": {
+        "functionCode": "// 1) Tomamos el texto crudo que viene del LLM\nconst raw = $json.text ?? '';\nlet cleaned = raw.trim();\n\n// 2) Quitamos fences de código tipo ```json ... ``` o ``` ... ```\ncleaned = cleaned\n  .replace(/^```(?:json)?\\s*/i, '') // inicio ```json o ```\n  .replace(/```$/i, '')             // cierre ```\n  .trim();\n\n// 3) Nos aseguramos de quedarnos solo con el bloque JSON\nconst firstBrace = cleaned.indexOf('{');\nconst lastBrace  = cleaned.lastIndexOf('}');\n\nif (firstBrace === -1 || lastBrace === -1) {\n  throw new Error(\n    'No se encontró un bloque JSON en la respuesta del modelo:\\n' + cleaned,\n  );\n}\n\nlet jsonString = cleaned.slice(firstBrace, lastBrace + 1);\n\n// 4) Parseamos el JSON (con intento de autocorrección)\nlet parsed;\n\ntry {\n  parsed = JSON.parse(jsonString);\n} catch (error) {\n  const message = (error && error.message) ? error.message : String(error);\n\n  // Caso típico: el modelo olvidó cerrar el array de preguntas_entrevista\n  const looksLikeMissingArrayEnd =\n    message.includes(\"Expected ',' or ']' after array element\") &&\n    jsonString.includes('\"preguntas_entrevista\"');\n\n  if (looksLikeMissingArrayEnd) {\n    let fixed = jsonString.trimEnd();\n\n    // Si termina en '}' (último objeto del array), agregamos el cierre del array y del objeto raíz\n    if (fixed.endsWith('}')) {\n      fixed = fixed + '\\n  ]\\n}';\n    }\n\n    try {\n      parsed = JSON.parse(fixed);\n      jsonString = fixed; // por si quieres logear/guardar la versión corregida\n    } catch (error2) {\n      throw new Error(\n        'La respuesta del modelo no es JSON válido incluso tras intentar corregirla: ' +\n          error2.message +\n          '\\nRespuesta corregida:\\n' +\n          fixed,\n      );\n    }\n  } else {\n    throw new Error(\n      'La respuesta del modelo no es JSON válido: ' +\n        message +\n        '\\nRespuesta limpia:\\n' +\n        jsonString,\n    );\n  }\n}\n\n// 5) Normalizamos nombres de campos (por si el modelo usa cv_ideal o similares)\nconst cvIdeal =\n  parsed.cvIdeal ??\n  parsed.cv_ideal ??\n  parsed.cvideal ??\n  {};\n\nconst preguntas =\n  parsed.preguntas ??\n  parsed.preguntas_entrevista ??\n  parsed.preguntasEntrevista ??\n  [];\n\n// 6) Devolvemos lo que usará el PATCH Backend\nreturn [\n  {\n    json: {\n      crudo: raw,          // por si quieres debug\n      cvIdeal,             // objeto CV ideal\n      preguntas,           // array de preguntas [{pregunta, tipo}, ...]\n      // Lo mandamos como objeto para que el backend tenga un \"preguntasJson\" tipo objeto\n      preguntasJson: { preguntas },\n    },\n  },\n];\n"
+      },
+      "name": "Parse/Validate",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        496,
+        336
+      ],
+      "id": "223286bf-cdd5-4f28-9628-0b521bfdf918"
+    },
+    {
+      "parameters": {
+        "requestMethod": "PATCH",
+        "url": "={{ $node[\"Normalize Input\"].json.backendHost + \"/cargos/\" + $node[\"Normalize Input\"].json.cargoId + \"/ia\" }}\n",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "cvIdeal",
+              "value": "={{ JSON.stringify($node[\"Parse/Validate\"].json.cvIdeal) }}"
+            },
+            {
+              "name": "preguntasJson",
+              "value": "={{ $node[\"Parse/Validate\"].json.preguntasJson }}"
+            }
+          ]
+        }
+      },
+      "name": "PATCH Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        720,
+        336
+      ],
+      "id": "65d84293-fdd6-4901-bff1-be09a3a181e2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        992,
+        336
+      ],
+      "id": "33421cde-19c2-4ca0-8cfc-b6bb72c7ad6c"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.prompt}}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        144,
+        336
+      ],
+      "id": "faf6afce-83f4-45dc-b583-af8ad24ec545",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 512,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        128,
+        528
+      ],
+      "id": "55033b52-e282-4179-9892-0d97befd6cff",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "pm3JxYUHi1zrxw2Q",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Get Cargo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cargo": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse/Validate": {
+      "main": [
+        [
+          {
+            "node": "PATCH Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PATCH Backend": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse/Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1241fab5-96ef-44a7-a6fc-c059cc4e95b6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "be202b595c238f745fd42a443c1d4938bbdef424048eb94ae6e2ba4b683568af"
+  },
+  "id": "HMX2KKAXXT5jvb14",
+  "tags": []
+}

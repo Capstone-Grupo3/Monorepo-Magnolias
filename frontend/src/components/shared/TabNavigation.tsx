@@ -14,7 +14,7 @@ interface TabNavigationProps {
 
 export function TabNavigation({ tabs, activeTab, onTabChange }: TabNavigationProps) {
   return (
-    <div className="bg-white border-b border-slate-200 shadow-sm">
+    <div className="bg-white border-b border-slate-200 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex gap-6 overflow-x-auto">
           {tabs.map((tab) => (

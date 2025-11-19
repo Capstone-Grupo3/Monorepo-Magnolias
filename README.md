@@ -1,10 +1,20 @@
-# 🚀 APT - Advanced People Tracking
+# 🚀 Plataforma de Reclutamiento Inteligente - Asesorías Magnolia
 
 Portal de empleo inteligente con IA para optimizar el proceso de reclutamiento y selección de personal en MiPyMEs.
 
+Proyecto desarrollado para **Asesorías Magnolia**, una PyME chilena que inspiró la creación de esta solución innovadora.
+
 ## 📋 Descripción
 
-APT es un sistema integral que conecta empresas con candidatos, utilizando inteligencia artificial para evaluar automáticamente la compatibilidad entre el perfil del candidato y los requisitos de la vacante.
+Esta plataforma es un sistema integral que conecta empresas con candidatos, utilizando inteligencia artificial para evaluar automáticamente la compatibilidad entre el perfil del candidato y los requisitos de la vacante. Fue diseñada especialmente para satisfacer las necesidades de reclutamiento de PyMEs como Asesorías Magnolia.
+
+## ✨ Novedades Recientes (v1.1.0)
+
+- 🎨 **Tailwind CSS v4.1.17**: Migración a la última versión con arquitectura CSS-first
+- 🎬 **Animaciones elegantes**: Framer Motion integrado en toda la home con efectos profesionales
+- 📜 **Smooth scroll**: Navegación fluida entre secciones con desplazamiento suave
+- 📦 **Dependencias actualizadas**: Next.js 16.0.2, React 19.2.0, TypeScript 5.9.3, y más
+- 🚀 **Performance mejorado**: Animaciones optimizadas con viewport triggers (useInView)
 
 ## ⚡ Inicio Rápido con Docker
 
@@ -13,7 +23,7 @@ APT es un sistema integral que conecta empresas con candidatos, utilizando intel
 ```powershell
 # 1. Clonar el repositorio
 git clone <url-repo>
-cd APT
+cd Monorepo-Magnolias
 
 # 2. Configurar variables de entorno
 # Copia los archivos .env.example y configúralos:
@@ -38,24 +48,29 @@ cp frontend/.env.example frontend/.env.local
 - **[INICIO-RAPIDO.md](./docs-mvp/INICIO-RAPIDO.md)** - ⭐ Guía de inicio en 5 minutos
 - **[PRUEBA-END-TO-END.md](./docs-mvp/PRUEBA-END-TO-END.md)** - Guía de pruebas E2E
 - **[RESUMEN-FINAL.md](./docs-mvp/RESUMEN-FINAL.md)** - Resumen del proyecto
-- **[ARCHITECTURE.md](./frontend/ARCHITECTURE.md)** - Arquitectura del frontend
-- **[INTEGRACION-N8N.md](./backend/INTEGRACION-N8N.md)** - Integración con n8n
+- **[ARCHITECTURE.md](./docs-mvp/ARCHITECTURE.md)** - Arquitectura del sistema
+- **[INTEGRACION-N8N.md](./docs-mvp/INTEGRACION-N8N.md)** - Integración con n8n
 
 ## 🛠 Stack Tecnológico
 
 ### Frontend
-- **Next.js 14** (App Router) + React + TypeScript
-- **TailwindCSS** + **Lucide Icons** para UI
+- **Next.js 16.0.2** (App Router) + **React 19.2.0** + **TypeScript 5.9.3**
+- **TailwindCSS 4.1.17** + **Lucide Icons 0.553.0** para UI
+- **Framer Motion 12.23.24** para animaciones elegantes
+- **Zustand 5.0.8** para gestión de estado
+- **React Hook Form 7.66.0** para formularios
+- **Zod 4.1.12** para validación de esquemas
 - Arquitectura modular: types, services, hooks, lib
-- Custom Hooks para gestión de estado
 - JWT para autenticación
 
 ### Backend
-- **NestJS** + TypeScript
-- **Prisma ORM** (v5.22.0)
+- **NestJS 11.1.8** + **TypeScript 5.9.3**
+- **Prisma ORM 6.19.0**
 - **PostgreSQL** (Supabase)
 - **JWT + Bcrypt** para seguridad
+- **Axios 1.13.2** para HTTP requests
 - REST API + Swagger
+- Storage con Supabase
 
 ### Inteligencia Artificial (Integrada en n8n)
 - **n8n** como orquestador de workflows de IA
@@ -72,7 +87,7 @@ cp frontend/.env.example frontend/.env.local
 ## 🏗 Arquitectura
 
 ```
-APT/
+Monorepo-Magnolias/
 ├── backend/                    # NestJS API
 │   ├── src/
 │   │   ├── modules/           # Módulos de dominio
@@ -113,6 +128,7 @@ APT/
 
 ### Prerrequisitos
 - Node.js >= 18
+- pnpm >= 10 (gestor de paquetes)
 - Docker y Docker Compose
 - Cuenta en Supabase (base de datos PostgreSQL)
 - API Key de OpenAI (para funcionalidad de IA en n8n)
@@ -137,12 +153,10 @@ cp frontend/.env.example frontend/.env
 3. **Instalar dependencias**
 
 ```bash
-# Backend
-cd backend
-npm install
+# Usar pnpm (recomendado)
+pnpm install
 
-# Frontend
-cd ../frontend
+# O si prefieres npm
 npm install
 ```
 
@@ -182,16 +196,16 @@ Accede a:
 #### Backend (NestJS)
 ```bash
 cd backend
-npm install
-npm run start:dev
+pnpm install
+pnpm run start:dev
 ```
 API disponible en: `http://localhost:3000`
 
 #### Frontend (Next.js)
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 **Estructura del frontend:**
@@ -224,8 +238,8 @@ n8n disponible en: `http://localhost:5678`
 - **[PRUEBA-END-TO-END.md](./docs-mvp/PRUEBA-END-TO-END.md)** - Guía completa de pruebas E2E del sistema
 
 ### Documentación Técnica
-- **[ARCHITECTURE.md](./frontend/ARCHITECTURE.md)** - Arquitectura modular del frontend
-- **[INTEGRACION-N8N.md](./backend/INTEGRACION-N8N.md)** - Documentación de integración con n8n
+- **[ARCHITECTURE.md](./docs-mvp/ARCHITECTURE.md)** - Arquitectura modular del sistema
+- **[INTEGRACION-N8N.md](./docs-mvp/INTEGRACION-N8N.md)** - Documentación de integración con n8n
 - **[RESUMEN-FINAL.md](./docs-mvp/RESUMEN-FINAL.md)** - Resumen ejecutivo del proyecto
 
 ## 🏛 Arquitectura del Sistema
@@ -237,42 +251,58 @@ El frontend sigue una arquitectura empresarial moderna con clara separación de 
 ```
 frontend/src/
 ├── types/          # 📦 Interfaces TypeScript centralizadas
-│   ├── candidato.types.ts
-│   ├── empresa.types.ts
-│   ├── vacante.types.ts
-│   ├── postulacion.types.ts
 │   ├── auth.types.ts
+│   ├── cargo.types.ts
+│   ├── empresa.types.ts
+│   ├── postulacion.types.ts
+│   ├── postulante.types.ts
 │   ├── common.types.ts
 │   └── index.ts
 │
 ├── services/       # 🌐 Capa de abstracción de API
 │   ├── api.service.ts       # HTTP client base con auth
 │   ├── auth.service.ts      # Autenticación
-│   ├── candidato.service.ts
+│   ├── cargo.service.ts
 │   ├── empresa.service.ts
-│   ├── vacante.service.ts
-│   └── postulacion.service.ts
+│   ├── postulacion.service.ts
+│   └── postulante.service.ts
 │
 ├── hooks/          # 🎣 Custom hooks (lógica de negocio)
 │   ├── useAuth.ts
-│   ├── useCandidatoPortal.ts
-│   └── useEmpresaDashboard.ts
+│   ├── useEmpresaDashboard.ts
+│   └── usePostulantePortal.ts
 │
 ├── lib/            # 🛠 Utilidades y helpers
+│   ├── constants.ts     # Constantes y enums
 │   ├── formatters.ts    # Formateo de datos
-│   ├── validators.ts    # Validaciones
-│   └── constants.ts     # Constantes y enums
+│   └── validators.ts    # Validaciones
 │
 ├── components/     # 🧩 Componentes reutilizables
-│   ├── VacanteCard.tsx
+│   ├── FormularioPostulacion.tsx
 │   ├── RankingTable.tsx
-│   └── FormularioPostulacion.tsx
+│   ├── VacanteCard.tsx
+│   ├── home/            # Componentes de la home con animaciones
+│   ├── login/
+│   ├── registro/
+│   └── shared/
 │
 └── app/            # 📄 Páginas (App Router)
-    ├── login/
-    ├── candidato/portal/
-    └── empresa/dashboard/
+    ├── layout.tsx
+    ├── page.tsx         # Home con animaciones elegantes
+    ├── (auth)/
+    ├── empresa/dashboard/
+    └── postulante/portal/
 ```
+
+**Características actuales:**
+- ✅ **Next.js App Router** para routing moderno
+- ✅ **Tailwind CSS v4.1.17** con soporte nativo CSS variables
+- ✅ **Framer Motion 12.23.24** para animaciones profesionales
+- ✅ **React Hook Form 7.66.0** para gestión de formularios
+- ✅ **Zod 4.1.12** para validación de esquemas
+- ✅ **Zustand 5.0.8** para gestión de estado simple y escalable
+- ✅ **Smooth scroll** con comportamiento nativo + JavaScript optimizado
+- ✅ **Animaciones elegantes** en componentes: HeroSection, FeaturesSection, ProcessSection, CTASection
 
 **Beneficios de esta arquitectura:**
 - ✅ **Single Source of Truth**: Tipos centralizados, sin duplicación
@@ -281,8 +311,7 @@ frontend/src/
 - ✅ **Testabilidad**: Servicios y hooks fácilmente mockeables
 - ✅ **Mantenibilidad**: Cambios localizados en un solo lugar
 - ✅ **Type Safety**: 100% de cobertura TypeScript
-
-📖 **Ver documentación completa:** [frontend/ARCHITECTURE.md](frontend/ARCHITECTURE.md)
+- ✅ **Performance**: Animaciones optimizadas con Framer Motion useInView
 
 ### Backend - API REST con NestJS
 
@@ -330,11 +359,11 @@ frontend/src/
 ```bash
 # Backend
 cd backend
-npm run test
+pnpm run test
 
-# Frontend
+# Frontend (si está configurado)
 cd frontend
-npm run test
+pnpm run test
 ```
 
 ## 📦 Despliegue
@@ -362,9 +391,13 @@ GitHub Actions configurado para:
 
 Este proyecto es parte del Capstone Grupo 3 - 2025.
 
-## 👥 Equipo
+## 👥 Equipo y Cliente
 
-Proyecto desarrollado por el equipo de Magnolias Asesorías.
+**Cliente inspirador del proyecto**: Asesorías Magnolia - PyME chilena dedicada a asesorías empresariales.
+
+**Equipo de desarrollo**: Capstone Grupo 3 - 2025
+
+**Agradecimientos especiales**: A Asesorías Magnolia por compartir sus necesidades y ser el catalizador para esta solución innovadora de reclutamiento inteligente.
 
 ## 📞 Contacto
 

@@ -102,7 +102,7 @@ export function LoginForm({
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => onRememberMeChange(e.target.checked)}
-            className="w-4 h-4 text-orange-600 border-slate-300 rounded focus:ring-orange-500"
+            className="w-4 h-4 text-orange-600 border-slate-300 rounded-sm focus:ring-3 focus:ring-orange-500"
           />
           <span className="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">
             Recordarme
@@ -120,7 +120,7 @@ export function LoginForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+        className="w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">

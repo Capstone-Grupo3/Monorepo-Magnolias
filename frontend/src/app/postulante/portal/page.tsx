@@ -119,7 +119,7 @@ export default function PortalCandidatoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-orange-50">
       <DashboardHeader
         icon={Briefcase}
         title="Portal de Postulante"
@@ -128,7 +128,7 @@ export default function PortalCandidatoPage() {
       />
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
+      <div className="bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <button
@@ -201,7 +201,7 @@ export default function PortalCandidatoPage() {
                       </p>
                     </div>
                     {cargo.empresa.logoUrl && (
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-sm">
+                      <div className="w-14 h-14 rounded-xl bg-linear-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-xs">
                         <Briefcase className="w-7 h-7 text-orange-500" />
                       </div>
                     )}
@@ -238,7 +238,7 @@ export default function PortalCandidatoPage() {
 
                   <button
                     onClick={() => handlePostular(cargo)}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-md hover:shadow-lg"
+                    className="w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-md hover:shadow-lg"
                   >
                     Postular Ahora
                   </button>
@@ -246,7 +246,7 @@ export default function PortalCandidatoPage() {
               ))}
 
               {cargos.length === 0 && (
-                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200">
+                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-xs border border-slate-200">
                   <div className="bg-orange-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-10 h-10 text-orange-500" />
                   </div>
@@ -273,7 +273,7 @@ export default function PortalCandidatoPage() {
               {postulaciones.map((postulacion) => (
                 <div
                   key={postulacion.id}
-                  className="bg-white rounded-xl shadow-sm border p-6"
+                  className="bg-white rounded-xl shadow-xs border p-6"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -343,7 +343,7 @@ export default function PortalCandidatoPage() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Mi Perfil</h2>
 
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-white rounded-xl shadow-xs border p-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -521,7 +521,7 @@ export default function PortalCandidatoPage() {
                   </span>
                 </div>
                 
-                <div className="relative bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-dashed border-orange-300 rounded-lg p-4 hover:border-orange-500 transition-all">
+                <div className="relative bg-linear-to-r from-orange-50 to-orange-100 border-2 border-dashed border-orange-300 rounded-lg p-4 hover:border-orange-500 transition-all">
                   <input
                     type="file"
                     accept=".pdf"
@@ -531,7 +531,7 @@ export default function PortalCandidatoPage() {
                       file:mr-4 file:py-2.5 file:px-6
                       file:rounded-lg file:border-0
                       file:text-sm file:font-bold
-                      file:bg-gradient-to-r file:from-orange-500 file:to-orange-600
+                      file:bg-linear-to-r file:from-orange-500 file:to-orange-600
                       file:text-white
                       hover:file:from-orange-600 hover:file:to-orange-700
                       file:shadow-md
