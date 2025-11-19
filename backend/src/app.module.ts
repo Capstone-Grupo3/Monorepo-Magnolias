@@ -9,6 +9,7 @@ import { PostulacionesModule } from './modules/postulaciones/postulaciones.modul
 import { IaModule } from './modules/ia/ia.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ReportesModule } from './modules/reportes/reportes.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AdminModule } from './modules/admin/admin.module';
     IaModule,
     StorageModule,
     AdminModule,
+    ReportesModule,
   ],
 })
 export class AppModule {}
