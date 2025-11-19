@@ -112,39 +112,6 @@ export class PostulacionesService {
     return postulacion;
   }
 
-  private async evaluarConIA(postulacionId: number) {
-    const postulacion = await this.prisma.postulacion.findUnique({
-      where: { id: postulacionId },
-      include: {
-        postulante: true,
-        cargo: true,
-      },
-    });
-
-    if (!postulacion) return;
-
-    try {
-      const resultado = await this.iaService.evaluarPostulacion({
-        cv_url: postulacion.postulante.cvUrl || '',
-        respuestas_json: postulacion.respuestasJson,
-        vacante_id: postulacion.idCargo,
-        requisitos: postulacion.cargo.requisitos || '',
-        skills: postulacion.postulante.skillsJson,
-      });
-
-      await this.prisma.postulacion.update({
-        where: { id: postulacionId },
-        data: {
-          puntajeIa: resultado.puntaje_ia,
-          feedbackIa: resultado.feedback,
-          estado: 'PENDIENTE',
-        },
-      });
-    } catch (error) {
-      console.error('Error en evaluación IA:', error);
-    }
-  }
-
   /**
    * 🚀 NUEVO: Trigger del workflow de n8n para análisis avanzado
    * Este método llama al webhook de n8n que ejecuta el workflow completo:
@@ -159,7 +126,7 @@ export class PostulacionesService {
       // Llamar al webhook de n8n con el ID de la postulación
       const response = await firstValueFrom(
         this.httpService.post(
-          this.n8nWebhookUrl,
+          process.env.N8N_WEBHOOK_URL!,
           { postulacionId },
           {
             timeout: 30000, // 30 segundos timeout
@@ -201,10 +168,6 @@ export class PostulacionesService {
             headers: { 'Content-Type': 'application/json' },
           }),
         );
-
-
-      } catch (err) {
-        console.error('❌ Error llamando al webhook de n8n:', err);
       }
     }
 

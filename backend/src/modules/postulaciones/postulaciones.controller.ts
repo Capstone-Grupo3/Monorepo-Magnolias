@@ -129,7 +129,9 @@ export class PostulacionesController {
   //  -> usado por n8n para actualizar puntajeIa, feedbackIa y estado
   // =====================================================
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualizar postulación (incluye estado y puntajes IA)' })
+  @ApiOperation({
+    summary: 'Actualizar postulación (incluye estado y puntajes IA)',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -158,10 +160,7 @@ export class PostulacionesController {
     },
   })
   @ApiResponse({ status: 200, description: 'Postulación actualizada' })
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
-  ) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     // n8n a veces puede mandar el body como string crudo (raw),
     // así que aquí lo normalizamos para que SIEMPRE sea un objeto.
     let data: any = body;

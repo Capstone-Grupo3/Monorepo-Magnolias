@@ -1,4 +1,9 @@
-﻿import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+﻿import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -46,7 +51,9 @@ export class CargoService {
     const webhookUrl = this.configService.get<string>('N8N_WEBHOOK_URL_CARGO');
 
     if (!webhookUrl) {
-      this.logger.warn('N8N_WEBHOOK_URL_CARGO no configurada, omitiendo trigger n8n');
+      this.logger.warn(
+        'N8N_WEBHOOK_URL_CARGO no configurada, omitiendo trigger n8n',
+      );
       return;
     }
 
@@ -84,7 +91,15 @@ export class CargoService {
     const cargo = await this.prisma.cargo.findUnique({
       where: { id },
       include: {
-        empresa: { select: { id: true, rut: true, nombre: true, descripcion: true, logoUrl: true } },
+        empresa: {
+          select: {
+            id: true,
+            rut: true,
+            nombre: true,
+            descripcion: true,
+            logoUrl: true,
+          },
+        },
         _count: { select: { postulaciones: true } },
       },
     });
@@ -95,9 +110,18 @@ export class CargoService {
 
   async update(id: number, updateCargoDto: UpdateCargoDto, empresaId: number) {
     const cargo = await this.findOne(id);
-    if (cargo.idEmpresa !== empresaId) throw new ForbiddenException('No tienes permisos');
+    if (cargo.idEmpresa !== empresaId)
+      throw new ForbiddenException('No tienes permisos');
 
-    return this.prisma.cargo.update({ where: { id }, data: updateCargoDto, include: { empresa: { select: { id: true, rut: true, nombre: true, logoUrl: true } } } });
+    return this.prisma.cargo.update({
+      where: { id },
+      data: updateCargoDto,
+      include: {
+        empresa: {
+          select: { id: true, rut: true, nombre: true, logoUrl: true },
+        },
+      },
+    });
   }
 
   async updateIa(id: number, updateCargoIaDto: UpdateCargoIaDto) {
@@ -110,14 +134,24 @@ export class CargoService {
         preguntasJson: updateCargoIaDto.preguntasJson || null,
         estadoIA: updateCargoIaDto.estadoIA || 'PENDIENTE',
       },
-      include: { empresa: { select: { id: true, rut: true, nombre: true, logoUrl: true } } },
+      include: {
+        empresa: {
+          select: { id: true, rut: true, nombre: true, logoUrl: true },
+        },
+      },
     });
   }
 
   async remove(id: number, empresaId: number) {
     const cargo = await this.findOne(id);
-    if (cargo.idEmpresa !== empresaId) throw new ForbiddenException('No tienes permisos para eliminar este cargo');
+    if (cargo.idEmpresa !== empresaId)
+      throw new ForbiddenException(
+        'No tienes permisos para eliminar este cargo',
+      );
 
-    return this.prisma.cargo.update({ where: { id }, data: { estado: 'CERRADA' } });
+    return this.prisma.cargo.update({
+      where: { id },
+      data: { estado: 'CERRADA' },
+    });
   }
 }

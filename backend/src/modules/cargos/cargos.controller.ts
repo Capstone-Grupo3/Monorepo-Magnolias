@@ -73,7 +73,9 @@ export class CargoController {
   }
 
   @Patch(':id/ia')
-  @ApiOperation({ summary: 'Endpoint para recibir resultados IA (n8n callback)' })
+  @ApiOperation({
+    summary: 'Endpoint para recibir resultados IA (n8n callback)',
+  })
   // Nota: considerar proteger con token si lo necesitas
   updateIa(@Param('id') id: string, @Body() payload: UpdateCargoIaDto) {
     return this.cargosService.updateIa(+id, payload);
