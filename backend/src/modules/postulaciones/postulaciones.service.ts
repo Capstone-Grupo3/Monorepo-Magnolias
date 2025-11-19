@@ -13,7 +13,6 @@ import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class PostulacionesService {
-  private readonly n8nWebhookUrl: string;
 
   constructor(
     private prisma: PrismaService,
@@ -22,10 +21,7 @@ export class PostulacionesService {
     private configService: ConfigService,
     private storageService: StorageService,
   ) {
-    // Obtener URL de n8n desde variables de entorno
-    this.n8nWebhookUrl =
-      this.configService.get<string>('N8N_WEBHOOK_URL') ||
-      'http://localhost:5678/webhook/analizar-postulacion';
+    
   }
 
   async create(
@@ -107,50 +103,13 @@ export class PostulacionesService {
     // ========================================
     // 🚀 TRIGGER WORKFLOW DE N8N
     // ========================================
-    // Llamar al webhook de n8n para análisis avanzado con CV + Respuestas
     this.triggerAnalisisN8n(postulacion.id).catch((err) => {
       console.error('❌ Error al triggear workflow de n8n:', err.message);
-      // No bloqueamos la postulación si n8n falla
-      // Fallback: usar evaluación con IA antigua
-      this.evaluarConIA(postulacion.id).catch((iaErr) => {
-        console.error('❌ Error en fallback de IA:', iaErr.message);
-      });
+      // Por ahora NO hacemos fallback automático.
+      // La postulación se queda en estado PENDIENTE si algo falla.
     });
 
     return postulacion;
-  }
-
-  private async evaluarConIA(postulacionId: number) {
-    const postulacion = await this.prisma.postulacion.findUnique({
-      where: { id: postulacionId },
-      include: {
-        postulante: true,
-        cargo: true,
-      },
-    });
-
-    if (!postulacion) return;
-
-    try {
-      const resultado = await this.iaService.evaluarPostulacion({
-        cv_url: postulacion.postulante.cvUrl || '',
-        respuestas_json: postulacion.respuestasJson,
-        vacante_id: postulacion.idCargo,
-        requisitos: postulacion.cargo.requisitos || '',
-        skills: postulacion.postulante.skillsJson,
-      });
-
-      await this.prisma.postulacion.update({
-        where: { id: postulacionId },
-        data: {
-          puntajeIa: resultado.puntaje_ia,
-          feedbackIa: resultado.feedback,
-          estado: 'EVALUADO',
-        },
-      });
-    } catch (error) {
-      console.error('Error en evaluación IA:', error);
-    }
   }
 
   /**
@@ -167,7 +126,7 @@ export class PostulacionesService {
       // Llamar al webhook de n8n con el ID de la postulación
       const response = await firstValueFrom(
         this.httpService.post(
-          this.n8nWebhookUrl,
+          process.env.N8N_WEBHOOK_URL!,
           { postulacionId },
           {
             timeout: 30000, // 30 segundos timeout
@@ -184,10 +143,34 @@ export class PostulacionesService {
         error.message,
       );
 
-      // Si n8n no está disponible o falla, el catch en create() llamará al fallback
-      throw error;
+        // 1) Traer la postulación completa desde la BD
+        const postulacion = await this.prisma.postulacion.findUnique({
+          where: { id: postulacionId },
+        });
+
+        if (!postulacion) {
+          console.error(
+            `❌ No se encontró la postulación ${postulacionId} para enviar a n8n`,
+          );
+          return;
+        }
+
+        // 2) Construir el payload que espera n8n
+        const payload = {
+          idPostulacion: postulacion.id,
+          idCargo: postulacion.idCargo,
+          idPostulante: postulacion.idPostulante,
+        };
+
+        // 3) Llamar al webhook de n8n
+        const response = await firstValueFrom(
+          this.httpService.post(process.env.N8N_WEBHOOK_URL, payload, {
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
+      }
     }
-  }
+
 
   async findByPostulante(postulanteId: number) {
     return this.prisma.postulacion.findMany({
@@ -336,8 +319,6 @@ export class PostulacionesService {
         const validEstados = ['PENDIENTE', 'EN_REVISION', 'EVALUADO', 'RECHAZADO', 'SELECCIONADO'];
         if (validEstados.includes(data.estado)) {
           updateData.estado = data.estado;
-        } else {
-          console.warn(`⚠️ Estado inválido recibido: ${data.estado}, se omite`);
         }
       }
 
