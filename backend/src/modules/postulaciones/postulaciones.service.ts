@@ -103,7 +103,7 @@ export class PostulacionesService {
     // ========================================
     // 🚀 TRIGGER WORKFLOW DE N8N
     // ========================================
-    this.triggerAnalisisN8n(postulacion.id).catch((err) => {
+    this.triggerAnalisisN8n(postulacion.id, postulacion.idCargo).catch((err) => {
       console.error('❌ Error al triggear workflow de n8n:', err.message);
       // Por ahora NO hacemos fallback automático.
       // La postulación se queda en estado PENDIENTE si algo falla.
@@ -121,13 +121,13 @@ export class PostulacionesService {
    * - Calcula scores de compatibilidad y veracidad
    * - Actualiza la postulación con feedback detallado
    */
-  private async triggerAnalisisN8n(postulacionId: number): Promise<void> {
+  private async triggerAnalisisN8n(postulacionId: number, idCargo: number): Promise<void> {
     try {
-      // Llamar al webhook de n8n con el ID de la postulación
+      // Llamar al webhook de n8n con el ID de la postulación y del cargo
       const response = await firstValueFrom(
         this.httpService.post(
           process.env.N8N_WEBHOOK_URL!,
-          { postulacionId },
+          { postulacionId, idCargo },
           {
             timeout: 30000, // 30 segundos timeout
             headers: {
@@ -142,34 +142,9 @@ export class PostulacionesService {
         `❌ Error al llamar webhook de n8n para postulación ${postulacionId}:`,
         error.message,
       );
-
-        // 1) Traer la postulación completa desde la BD
-        const postulacion = await this.prisma.postulacion.findUnique({
-          where: { id: postulacionId },
-        });
-
-        if (!postulacion) {
-          console.error(
-            `❌ No se encontró la postulación ${postulacionId} para enviar a n8n`,
-          );
-          return;
-        }
-
-        // 2) Construir el payload que espera n8n
-        const payload = {
-          idPostulacion: postulacion.id,
-          idCargo: postulacion.idCargo,
-          idPostulante: postulacion.idPostulante,
-        };
-
-        // 3) Llamar al webhook de n8n
-        const response = await firstValueFrom(
-          this.httpService.post(process.env.N8N_WEBHOOK_URL, payload, {
-            headers: { 'Content-Type': 'application/json' },
-          }),
-        );
-      }
+      throw error;
     }
+  }
 
 
   async findByPostulante(postulanteId: number) {
