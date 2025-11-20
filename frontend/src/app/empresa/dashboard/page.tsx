@@ -852,69 +852,6 @@ export default function DashboardEmpresaPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  Preguntas para Candidatos (3 preguntas requeridas para
-                  análisis IA) *
-                </label>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Pregunta 1 *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={nuevoCargo.pregunta1}
-                      onChange={(e) =>
-                        setNuevoCargo({
-                          ...nuevoCargo,
-                          pregunta1: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Ej: ¿Cuántos años de experiencia tienes con React y Node.js?"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Pregunta 2 *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={nuevoCargo.pregunta2}
-                      onChange={(e) =>
-                        setNuevoCargo({
-                          ...nuevoCargo,
-                          pregunta2: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Ej: Describe un proyecto complejo que hayas liderado"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">
-                      Pregunta 3 *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={nuevoCargo.pregunta3}
-                      onChange={(e) =>
-                        setNuevoCargo({
-                          ...nuevoCargo,
-                          pregunta3: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Ej: ¿Qué experiencia tienes con PostgreSQL y bases de datos?"
-                    />
-                  </div>
-                </div>
-              </div>
-
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"

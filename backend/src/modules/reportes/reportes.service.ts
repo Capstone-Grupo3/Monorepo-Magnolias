@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { IaService } from '../ia/ia.service';
 import { GenerarReporteDto } from './dto/generar-reporte.dto';
-import * as puppeteer from 'puppeteer';
+import * as puppeteer from 'puppeteer-core';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -473,6 +473,7 @@ export class ReportesService {
     const browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium',
     });
 
     try {
