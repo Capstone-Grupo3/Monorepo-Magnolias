@@ -53,6 +53,10 @@ RUN apt-get update -y && \
 # Variable de entorno para Chromium (usado por puppeteer-core)
 ENV CHROME_PATH=/usr/bin/chromium
 
+# Dar permisos al usuario nestjs para acceder a Chromium y dependencias de sistema
+RUN chmod +x /usr/bin/chromium && \
+    chown -R 1001:1001 /app || true
+
 # Copiar archivos necesarios desde builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
@@ -61,6 +65,10 @@ COPY package*.json ./
 
 # Crear usuario no root
 RUN groupadd -g 1001 nodejs && useradd -r -u 1001 -g nodejs nestjs
+
+# Cambiar dueño de archivos al usuario nestjs
+RUN chown -R nestjs:nodejs /app
+
 USER nestjs
 
 # Exponer puerto

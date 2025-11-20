@@ -500,10 +500,39 @@ export class ReportesService {
   }
 
   private async generarPDF(reporte: ReporteRanking): Promise<string> {
+    // Detectar ruta de Chromium (probar múltiples ubicaciones)
+    const chromePaths = [
+      process.env.CHROME_PATH || '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/snap/bin/chromium',
+    ];
+
+    let executablePath: string | undefined;
+    for (const path of chromePaths) {
+      try {
+        const exists = require('fs').existsSync(path);
+        if (exists) {
+          executablePath = path;
+          this.logger.log(`✅ Found Chromium at: ${path}`);
+          break;
+        }
+      } catch (e) {
+        // continue
+      }
+    }
+
+    if (!executablePath) {
+      const msg = `❌ Chromium not found. Tried paths: ${chromePaths.join(', ')}`;
+      this.logger.error(msg);
+      throw new Error(msg);
+    }
+
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      executablePath,
     });
 
     try {
