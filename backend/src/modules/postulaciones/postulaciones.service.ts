@@ -124,9 +124,9 @@ export class PostulacionesService {
   private async triggerAnalisisN8n(postulacionId: number, idCargo: number): Promise<void> {
     try {
       // Llamar al webhook de n8n con el ID de la postulación y del cargo
-      const response = await firstValueFrom(
+      await firstValueFrom(
         this.httpService.post(
-          process.env.N8N_WEBHOOK_URL!,
+          process.env.N8N_WEBHOOK_URL,
           { postulacionId, idCargo },
           {
             timeout: 30000, // 30 segundos timeout
