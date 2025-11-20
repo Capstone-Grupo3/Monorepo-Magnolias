@@ -27,13 +27,12 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Instalar OpenSSL, Chromium y librerías necesarias para Puppeteer + Prisma
+# Instalar dependencias del sistema para Google Chrome y Puppeteer
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
-    openssl \
     ca-certificates \
-    chromium \
-    fonts-liberation \
+    wget \
+    gnupg \
     libnss3 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -47,15 +46,21 @@ RUN apt-get update -y && \
     libxshmfence1 \
     libpangocairo-1.0-0 \
     libx11-6 \
-    libxext6 && \
+    libxext6 \
+    libgtk-3-0 \
+    fonts-liberation \
+    openssl && \
     rm -rf /var/lib/apt/lists/*
 
-# Variable de entorno para Chromium (usado por puppeteer-core)
-ENV CHROME_PATH=/usr/bin/chromium
+# Descargar e instalar Google Chrome stable (deb)
+RUN wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get update -y && \
+    apt-get install -y /tmp/chrome.deb --no-install-recommends && \
+    rm /tmp/chrome.deb && \
+    rm -rf /var/lib/apt/lists/*
 
-# Dar permisos al usuario nestjs para acceder a Chromium y dependencias de sistema
-RUN chmod +x /usr/bin/chromium && \
-    chown -R 1001:1001 /app || true
+# Variable de entorno para Google Chrome (usado por puppeteer-core)
+ENV CHROME_PATH=/usr/bin/google-chrome-stable
 
 # Copiar archivos necesarios desde builder
 COPY --from=builder /app/node_modules ./node_modules
