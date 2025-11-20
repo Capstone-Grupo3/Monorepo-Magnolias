@@ -67,6 +67,10 @@ export interface ReporteRanking {
 export class ReportesService {
   private readonly logger = new Logger(ReportesService.name);
   private reportesEnMemoria: Map<string, ReporteRanking> = new Map();
+  // Control de concurrencia para generación de reportes (evitar OOM)
+  private reportsConcurrency: number = parseInt(process.env.REPORTS_CONCURRENCY || '1', 10);
+  private activeReports = 0;
+  private queue: Array<() => void> = [];
 
   constructor(
     private prisma: PrismaService,
@@ -148,6 +152,9 @@ export class ReportesService {
     dto: GenerarReporteDto,
     cargo: any,
   ) {
+    // Adquirir permiso para generar (semáforo)
+    await this.acquireReportSlot();
+
     try {
       this.logger.log(`Generando reporte ${reporteId} para cargo ${cargo.id}`);
 
@@ -261,7 +268,30 @@ export class ReportesService {
     } catch (error) {
       this.logger.error(`Error en generación de reporte: ${error.message}`);
       throw error;
+    } finally {
+      // Liberar slot del semáforo siempre al finalizar
+      this.releaseReportSlot();
     }
+  }
+
+  private acquireReportSlot(): Promise<void> {
+    return new Promise((resolve) => {
+      if (this.activeReports < this.reportsConcurrency) {
+        this.activeReports += 1;
+        resolve();
+      } else {
+        this.queue.push(() => {
+          this.activeReports += 1;
+          resolve();
+        });
+      }
+    });
+  }
+
+  private releaseReportSlot() {
+    this.activeReports = Math.max(0, this.activeReports - 1);
+    const next = this.queue.shift();
+    if (next) next();
   }
 
   private parseFeedbackIA(feedbackIa: string): Partial<CandidatoRanking> {
