@@ -164,7 +164,7 @@ export default function PostulacionesView() {
   };
 
   const getEstadoColor = (estado: string) => {
-    return ESTADOS.find((e) => e.value === estado)?.color || "bg-gray-100 text-gray-800";
+    return ESTADOS.find((e) => e.value === estado)?.color || "bg-gray-100 text-gray-800 dark:text-white";
   };
 
   if (loading && postulaciones.length === 0) {
@@ -178,7 +178,7 @@ export default function PostulacionesView() {
   return (
     <div className="space-y-6">
       {/* Filtros */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -204,7 +204,7 @@ export default function PostulacionesView() {
           <div className="md:col-span-2 flex items-end gap-4">
             <button
               onClick={loadPostulaciones}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700"
             >
               <RefreshCw className="w-4 h-4" />
               Actualizar
@@ -254,63 +254,63 @@ export default function PostulacionesView() {
       </div>
 
       {/* Tabla de postulaciones */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Postulante
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Cargo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Empresa
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Fecha
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Puntaje
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {postulaciones.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     No se encontraron postulaciones
                   </td>
                 </tr>
               ) : (
                 postulaciones.map((post) => (
-                  <tr key={post.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <tr key={post.id} className="hover:bg-gray-50 dark:bg-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {post.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {post.postulante.nombre}
                       </div>
-                      <div className="text-sm text-gray-500">{post.postulante.correo}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{post.postulante.correo}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {post.cargo.titulo}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {post.empresa.nombre}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {new Date(post.fechaPostulacion).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -370,11 +370,11 @@ export default function PostulacionesView() {
 
       {/* Paginación */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between bg-white px-6 py-3 rounded-lg shadow">
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 px-6 py-3 rounded-lg shadow">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
             Anterior
@@ -387,7 +387,7 @@ export default function PostulacionesView() {
           <button
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Siguiente
             <ChevronRight className="w-4 h-4" />
@@ -412,10 +412,10 @@ export default function PostulacionesView() {
       >
         <div className="space-y-4">
           {postulacionToEdit && (
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
               <p className="text-sm text-gray-600">Postulante</p>
               <p className="font-medium">{postulacionToEdit.postulante.nombre}</p>
-              <p className="text-sm text-gray-500">{postulacionToEdit.cargo.titulo} - {postulacionToEdit.empresa.nombre}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{postulacionToEdit.cargo.titulo} - {postulacionToEdit.empresa.nombre}</p>
             </div>
           )}
 
@@ -462,9 +462,9 @@ export default function PostulacionesView() {
       {/* Modal de detalles */}
       {showModal && selectedPostulacion && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-gray-900">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Detalles de Postulación
               </h3>
               <button
@@ -482,7 +482,7 @@ export default function PostulacionesView() {
                   <User className="w-5 h-5 text-purple-600" />
                   Postulante
                 </h4>
-                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                   <div>
                     <p className="text-sm text-gray-600">Nombre</p>
                     <p className="font-medium">{selectedPostulacion.postulante.nombre}</p>
@@ -510,7 +510,7 @@ export default function PostulacionesView() {
                   <Briefcase className="w-5 h-5 text-purple-600" />
                   Cargo
                 </h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                   <p className="font-medium text-lg">{selectedPostulacion.cargo.titulo}</p>
                   <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
                     <Building2 className="w-4 h-4" />
@@ -526,7 +526,7 @@ export default function PostulacionesView() {
                     <TrendingUp className="w-5 h-5 text-purple-600" />
                     Análisis IA
                   </h4>
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                     <div className="flex items-center gap-4">
                       <div>
                         <p className="text-sm text-gray-600">Puntaje</p>
@@ -564,7 +564,7 @@ export default function PostulacionesView() {
             <div className="p-6 border-t border-gray-200">
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                className="w-full px-4 py-2 bg-gray-200 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300"
               >
                 Cerrar
               </button>
@@ -575,3 +575,6 @@ export default function PostulacionesView() {
     </div>
   );
 }
+
+
+

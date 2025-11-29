@@ -65,7 +65,7 @@ export default function ConfirmModal({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6"
+              className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
             >
               <div className="flex items-start gap-4">
                 {/* Icono */}
@@ -75,14 +75,14 @@ export default function ConfirmModal({
 
                 {/* Contenido */}
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-                  <p className="mt-2 text-sm text-gray-600">{message}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{message}</p>
                 </div>
 
                 {/* Botón cerrar */}
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-500 transition-colors"
+                  className="text-gray-400 hover:text-gray-500 dark:text-gray-400 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -93,7 +93,7 @@ export default function ConfirmModal({
                 <button
                   onClick={onClose}
                   disabled={loading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
                 >
                   {cancelText}
                 </button>
@@ -113,3 +113,4 @@ export default function ConfirmModal({
     </AnimatePresence>
   );
 }
+

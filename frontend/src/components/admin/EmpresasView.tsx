@@ -163,7 +163,7 @@ export default function EmpresasView() {
   return (
     <div className="space-y-6">
       {/* Filtros y búsqueda */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -218,7 +218,7 @@ export default function EmpresasView() {
             <button
               onClick={loadEmpresas}
               disabled={loading}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 flex items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </button>
@@ -228,35 +228,35 @@ export default function EmpresasView() {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-100 rounded-lg">
               <Building2 className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Empresas</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Empresas</p>
               <p className="text-xl font-bold">{total}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 rounded-lg">
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Activas</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Activas</p>
               <p className="text-xl font-bold">{empresas.filter((e) => e.estado === "ACTIVO").length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm border p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-100 rounded-lg">
               <XCircle className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Inactivas</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Inactivas</p>
               <p className="text-xl font-bold">{empresas.filter((e) => e.estado === "INACTIVO").length}</p>
             </div>
           </div>
@@ -264,25 +264,25 @@ export default function EmpresasView() {
       </div>
 
       {/* Tabla */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RUT</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Correo</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LinkedIn</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargos</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Empresa</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">RUT</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Correo</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">LinkedIn</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cargos</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {empresas.map((empresa) => (
-                <tr key={empresa.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{empresa.id}</td>
+                <tr key={empresa.id} className="hover:bg-gray-50 dark:bg-gray-700">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{empresa.id}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       {empresa.logoUrl ? (
@@ -297,9 +297,9 @@ export default function EmpresasView() {
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-gray-900">{empresa.nombre}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{empresa.nombre}</p>
                         {empresa.descripcion && (
-                          <p className="text-xs text-gray-500 truncate max-w-[200px]">{empresa.descripcion}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{empresa.descripcion}</p>
                         )}
                       </div>
                     </div>
@@ -372,14 +372,14 @@ export default function EmpresasView() {
 
         {/* Paginación */}
         <div className="px-4 py-3 border-t flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Mostrando {(page - 1) * 25 + 1} - {Math.min(page * 25, total)} de {total} empresas
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 border rounded hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             >
               <ChevronLeft className="w-4 h-4" />
               Anterior
@@ -390,7 +390,7 @@ export default function EmpresasView() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 border rounded hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
             >
               Siguiente
               <ChevronRight className="w-4 h-4" />
@@ -485,3 +485,6 @@ export default function EmpresasView() {
     </div>
   );
 }
+
+
+

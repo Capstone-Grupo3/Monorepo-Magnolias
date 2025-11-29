@@ -170,7 +170,7 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
           
           {/* Contador de filtros */}
           {empresasSeleccionadas.size > 0 && (
-            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+            <div className="bg-white dark:bg-gray-800/20 backdrop-blur-sm px-4 py-2 rounded-full">
               <span className="text-sm font-medium">
                 Filtrando {empresasSeleccionadas.size} empresa{empresasSeleccionadas.size !== 1 ? "s" : ""} • {rankingsFiltrados.length} candidato{rankingsFiltrados.length !== 1 ? "s" : ""}
               </span>
@@ -180,7 +180,7 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
       </div>
 
       {/* Panel de Filtro y Exportación */}
-      <div className="bg-white rounded-xl shadow-md border border-slate-200 p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-slate-200 p-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Selector de Empresas */}
           <div className="relative">
@@ -215,7 +215,7 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+                  className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
                 >
                   {/* Acciones rápidas */}
                   <div className="p-3 border-b border-slate-100 bg-slate-50 flex gap-2">
@@ -351,19 +351,19 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
       {rankingsFiltrados.length >= 3 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Segundo lugar */}
-          <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-gray-400 order-2 md:order-1">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-t-4 border-gray-400 order-2 md:order-1">
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Medal className="w-8 h-8 text-gray-400" />
               </div>
               <span className="text-4xl font-bold text-gray-400 mb-2">2°</span>
-              <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                 {rankingsFiltrados[1].nombrePostulante}
               </h3>
-              <p className="text-sm text-gray-600 mb-2">{rankingsFiltrados[1].cargo}</p>
-              <p className="text-xs text-gray-500 mb-4">{rankingsFiltrados[1].empresa}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{rankingsFiltrados[1].cargo}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{rankingsFiltrados[1].empresa}</p>
               <div className="bg-gray-100 px-4 py-2 rounded-full">
-                <span className="text-2xl font-bold text-gray-600">
+                <span className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   {rankingsFiltrados[1].puntaje.toFixed(2)}
                 </span>
               </div>
@@ -371,17 +371,17 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
           </div>
 
           {/* Primer lugar */}
-          <div className="bg-white rounded-lg shadow-xl p-6 border-t-4 border-yellow-400 transform md:scale-105 order-1 md:order-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 border-t-4 border-yellow-400 transform md:scale-105 order-1 md:order-2">
             <div className="flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
                 <Trophy className="w-10 h-10 text-yellow-500" />
               </div>
               <span className="text-5xl font-bold text-yellow-500 mb-2">1°</span>
-              <h3 className="text-2xl font-bold text-gray-900 mb-1">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 {rankingsFiltrados[0].nombrePostulante}
               </h3>
-              <p className="text-sm text-gray-600 mb-2">{rankingsFiltrados[0].cargo}</p>
-              <p className="text-xs text-gray-500 mb-4">{rankingsFiltrados[0].empresa}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{rankingsFiltrados[0].cargo}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{rankingsFiltrados[0].empresa}</p>
               <div className="bg-yellow-100 px-6 py-3 rounded-full">
                 <span className="text-3xl font-bold text-yellow-600">
                   {rankingsFiltrados[0].puntaje.toFixed(2)}
@@ -391,17 +391,17 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
           </div>
 
           {/* Tercer lugar */}
-          <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-orange-400 order-3">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-t-4 border-orange-400 order-3">
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
                 <Award className="w-8 h-8 text-orange-400" />
               </div>
               <span className="text-4xl font-bold text-orange-400 mb-2">3°</span>
-              <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                 {rankingsFiltrados[2].nombrePostulante}
               </h3>
-              <p className="text-sm text-gray-600 mb-2">{rankingsFiltrados[2].cargo}</p>
-              <p className="text-xs text-gray-500 mb-4">{rankingsFiltrados[2].empresa}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{rankingsFiltrados[2].cargo}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{rankingsFiltrados[2].empresa}</p>
               <div className="bg-orange-100 px-4 py-2 rounded-full">
                 <span className="text-2xl font-bold text-orange-600">
                   {rankingsFiltrados[2].puntaje.toFixed(2)}
@@ -413,8 +413,8 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
       )}
 
       {/* Tabla completa de rankings */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-purple-600" />
             Ranking Completo
@@ -422,33 +422,33 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Posición
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Candidato
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Correo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Cargo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Empresa
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Puntaje
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {rankingsFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     {empresasSeleccionadas.size === 0 
                       ? 'Selecciona al menos una empresa para ver el ranking'
                       : 'No hay datos de ranking disponibles'}
@@ -460,7 +460,7 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
                     key={`${rank.postulanteId}-${rank.cargo}-${index}`}
                     className={`${
                       index < 3 ? "bg-purple-50" : ""
-                    } hover:bg-gray-50`}
+                    } hover:bg-gray-50 dark:bg-gray-700`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -472,7 +472,7 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
                               ? "text-gray-400"
                               : index === 2
                               ? "text-orange-400"
-                              : "text-gray-900"
+                              : "text-gray-900 dark:text-white"
                           }`}
                         >
                           {index + 1}°
@@ -487,17 +487,17 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-gray-900 dark:text-white">
                         {rank.nombrePostulante}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {rank.correo}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {rank.cargo}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {rank.empresa}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -521,3 +521,6 @@ export default function RankingsView({ rankings }: RankingsViewProps) {
     </div>
   );
 }
+
+
+
