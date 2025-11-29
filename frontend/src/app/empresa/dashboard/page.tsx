@@ -32,11 +32,15 @@ import {
   StatCard,
   LoadingSpinner,
   LogoutButton,
+  useToast,
 } from "@/components/shared";
 import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
 import GenerarReporteButton from "@/components/empresa/GenerarReporteButton";
 
 export default function DashboardEmpresaPage() {
+  // Hook de notificaciones toast
+  const toast = useToast();
+
   // Estado para verificación de email
   const [emailVerificado, setEmailVerificado] = useState(true);
   const [userEmail, setUserEmail] = useState("");
@@ -91,7 +95,7 @@ export default function DashboardEmpresaPage() {
     if (confirm("¿Estás seguro de eliminar este cargo?")) {
       const success = await deleteCargo(cargoId);
       if (success) {
-        alert("Cargo eliminado correctamente");
+        toast.success("Cargo eliminado", "El cargo ha sido eliminado correctamente.");
       }
     }
   };
@@ -99,7 +103,10 @@ export default function DashboardEmpresaPage() {
   const handleToggleCargo = async (cargoId: number, activo: boolean) => {
     const success = await toggleCargoStatus(cargoId, !activo);
     if (success) {
-      alert(`Cargo ${!activo ? "activado" : "desactivado"} correctamente`);
+      toast.success(
+        `Cargo ${!activo ? "activado" : "desactivado"}`,
+        `El cargo ha sido ${!activo ? "activado" : "desactivado"} correctamente.`
+      );
     }
   };
 
@@ -127,16 +134,19 @@ export default function DashboardEmpresaPage() {
       );
 
       if (response.ok) {
-        alert(
-          `Cargo ${nuevoEstado === "CERRADA" ? "cerrado" : "reabierto"} exitosamente`
+        toast.success(
+          `Cargo ${nuevoEstado === "CERRADA" ? "cerrado" : "reabierto"}`,
+          nuevoEstado === "CERRADA" 
+            ? "Ya puedes generar el reporte final de este cargo."
+            : "El cargo está activo para recibir postulaciones."
         );
         refresh();
       } else {
-        alert("Error al cambiar el estado del cargo");
+        toast.error("Error", "No se pudo cambiar el estado del cargo.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al cambiar el estado del cargo");
+      toast.error("Error", "No se pudo cambiar el estado del cargo.");
     }
   };
 
@@ -210,7 +220,7 @@ export default function DashboardEmpresaPage() {
       );
 
       if (response.ok) {
-        alert("¡Cargo creado exitosamente!");
+        toast.success("¡Cargo creado!", "El nuevo cargo está listo para recibir postulaciones.");
         setNuevoCargo({
           titulo: "",
           descripcion: "",
@@ -226,11 +236,11 @@ export default function DashboardEmpresaPage() {
         setActiveTab("cargos");
         window.location.reload();
       } else {
-        alert("Error al crear el cargo");
+        toast.error("Error", "No se pudo crear el cargo. Revisa los datos e intenta nuevamente.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al crear el cargo");
+      toast.error("Error", "No se pudo crear el cargo. Intenta nuevamente.");
     }
   };
 
@@ -250,14 +260,14 @@ export default function DashboardEmpresaPage() {
       );
 
       if (response.ok) {
-        alert("Cargo eliminado");
+        toast.success("Cargo eliminado", "El cargo ha sido eliminado permanentemente.");
         window.location.reload();
       } else {
-        alert("Error al eliminar el cargo");
+        toast.error("Error", "No se pudo eliminar el cargo.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al eliminar el cargo");
+      toast.error("Error", "No se pudo eliminar el cargo.");
     }
   };
 
@@ -280,15 +290,16 @@ export default function DashboardEmpresaPage() {
       );
 
       if (response.ok) {
-        alert(`Postulación ${nuevoEstado.toLowerCase()}`);
+        const estadoTexto = nuevoEstado === "SELECCIONADO" ? "seleccionada" : nuevoEstado.toLowerCase();
+        toast.success("Estado actualizado", `La postulación ha sido ${estadoTexto}.`);
         // Recargar todas las postulaciones
         refresh();
       } else {
-        alert("Error al actualizar la postulación");
+        toast.error("Error", "No se pudo actualizar el estado de la postulación.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al actualizar la postulación");
+      toast.error("Error", "No se pudo actualizar el estado de la postulación.");
     }
   };
 

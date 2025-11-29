@@ -18,22 +18,25 @@ export function useAdminDashboard() {
 
   /**
    * Cargar datos del dashboard
+   * Las llamadas se hacen secuencialmente para no saturar el pool de conexiones de la DB
    */
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [statsData, rankingsData, postulacionesStatsData, topCargosData] = await Promise.all([
-        adminService.getDashboardStats(),
-        adminService.getRankings(),
-        adminService.getPostulacionesStats("mes"),
-        adminService.getTopCargos(5),
-      ]);
-
+      // Ejecutar llamadas secuencialmente para no saturar el pool de conexiones
+      // Supabase free tier tiene límite de conexiones muy bajo
+      const statsData = await adminService.getDashboardStats();
       setStats(statsData);
+      
+      const rankingsData = await adminService.getRankings();
       setRankings(rankingsData);
+      
+      const postulacionesStatsData = await adminService.getPostulacionesStats("mes");
       setPostulacionesStats(postulacionesStatsData);
+      
+      const topCargosData = await adminService.getTopCargos(5);
       setTopCargos(topCargosData);
     } catch (err: any) {
       console.error("Error al cargar datos del dashboard:", err);

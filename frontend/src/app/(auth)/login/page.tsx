@@ -14,6 +14,7 @@ import {
 } from "@/components/login";
 import { OAuthSection } from "@/components/shared/OAuthButtons";
 import { authService } from "@/services/auth.service";
+import { useToast } from "@/components/shared";
 
 // Componente que maneja los parámetros de búsqueda
 function RegistrationSuccess({ onShow }: { onShow: (show: boolean) => void }) {
@@ -31,6 +32,7 @@ function RegistrationSuccess({ onShow }: { onShow: (show: boolean) => void }) {
 
 function LoginPageContent() {
   const { loginEmpresa, loginPostulante, loading, error: authError } = useAuth();
+  const toast = useToast();
 
   const [tipoUsuario, setTipoUsuario] = useState<"empresa" | "postulante">("postulante");
   const [email, setEmail] = useState("");
@@ -117,7 +119,10 @@ function LoginPageContent() {
       }
       setError("");
       setEmailNotVerifiedError(false);
-      alert("Se ha enviado un nuevo correo de verificación. Por favor, revisa tu bandeja de entrada.");
+      toast.success(
+        "Correo enviado",
+        "Se ha enviado un nuevo correo de verificación. Revisa tu bandeja de entrada."
+      );
     } catch (err: any) {
       setError(err.response?.data?.message || "Error al reenviar el correo de verificación");
     } finally {

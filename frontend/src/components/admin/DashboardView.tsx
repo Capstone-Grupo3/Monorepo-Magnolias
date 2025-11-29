@@ -155,7 +155,7 @@ export default function DashboardView({
                 </tr>
               ) : (
                 rankings.map((rank, index) => (
-                  <tr key={rank.postulanteId} className={index < 3 ? "bg-purple-50" : ""}>
+                  <tr key={`${rank.postulanteId}-${rank.cargo}-${index}`} className={index < 3 ? "bg-purple-50" : ""}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`font-bold ${index < 3 ? "text-purple-600" : "text-gray-900"}`}>
                         #{index + 1}

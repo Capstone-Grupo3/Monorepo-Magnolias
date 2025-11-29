@@ -78,6 +78,86 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// DTOs para actualizaciones
+export interface UpdatePostulanteDto {
+  nombre?: string;
+  correo?: string;
+  rut?: string;
+  telefono?: string;
+  estado?: 'ACTIVO' | 'INACTIVO';
+}
+
+export interface UpdateEmpresaDto {
+  nombre?: string;
+  correo?: string;
+  rut?: string;
+  descripcion?: string;
+  logoUrl?: string;
+  linkedinUrl?: string;
+  estado?: 'ACTIVO' | 'INACTIVO';
+}
+
+export interface UpdatePostulacionDto {
+  estado?: 'PENDIENTE' | 'EVALUADO' | 'EN_REVISION' | 'SELECCIONADO' | 'RECHAZADO';
+  puntajeIa?: number;
+}
+
+export interface UpdateCargoDto {
+  titulo?: string;
+  descripcion?: string;
+  ubicacion?: string;
+  modalidad?: 'PRESENCIAL' | 'REMOTO' | 'HIBRIDO';
+  tipoContrato?: 'FULL_TIME' | 'PART_TIME' | 'PRACTICA' | 'FREELANCE';
+  salarioEstimado?: number;
+  requisitos?: string;
+  estado?: 'ACTIVA' | 'CERRADA' | 'PAUSADA';
+}
+
+export interface CreateCargoDto {
+  idEmpresa: number;
+  titulo: string;
+  descripcion: string;
+  ubicacion: string;
+  modalidad: 'PRESENCIAL' | 'REMOTO' | 'HIBRIDO';
+  tipoContrato: 'FULL_TIME' | 'PART_TIME' | 'PRACTICA' | 'FREELANCE';
+  salarioEstimado?: number;
+  requisitos?: string;
+}
+
+export interface Cargo {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  ubicacion: string | null;
+  modalidad: string | null;
+  tipoContrato: string | null;
+  salarioEstimado: number | null;
+  requisitos: string | null;
+  estado: string;
+  fechaPublicacion: Date;
+  fechaCierre: Date | null;
+  empresa: { id: number; nombre: string };
+  totalPostulaciones: number;
+}
+
+export interface Empresa {
+  id: number;
+  nombre: string;
+  rut: string | null;
+  correo: string;
+  descripcion: string | null;
+  logoUrl: string | null;
+  linkedinUrl: string | null;
+  estado: string;
+  fechaCreacion: Date;
+  totalCargos: number;
+}
+
+export interface EmpresaSimple {
+  id: number;
+  nombre: string;
+}
+
 class AdminService {
   /**
    * Login de administrador
@@ -229,6 +309,127 @@ class AdminService {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // ==================== CRUD POSTULANTES ====================
+
+  /**
+   * Actualizar postulante
+   */
+  async updatePostulante(id: number, data: UpdatePostulanteDto): Promise<AdminUser> {
+    return apiService.put<AdminUser>(`/admin/postulantes/${id}`, data);
+  }
+
+  /**
+   * Eliminar postulante
+   */
+  async deletePostulante(id: number): Promise<void> {
+    return apiService.delete(`/admin/postulantes/${id}`);
+  }
+
+  // ==================== CRUD EMPRESAS ====================
+
+  /**
+   * Obtener todas las empresas
+   */
+  async getAllEmpresas(params?: {
+    page?: number;
+    limit?: number;
+    estado?: string;
+    search?: string;
+  }): Promise<PaginatedResponse<Empresa>> {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.estado) queryParams.append("estado", params.estado);
+    if (params?.search) queryParams.append("search", params.search);
+
+    const url = `/admin/empresas${queryParams.toString() ? `?${queryParams}` : ""}`;
+    return apiService.get<PaginatedResponse<Empresa>>(url);
+  }
+
+  /**
+   * Obtener lista simple de empresas para selects
+   */
+  async getEmpresasSimple(): Promise<EmpresaSimple[]> {
+    return apiService.get<EmpresaSimple[]>("/admin/empresas/simple");
+  }
+
+  /**
+   * Actualizar empresa
+   */
+  async updateEmpresa(id: number, data: UpdateEmpresaDto): Promise<Empresa> {
+    return apiService.put<Empresa>(`/admin/empresas/${id}`, data);
+  }
+
+  /**
+   * Eliminar empresa
+   */
+  async deleteEmpresa(id: number, hardDelete: boolean = false): Promise<void> {
+    const url = hardDelete ? `/admin/empresas/${id}?hard=true` : `/admin/empresas/${id}`;
+    return apiService.delete(url);
+  }
+
+  // ==================== CRUD POSTULACIONES ====================
+
+  /**
+   * Actualizar postulación
+   */
+  async updatePostulacion(id: number, data: UpdatePostulacionDto): Promise<Postulacion> {
+    return apiService.put<Postulacion>(`/admin/postulaciones/${id}`, data);
+  }
+
+  /**
+   * Eliminar postulación
+   */
+  async deletePostulacion(id: number): Promise<void> {
+    return apiService.delete(`/admin/postulaciones/${id}`);
+  }
+
+  // ==================== CRUD CARGOS ====================
+
+  /**
+   * Obtener todos los cargos
+   */
+  async getAllCargos(params?: {
+    page?: number;
+    limit?: number;
+    empresaId?: number;
+    estado?: string;
+    search?: string;
+  }): Promise<PaginatedResponse<Cargo>> {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.empresaId) queryParams.append("empresaId", params.empresaId.toString());
+    if (params?.estado) queryParams.append("estado", params.estado);
+    if (params?.search) queryParams.append("search", params.search);
+
+    const url = `/admin/cargos${queryParams.toString() ? `?${queryParams}` : ""}`;
+    return apiService.get<PaginatedResponse<Cargo>>(url);
+  }
+
+  /**
+   * Crear cargo
+   */
+  async createCargo(data: CreateCargoDto): Promise<Cargo> {
+    return apiService.post<Cargo>("/admin/cargos", data);
+  }
+
+  /**
+   * Actualizar cargo
+   */
+  async updateCargo(id: number, data: UpdateCargoDto): Promise<Cargo> {
+    return apiService.put<Cargo>(`/admin/cargos/${id}`, data);
+  }
+
+  /**
+   * Eliminar cargo
+   */
+  async deleteCargo(id: number): Promise<void> {
+    return apiService.delete(`/admin/cargos/${id}`);
   }
 }
 

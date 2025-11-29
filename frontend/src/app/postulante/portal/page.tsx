@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   User,
   Briefcase,
@@ -32,11 +32,16 @@ import { validarRUT, formatearRUT } from "@/lib/validators";
 import {
   DashboardHeader,
   LoadingSpinner,
-  LogoutButton
+  LogoutButton,
+  useToast
 } from "@/components/shared";
 import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
+import BuscadorCargos from "@/components/postulante/BuscadorCargos";
 
 export default function PortalCandidatoPage() {
+  // Hook de notificaciones toast
+  const toast = useToast();
+
   // Estado para verificación de email
   const [emailVerificado, setEmailVerificado] = useState(true);
   const [userEmail, setUserEmail] = useState("");
@@ -65,6 +70,14 @@ export default function PortalCandidatoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvPreview, setCvPreview] = useState<string>("");
+
+  // Estado para cargos filtrados por el buscador
+  const [cargosFiltrados, setCargosFiltrados] = useState<Cargo[]>([]);
+
+  // Callback para recibir los cargos filtrados del buscador
+  const handleCargosFiltrados = useCallback((cargos: Cargo[]) => {
+    setCargosFiltrados(cargos);
+  }, []);
 
   // Estados para edición de perfil
   const [editandoPerfil, setEditandoPerfil] = useState(false);
@@ -143,11 +156,13 @@ export default function PortalCandidatoPage() {
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
       localStorage.setItem("user", JSON.stringify({ ...userData, ...perfilEditado }));
       
+      toast.success("¡Perfil actualizado!", "Tus datos han sido guardados correctamente.");
+      setEditandoPerfil(false);
       // Recargar página para actualizar datos
       window.location.reload();
     } catch (error) {
       console.error("Error al guardar perfil:", error);
-      alert("Error al guardar el perfil. Intenta nuevamente.");
+      toast.error("Error al guardar", "No se pudo actualizar el perfil. Intenta nuevamente.");
     } finally {
       setGuardandoPerfil(false);
     }
@@ -172,13 +187,13 @@ export default function PortalCandidatoPage() {
     if (file) {
       // Validar tipo de archivo
       if (file.type !== "application/pdf") {
-        alert("Solo se permiten archivos PDF");
+        toast.warning("Formato no válido", "Solo se permiten archivos PDF");
         return;
       }
 
       // Validar tamaño (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert("El archivo no debe superar 5MB");
+        toast.warning("Archivo muy grande", "El archivo no debe superar 5MB");
         return;
       }
 
@@ -197,7 +212,7 @@ export default function PortalCandidatoPage() {
         respuestas[`pregunta_${index + 1}`]?.trim()
       );
       if (!todasRespondidas) {
-        alert("Por favor responde todas las preguntas antes de enviar");
+        toast.warning("Respuestas incompletas", "Por favor responde todas las preguntas antes de enviar");
         return;
       }
     }
@@ -207,13 +222,14 @@ export default function PortalCandidatoPage() {
       // Usar el hook que maneja el servicio correctamente
       await crearPostulacion(cargoSeleccionado.id, respuestas, cvFile || undefined);
 
-      alert(
-        "¡Postulación enviada exitosamente! El análisis con IA se está procesando."
+      toast.success(
+        "¡Postulación enviada!",
+        "El análisis con IA se está procesando. Te notificaremos los resultados."
       );
       handleCerrarModal();
     } catch (error: any) {
       console.error("Error:", error);
-      alert(error.message || "Error al enviar la postulación");
+      toast.error("Error al postular", error.message || "No se pudo enviar la postulación. Intenta nuevamente.");
     } finally {
       setSubmitting(false);
     }
@@ -291,14 +307,19 @@ export default function PortalCandidatoPage() {
         {/* cargos Tab */}
         {activeTab === "cargos" && (
           <div className="space-y-6">
+            {/* Título de la sección */}
             <div className="flex justify-between items-center">
               <h2 className="text-3xl font-bold text-slate-900">
-                Cargos Disponibles <span className="text-orange-500">({cargos.length})</span>
+                Buscar Oportunidades
               </h2>
             </div>
 
+            {/* Componente de búsqueda y filtros */}
+            <BuscadorCargos cargos={cargos} onResultados={handleCargosFiltrados} />
+
+            {/* Grid de cargos filtrados */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {cargos.map((cargo) => (
+              {cargosFiltrados.map((cargo) => (
                 <div
                   key={cargo.id}
                   className="bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:border-orange-200 transition-all p-6 group"
@@ -312,11 +333,9 @@ export default function PortalCandidatoPage() {
                         {cargo.empresa.nombre}
                       </p>
                     </div>
-                    {cargo.empresa.logoUrl && (
-                      <div className="w-14 h-14 rounded-xl bg-linear-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-xs">
-                        <Briefcase className="w-7 h-7 text-orange-500" />
-                      </div>
-                    )}
+                    <div className="w-14 h-14 rounded-xl bg-linear-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-sm">
+                      <Briefcase className="w-7 h-7 text-orange-500" />
+                    </div>
                   </div>
 
                   <p className="text-slate-600 mb-4 line-clamp-3 text-sm leading-relaxed">
@@ -329,6 +348,11 @@ export default function PortalCandidatoPage() {
                         <MapPin size={16} className="text-orange-500" />
                       </div>
                       <span className="text-sm font-medium">{cargo.ubicacion}</span>
+                      {cargo.modalidad && (
+                        <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                          {cargo.modalidad === "REMOTO" ? "Remoto" : cargo.modalidad === "HIBRIDO" ? "Híbrido" : "Presencial"}
+                        </span>
+                      )}
                     </div>
                     {cargo.salarioEstimado && (
                       <div className="flex items-center gap-2.5 text-slate-700">
@@ -344,7 +368,13 @@ export default function PortalCandidatoPage() {
                       <div className="bg-blue-50 p-1.5 rounded-lg">
                         <Clock size={16} className="text-blue-600" />
                       </div>
-                      <span className="text-sm font-medium">{cargo.tipoContrato}</span>
+                      <span className="text-sm font-medium">
+                        {cargo.tipoContrato === "FULL_TIME" ? "Tiempo Completo" :
+                         cargo.tipoContrato === "PART_TIME" ? "Medio Tiempo" :
+                         cargo.tipoContrato === "CONTRACTOR" ? "Contratista" :
+                         cargo.tipoContrato === "TEMPORARY" ? "Temporal" :
+                         cargo.tipoContrato === "INTERNSHIP" ? "Práctica" : cargo.tipoContrato}
+                      </span>
                     </div>
                   </div>
 
@@ -357,10 +387,24 @@ export default function PortalCandidatoPage() {
                 </div>
               ))}
 
+              {cargosFiltrados.length === 0 && cargos.length > 0 && (
+                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200">
+                  <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-10 h-10 text-slate-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                    No se encontraron resultados
+                  </h3>
+                  <p className="text-slate-600 mb-4">
+                    Intenta ajustar los filtros o buscar con otras palabras clave
+                  </p>
+                </div>
+              )}
+
               {cargos.length === 0 && (
-                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-xs border border-slate-200">
+                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200">
                   <div className="bg-orange-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-10 h-10 text-orange-500" />
+                    <Briefcase className="w-10 h-10 text-orange-500" />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-900 mb-2">
                     No hay cargos disponibles

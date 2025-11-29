@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { IaService } from '../ia/ia.service';
 import { GenerarReporteDto } from './dto/generar-reporte.dto';
-import * as puppeteer from 'puppeteer-core';
+import * as puppeteer from 'puppeteer';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -500,14 +500,28 @@ export class ReportesService {
   }
 
   private async generarPDF(reporte: ReporteRanking): Promise<string> {
-    // Detectar ruta de Chromium (probar múltiples ubicaciones)
-    const chromePaths = [
-      process.env.CHROME_PATH || '/usr/bin/chromium',
-      '/usr/bin/chromium-browser',
-      '/usr/bin/google-chrome',
-      '/usr/bin/google-chrome-stable',
-      '/snap/bin/chromium',
-    ];
+    // Detectar ruta de Chromium (probar múltiples ubicaciones según SO)
+    let chromePaths: string[] = [];
+
+    if (process.platform === 'win32') {
+      // Rutas de Windows
+      chromePaths = [
+        process.env.CHROME_PATH,
+        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files\\Chromium\\Application\\chrome.exe',
+      ].filter((p) => p); // Filtrar valores null/undefined
+    } else {
+      // Rutas de Linux/macOS
+      chromePaths = [
+        process.env.CHROME_PATH,
+        '/usr/bin/chromium',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/snap/bin/chromium',
+      ].filter((p) => p);
+    }
 
     let executablePath: string | undefined;
     for (const path of chromePaths) {

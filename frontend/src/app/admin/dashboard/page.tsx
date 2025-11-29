@@ -11,6 +11,8 @@ import {
   Menu,
   X,
   Shield,
+  Briefcase,
+  Building2,
 } from "lucide-react";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
 import DashboardView from "@/components/admin/DashboardView";
@@ -18,8 +20,10 @@ import UsersView from "@/components/admin/UsersView";
 import PostulacionesView from "@/components/admin/PostulacionesView";
 import RankingsView from "@/components/admin/RankingsView";
 import RawDataView from "@/components/admin/RawDataView";
+import CargosView from "@/components/admin/CargosView";
+import EmpresasView from "@/components/admin/EmpresasView";
 
-type TabType = "dashboard" | "usuarios" | "postulaciones" | "rankings" | "raw-data";
+type TabType = "dashboard" | "usuarios" | "empresas" | "cargos" | "postulaciones" | "rankings" | "raw-data";
 
 export default function AdminDashboardPage() {
   const { stats, rankings, postulacionesStats, topCargos, loading, error, logout, refresh } =
@@ -30,6 +34,8 @@ export default function AdminDashboardPage() {
   const tabs = [
     { id: "dashboard" as TabType, label: "Dashboard", icon: LayoutDashboard },
     { id: "usuarios" as TabType, label: "Usuarios", icon: Users },
+    { id: "empresas" as TabType, label: "Empresas", icon: Building2 },
+    { id: "cargos" as TabType, label: "Cargos", icon: Briefcase },
     { id: "postulaciones" as TabType, label: "Postulaciones", icon: FileText },
     { id: "rankings" as TabType, label: "Rankings", icon: TrendingUp },
     { id: "raw-data" as TabType, label: "Data Cruda", icon: Database },
@@ -79,7 +85,7 @@ export default function AdminDashboardPage() {
           {sidebarOpen && (
             <div className="flex items-center gap-2">
               <Shield className="w-8 h-8 text-purple-400" />
-              <span className="font-bold text-lg">Admin Panel</span>
+              <span className="font-bold text-lg">Magnolias Admin</span>
             </div>
           )}
           <button
@@ -150,6 +156,10 @@ export default function AdminDashboardPage() {
           )}
 
           {activeTab === "usuarios" && <UsersView />}
+
+          {activeTab === "empresas" && <EmpresasView />}
+
+          {activeTab === "cargos" && <CargosView />}
 
           {activeTab === "postulaciones" && <PostulacionesView />}
 

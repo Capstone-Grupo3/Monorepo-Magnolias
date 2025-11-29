@@ -8,10 +8,19 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
+  Edit,
+  Trash2,
+  RefreshCw,
+  UserCheck,
+  UserX,
 } from "lucide-react";
-import { adminService, AdminUser } from "@/services/admin.service";
+import { adminService, AdminUser, UpdatePostulanteDto, UpdateEmpresaDto } from "@/services/admin.service";
+import AdminModal, { FormField, ModalFooterButtons } from "./AdminModal";
+import ConfirmModal from "./ConfirmModal";
+import { useToast } from "@/components/shared/Toast";
 
 export default function UsersView() {
+  const { success, error } = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -22,6 +31,15 @@ export default function UsersView() {
   const [search, setSearch] = useState("");
   const [tipoFilter, setTipoFilter] = useState<"" | "postulante" | "empresa">("");
   const [estadoFilter, setEstadoFilter] = useState("");
+
+  // Modales
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Formulario de edición
+  const [editForm, setEditForm] = useState<UpdatePostulanteDto | UpdateEmpresaDto>({});
 
   const loadUsers = async () => {
     try {
@@ -37,8 +55,9 @@ export default function UsersView() {
       setUsers(response.data);
       setTotal(response.total);
       setTotalPages(response.totalPages);
-    } catch (error) {
-      console.error("Error al cargar usuarios:", error);
+    } catch (err) {
+      console.error("Error al cargar usuarios:", err);
+      error("Error al cargar usuarios");
     } finally {
       setLoading(false);
     }
@@ -66,6 +85,87 @@ export default function UsersView() {
       })),
       `usuarios_${new Date().toISOString().split('T')[0]}`
     );
+    success("Archivo exportado exitosamente");
+  };
+
+  const handleEdit = (user: AdminUser) => {
+    setSelectedUser(user);
+    setEditForm({
+      nombre: user.nombre,
+      correo: user.correo,
+      rut: user.rut || "",
+      telefono: user.telefono || "",
+      estado: user.estado as "ACTIVO" | "INACTIVO",
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (user: AdminUser) => {
+    setSelectedUser(user);
+    setDeleteModalOpen(true);
+  };
+
+  const handleToggleEstado = async (user: AdminUser) => {
+    try {
+      const nuevoEstado = user.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
+      
+      if (user.tipo === "postulante") {
+        await adminService.updatePostulante(user.id, { estado: nuevoEstado });
+      } else {
+        await adminService.updateEmpresa(user.id, { estado: nuevoEstado });
+      }
+      
+      success(
+        `Usuario ${nuevoEstado === "ACTIVO" ? "activado" : "desactivado"} exitosamente`
+      );
+      loadUsers();
+    } catch (err: any) {
+      error(err.message || "Error al cambiar estado");
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setSaving(true);
+      
+      if (selectedUser.tipo === "postulante") {
+        await adminService.updatePostulante(selectedUser.id, editForm as UpdatePostulanteDto);
+      } else {
+        await adminService.updateEmpresa(selectedUser.id, editForm as UpdateEmpresaDto);
+      }
+
+      success("Usuario actualizado exitosamente");
+      setEditModalOpen(false);
+      loadUsers();
+    } catch (err: any) {
+      error(err.message || "Error al actualizar usuario");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setSaving(true);
+      
+      if (selectedUser.tipo === "postulante") {
+        await adminService.deletePostulante(selectedUser.id);
+      } else {
+        await adminService.deleteEmpresa(selectedUser.id, false);
+      }
+
+      success("Usuario eliminado exitosamente");
+      setDeleteModalOpen(false);
+      loadUsers();
+    } catch (err: any) {
+      error(err.message || "Error al eliminar usuario");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading && users.length === 0) {
@@ -107,7 +207,7 @@ export default function UsersView() {
             <select
               value={tipoFilter}
               onChange={(e) => {
-                setTipoFilter(e.target.value as any);
+                setTipoFilter(e.target.value as "" | "postulante" | "empresa");
                 setPage(1);
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -145,6 +245,13 @@ export default function UsersView() {
           >
             <Search className="w-4 h-4" />
             Buscar
+          </button>
+          <button
+            onClick={loadUsers}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Actualizar
           </button>
           <button
             onClick={handleExport}
@@ -191,12 +298,15 @@ export default function UsersView() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                     No se encontraron usuarios
                   </td>
                 </tr>
@@ -221,7 +331,7 @@ export default function UsersView() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.rut}
+                      {user.rut || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{user.correo}</div>
@@ -253,6 +363,39 @@ export default function UsersView() {
                       >
                         {user.estado}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleToggleEstado(user)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            user.estado === "ACTIVO"
+                              ? "text-yellow-600 hover:bg-yellow-50"
+                              : "text-green-600 hover:bg-green-50"
+                          }`}
+                          title={user.estado === "ACTIVO" ? "Desactivar" : "Activar"}
+                        >
+                          {user.estado === "ACTIVO" ? (
+                            <UserX className="w-4 h-4" />
+                          ) : (
+                            <UserCheck className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(user)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -288,6 +431,86 @@ export default function UsersView() {
           </button>
         </div>
       )}
+
+      {/* Modal de edición */}
+      <AdminModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title={`Editar ${selectedUser?.tipo === "empresa" ? "Empresa" : "Postulante"}`}
+        size="md"
+        footer={
+          <ModalFooterButtons
+            onCancel={() => setEditModalOpen(false)}
+            onSubmit={handleSaveEdit}
+            submitText="Guardar cambios"
+            loading={saving}
+          />
+        }
+      >
+        <div className="space-y-4">
+          <FormField label="Nombre" required>
+            <input
+              type="text"
+              value={editForm.nombre || ""}
+              onChange={(e) => setEditForm({ ...editForm, nombre: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </FormField>
+
+          <FormField label="Correo electrónico" required>
+            <input
+              type="email"
+              value={editForm.correo || ""}
+              onChange={(e) => setEditForm({ ...editForm, correo: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </FormField>
+
+          <FormField label="RUT">
+            <input
+              type="text"
+              value={editForm.rut || ""}
+              onChange={(e) => setEditForm({ ...editForm, rut: e.target.value })}
+              placeholder="12.345.678-9"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </FormField>
+
+          {selectedUser?.tipo === "postulante" && (
+            <FormField label="Teléfono">
+              <input
+                type="tel"
+                value={(editForm as UpdatePostulanteDto).telefono || ""}
+                onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+            </FormField>
+          )}
+
+          <FormField label="Estado">
+            <select
+              value={editForm.estado || "ACTIVO"}
+              onChange={(e) => setEditForm({ ...editForm, estado: e.target.value as "ACTIVO" | "INACTIVO" })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option value="ACTIVO">Activo</option>
+              <option value="INACTIVO">Inactivo</option>
+            </select>
+          </FormField>
+        </div>
+      </AdminModal>
+
+      {/* Modal de confirmación de eliminación */}
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar usuario"
+        message={`¿Estás seguro de que deseas eliminar a "${selectedUser?.nombre}"? Esta acción no se puede deshacer y eliminará todos los datos asociados.`}
+        confirmText="Eliminar"
+        type="danger"
+        loading={saving}
+      />
     </div>
   );
 }
