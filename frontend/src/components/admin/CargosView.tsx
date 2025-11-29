@@ -276,7 +276,7 @@ export default function CargosView() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
             <div className="relative">
               <input
                 type="text"
@@ -284,18 +284,18 @@ export default function CargosView() {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Buscar por título o descripción..."
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
               <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
           </div>
 
           <div className="w-40">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
             <select
               value={estadoFilter}
               onChange={(e) => setEstadoFilter(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             >
               <option value="">Todos</option>
               {ESTADOS.map((e) => (
@@ -305,11 +305,11 @@ export default function CargosView() {
           </div>
 
           <div className="w-48">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Empresa</label>
             <select
               value={empresaFilter}
               onChange={(e) => setEmpresaFilter(e.target.value ? Number(e.target.value) : "")}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             >
               <option value="">Todas</option>
               {empresas.map((e) => (

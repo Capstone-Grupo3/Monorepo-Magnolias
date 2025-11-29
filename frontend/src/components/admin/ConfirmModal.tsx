@@ -69,7 +69,7 @@ export default function ConfirmModal({
             >
               <div className="flex items-start gap-4">
                 {/* Icono */}
-                <div className={`flex-shrink-0 p-3 rounded-full ${styles.iconBg}`}>
+                <div className={`shrink-0 p-3 rounded-full ${styles.iconBg}`}>
                   {styles.icon}
                 </div>
 
