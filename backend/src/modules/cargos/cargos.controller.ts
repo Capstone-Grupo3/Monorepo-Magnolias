@@ -21,6 +21,7 @@ import { CargoService } from './cargos.service';
 import { CreateCargoDto } from './dto/create-cargo.dto';
 import { UpdateCargoDto } from './dto/update-cargo.dto';
 import { UpdateCargoIaDto } from './dto/update-cargo-ia.dto';
+import { FilterCargoDto } from './dto/filter-cargo.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('cargos')
@@ -38,10 +39,32 @@ export class CargoController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Obtener todas las cargos activas' })
-  @ApiQuery({ name: 'estado', required: false })
-  findAll(@Query('estado') estado?: string) {
-    return this.cargosService.findAll(estado);
+  @ApiOperation({ 
+    summary: 'Obtener cargos con filtros y paginación',
+    description: 'Busca cargos aplicando filtros opcionales. Soporta búsqueda por texto, ubicación, modalidad, tipo de contrato, empresa y rango salarial. Incluye paginación.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de cargos paginada con metadatos',
+    schema: {
+      properties: {
+        data: { type: 'array', description: 'Lista de cargos' },
+        meta: {
+          type: 'object',
+          properties: {
+            total: { type: 'number', description: 'Total de registros' },
+            page: { type: 'number', description: 'Página actual' },
+            limit: { type: 'number', description: 'Elementos por página' },
+            totalPages: { type: 'number', description: 'Total de páginas' },
+            hasNextPage: { type: 'boolean' },
+            hasPrevPage: { type: 'boolean' },
+          }
+        }
+      }
+    }
+  })
+  findAll(@Query() filterDto: FilterCargoDto) {
+    return this.cargosService.findAllWithFilters(filterDto);
   }
 
   @Get('empresa/:empresaId')

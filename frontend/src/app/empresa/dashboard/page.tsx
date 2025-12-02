@@ -819,7 +819,8 @@ export default function DashboardEmpresaPage() {
                     <option value="PART_TIME">Medio Tiempo</option>
                     <option value="PROJECT">Por Proyecto</option>
                     <option value="FREELANCE">Freelance</option>
-                    <option value="INTERNSHIP">Práctica</option>
+                    <option value="PRACTICA">Práctica</option>
+                    <option value="FREELANCE">Freelance</option>
                   </select>
                 </div>
 

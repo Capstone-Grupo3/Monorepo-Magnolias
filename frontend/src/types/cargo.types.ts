@@ -7,11 +7,12 @@ import { Empresa } from "./empresa.types";
 export type TipoContrato =
   | "FULL_TIME"
   | "PART_TIME"
-  | "CONTRACTOR"
-  | "TEMPORARY"
-  | "INTERNSHIP";
+  | "PRACTICA"
+  | "FREELANCE";
 
 export type Modalidad = "PRESENCIAL" | "REMOTO" | "HIBRIDO";
+
+export type EstadoCargo = "ACTIVA" | "CERRADA" | "EN_PROCESO";
 
 export interface Cargo {
   id: number;
@@ -73,3 +74,43 @@ export interface CreateCargoDTO {
   requisitos?: string;
   fechaCierre?: string;
 }
+
+/**
+ * Filtros para búsqueda de cargos
+ */
+export interface FiltrosCargo {
+  busqueda?: string;
+  ubicacion?: string;
+  tipoContrato?: TipoContrato | "";
+  modalidad?: Modalidad | "";
+  estado?: EstadoCargo | "";
+  empresa?: string;
+  empresaId?: number;
+  salarioMin?: number | null;
+  salarioMax?: number | null;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+/**
+ * Metadatos de paginación
+ */
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+/**
+ * Respuesta paginada de cargos
+ */
+export interface CargosPaginatedResponse {
+  data: Cargo[];
+  meta: PaginationMeta;
+}
+

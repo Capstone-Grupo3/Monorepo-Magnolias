@@ -10,6 +10,21 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateCargoDto } from './dto/create-cargo.dto';
 import { UpdateCargoDto } from './dto/update-cargo.dto';
 import { UpdateCargoIaDto } from './dto/update-cargo-ia.dto';
+import { FilterCargoDto } from './dto/filter-cargo.dto';
+import { Prisma } from '@prisma/client';
+
+// Interfaz para respuesta paginada
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
 
 @Injectable()
 export class CargoService {
@@ -77,6 +92,126 @@ export class CargoService {
       },
       orderBy: { fechaPublicacion: 'desc' },
     });
+  }
+
+  /**
+   * Buscar cargos con filtros avanzados y paginación
+   */
+  async findAllWithFilters(filterDto: FilterCargoDto): Promise<PaginatedResponse<any>> {
+    const {
+      busqueda,
+      ubicacion,
+      tipoContrato,
+      modalidad,
+      estado,
+      empresaId,
+      empresa,
+      salarioMin,
+      salarioMax,
+      page = 1,
+      limit = 10,
+      sortBy = 'fechaPublicacion',
+      sortOrder = 'desc',
+    } = filterDto;
+
+    // Construir condiciones de filtrado
+    const where: Prisma.CargoWhereInput = {};
+
+    // Filtro de búsqueda por texto (título, descripción, empresa)
+    if (busqueda) {
+      where.OR = [
+        { titulo: { contains: busqueda, mode: 'insensitive' } },
+        { descripcion: { contains: busqueda, mode: 'insensitive' } },
+        { empresa: { nombre: { contains: busqueda, mode: 'insensitive' } } },
+      ];
+    }
+
+    // Filtro por ubicación
+    if (ubicacion) {
+      where.ubicacion = { contains: ubicacion, mode: 'insensitive' };
+    }
+
+    // Filtro por tipo de contrato
+    if (tipoContrato) {
+      where.tipoContrato = tipoContrato;
+    }
+
+    // Filtro por modalidad
+    if (modalidad) {
+      where.modalidad = modalidad;
+    }
+
+    // Filtro por estado
+    if (estado) {
+      where.estado = estado;
+    }
+
+    // Filtro por ID de empresa
+    if (empresaId) {
+      where.idEmpresa = empresaId;
+    }
+
+    // Filtro por nombre de empresa
+    if (empresa) {
+      where.empresa = {
+        nombre: { contains: empresa, mode: 'insensitive' },
+      };
+    }
+
+    // Filtro por rango salarial
+    if (salarioMin !== undefined || salarioMax !== undefined) {
+      where.salarioEstimado = {};
+      if (salarioMin !== undefined) {
+        where.salarioEstimado.gte = salarioMin;
+      }
+      if (salarioMax !== undefined) {
+        where.salarioEstimado.lte = salarioMax;
+      }
+    }
+
+    // Calcular skip para paginación
+    const skip = (page - 1) * limit;
+
+    // Validar campo de ordenamiento para prevenir inyección
+    const allowedSortFields = [
+      'fechaPublicacion',
+      'titulo',
+      'salarioEstimado',
+      'ubicacion',
+      'createdAt',
+    ];
+    const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'fechaPublicacion';
+
+    // Ejecutar consultas en paralelo para mejor rendimiento
+    const [data, total] = await Promise.all([
+      this.prisma.cargo.findMany({
+        where,
+        include: {
+          empresa: {
+            select: { id: true, rut: true, nombre: true, logoUrl: true },
+          },
+        },
+        orderBy: { [safeSortBy]: sortOrder },
+        skip,
+        take: limit,
+      }),
+      this.prisma.cargo.count({ where }),
+    ]);
+
+    // Calcular metadatos de paginación
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    };
   }
 
   async findByEmpresa(empresaId: number) {

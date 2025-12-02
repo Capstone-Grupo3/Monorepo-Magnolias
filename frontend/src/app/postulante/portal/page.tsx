@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import {
   User,
   Briefcase,
@@ -20,6 +20,7 @@ import { Cargo } from "@/types";
 
 // Importar hook personalizado
 import { usePostulantePortal } from "@/hooks/usePostulantePortal";
+import { useCargoFilters } from "@/hooks/useCargoFilters";
 
 // Importar servicios
 import { postulanteService } from "@/services/postulante.service";
@@ -33,12 +34,14 @@ import {
   DashboardHeader,
   LoadingSpinner,
   LogoutButton,
-  useToast
+  useToast,
+  Paginacion,
 } from "@/components/shared";
 import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
-import BuscadorCargos from "@/components/postulante/BuscadorCargos";
+import BuscadorCargosV2 from "@/components/postulante/BuscadorCargosV2";
 
-export default function PortalCandidatoPage() {
+// Componente interno que usa useSearchParams
+function PortalContent() {
   // Hook de notificaciones toast
   const toast = useToast();
 
@@ -46,9 +49,23 @@ export default function PortalCandidatoPage() {
   const [emailVerificado, setEmailVerificado] = useState(true);
   const [userEmail, setUserEmail] = useState("");
 
-  // Usar hook personalizado para toda la lógica
-  const { postulante, cargos, postulaciones, loading, crearPostulacion, logout } =
+  // Usar hook personalizado para postulante y postulaciones
+  const { postulante, postulaciones, loading: loadingPostulante, crearPostulacion, logout } =
     usePostulantePortal();
+
+  // Hook para filtros de cargos con sincronización de URL
+  const {
+    cargos,
+    pagination,
+    filtros,
+    loading: loadingCargos,
+    rangoSalario,
+    filtrosActivos,
+    setFiltro,
+    setRangoSalario,
+    setPage,
+    limpiarFiltros,
+  } = useCargoFilters({ defaultLimit: 12 });
 
   // Verificar estado de email al cargar
   useEffect(() => {
@@ -70,14 +87,6 @@ export default function PortalCandidatoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvPreview, setCvPreview] = useState<string>("");
-
-  // Estado para cargos filtrados por el buscador
-  const [cargosFiltrados, setCargosFiltrados] = useState<Cargo[]>([]);
-
-  // Callback para recibir los cargos filtrados del buscador
-  const handleCargosFiltrados = useCallback((cargos: Cargo[]) => {
-    setCargosFiltrados(cargos);
-  }, []);
 
   // Estados para edición de perfil
   const [editandoPerfil, setEditandoPerfil] = useState(false);
@@ -235,7 +244,12 @@ export default function PortalCandidatoPage() {
     }
   };
 
-  if (loading) {
+  // Handler para cambiar filtros (adaptador para el componente)
+  const handleFiltroChange = useCallback((campo: string, valor: string | number | null) => {
+    setFiltro(campo as keyof typeof filtros, valor as any);
+  }, [setFiltro]);
+
+  if (loadingPostulante) {
     return <LoadingSpinner />;
   }
 
@@ -314,12 +328,30 @@ export default function PortalCandidatoPage() {
               </h2>
             </div>
 
-            {/* Componente de búsqueda y filtros */}
-            <BuscadorCargos cargos={cargos} onResultados={handleCargosFiltrados} />
+            {/* Componente de búsqueda y filtros con sincronización de URL */}
+            <BuscadorCargosV2
+              cargosDisponibles={cargos}
+              filtros={{
+                busqueda: filtros.busqueda || "",
+                ubicacion: filtros.ubicacion || "",
+                tipoContrato: filtros.tipoContrato || "",
+                modalidad: filtros.modalidad || "",
+                empresa: filtros.empresa || "",
+                salarioMin: filtros.salarioMin ?? null,
+                salarioMax: filtros.salarioMax ?? null,
+              }}
+              rangoSalario={rangoSalario}
+              filtrosActivos={filtrosActivos}
+              totalResultados={pagination?.total || cargos.length}
+              loading={loadingCargos}
+              onFiltroChange={handleFiltroChange}
+              onRangoSalarioChange={setRangoSalario}
+              onLimpiarFiltros={limpiarFiltros}
+            />
 
             {/* Grid de cargos filtrados */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {cargosFiltrados.map((cargo) => (
+              {cargos.map((cargo) => (
                 <div
                   key={cargo.id}
                   className="bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:border-orange-200 transition-all p-6 group"
@@ -371,9 +403,8 @@ export default function PortalCandidatoPage() {
                       <span className="text-sm font-medium">
                         {cargo.tipoContrato === "FULL_TIME" ? "Tiempo Completo" :
                          cargo.tipoContrato === "PART_TIME" ? "Medio Tiempo" :
-                         cargo.tipoContrato === "CONTRACTOR" ? "Contratista" :
-                         cargo.tipoContrato === "TEMPORARY" ? "Temporal" :
-                         cargo.tipoContrato === "INTERNSHIP" ? "Práctica" : cargo.tipoContrato}
+                         cargo.tipoContrato === "PRACTICA" ? "Práctica" :
+                         cargo.tipoContrato === "FREELANCE" ? "Freelance" : cargo.tipoContrato}
                       </span>
                     </div>
                   </div>
@@ -387,7 +418,7 @@ export default function PortalCandidatoPage() {
                 </div>
               ))}
 
-              {cargosFiltrados.length === 0 && cargos.length > 0 && (
+              {cargos.length === 0 && !loadingCargos && (
                 <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200">
                   <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-10 h-10 text-slate-400" />
@@ -398,23 +429,34 @@ export default function PortalCandidatoPage() {
                   <p className="text-slate-600 mb-4">
                     Intenta ajustar los filtros o buscar con otras palabras clave
                   </p>
+                  {filtrosActivos > 0 && (
+                    <button
+                      onClick={limpiarFiltros}
+                      className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                    >
+                      Limpiar filtros
+                    </button>
+                  )}
                 </div>
               )}
 
-              {cargos.length === 0 && (
-                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200">
-                  <div className="bg-orange-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Briefcase className="w-10 h-10 text-orange-500" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                    No hay cargos disponibles
-                  </h3>
-                  <p className="text-slate-600">
-                    Vuelve más tarde para ver nuevas oportunidades laborales
-                  </p>
+              {loadingCargos && (
+                <div className="col-span-2 text-center py-16">
+                  <LoadingSpinner />
                 </div>
               )}
             </div>
+
+            {/* Paginación */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="mt-8">
+                <Paginacion
+                  meta={pagination}
+                  onPageChange={setPage}
+                  showInfo={true}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -862,5 +904,14 @@ export default function PortalCandidatoPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// Componente principal con Suspense para useSearchParams
+export default function PortalCandidatoPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <PortalContent />
+    </Suspense>
   );
 }

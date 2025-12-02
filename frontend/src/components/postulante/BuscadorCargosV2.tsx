@@ -1,30 +1,11 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { Search, SlidersHorizontal, X, MapPin, Briefcase, Clock, DollarSign, Building2, ChevronDown } from "lucide-react";
+import { useCallback, useMemo } from "react";
+import { Search, SlidersHorizontal, X, MapPin, Briefcase, Clock, DollarSign, Building2, ChevronDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cargo } from "@/types";
-
-// Tipos para los filtros
-export interface FiltrosCargo {
-  busqueda: string;
-  ubicacion: string;
-  tipoContrato: string;
-  modalidad: string;
-  salarioMin: number | null;
-  salarioMax: number | null;
-  empresa: string;
-}
-
-export const filtrosIniciales: FiltrosCargo = {
-  busqueda: "",
-  ubicacion: "",
-  tipoContrato: "",
-  modalidad: "",
-  salarioMin: null,
-  salarioMax: null,
-  empresa: "",
-};
+import { useState } from "react";
+import { Cargo, PaginationMeta } from "@/types";
+import { RANGOS_SALARIO } from "@/hooks/useCargoFilters";
 
 // Opciones de filtros
 export const tiposContrato = [
@@ -42,130 +23,64 @@ export const modalidades = [
   { value: "HIBRIDO", label: "Híbrido" },
 ];
 
-export const rangosSalario = [
-  { value: "", label: "Cualquier salario", min: null, max: null },
-  { value: "0-500000", label: "Hasta $500.000", min: 0, max: 500000 },
-  { value: "500000-1000000", label: "$500.000 - $1.000.000", min: 500000, max: 1000000 },
-  { value: "1000000-1500000", label: "$1.000.000 - $1.500.000", min: 1000000, max: 1500000 },
-  { value: "1500000-2000000", label: "$1.500.000 - $2.000.000", min: 1500000, max: 2000000 },
-  { value: "2000000+", label: "Más de $2.000.000", min: 2000000, max: null },
-];
-
-interface BuscadorCargosProps {
-  cargos: Cargo[];
-  onResultados: (cargos: Cargo[]) => void;
+interface FiltrosState {
+  busqueda: string;
+  ubicacion: string;
+  tipoContrato: string;
+  modalidad: string;
+  empresa: string;
+  salarioMin: number | null;
+  salarioMax: number | null;
 }
 
-export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosProps) {
-  const [filtros, setFiltros] = useState<FiltrosCargo>(filtrosIniciales);
+interface BuscadorCargosProps {
+  /** Cargos disponibles para extraer ubicaciones/empresas únicas */
+  cargosDisponibles?: Cargo[];
+  /** Filtros actuales desde la URL */
+  filtros: FiltrosState;
+  /** Rango de salario seleccionado */
+  rangoSalario: string;
+  /** Cantidad de filtros activos */
+  filtrosActivos: number;
+  /** Total de resultados */
+  totalResultados: number;
+  /** Estado de carga */
+  loading?: boolean;
+  /** Callbacks para actualizar filtros */
+  onFiltroChange: (campo: keyof FiltrosState, valor: string | number | null) => void;
+  onRangoSalarioChange: (valor: string) => void;
+  onLimpiarFiltros: () => void;
+}
+
+export default function BuscadorCargos({
+  cargosDisponibles = [],
+  filtros,
+  rangoSalario,
+  filtrosActivos,
+  totalResultados,
+  loading = false,
+  onFiltroChange,
+  onRangoSalarioChange,
+  onLimpiarFiltros,
+}: BuscadorCargosProps) {
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
-  const [rangoSalarioSeleccionado, setRangoSalarioSeleccionado] = useState("");
 
   // Obtener ubicaciones únicas de los cargos
   const ubicacionesUnicas = useMemo(() => {
-    const ubicaciones = new Set(cargos.map(c => c.ubicacion).filter(Boolean));
+    const ubicaciones = new Set(cargosDisponibles.map(c => c.ubicacion).filter(Boolean));
     return Array.from(ubicaciones).sort();
-  }, [cargos]);
+  }, [cargosDisponibles]);
 
   // Obtener empresas únicas de los cargos
   const empresasUnicas = useMemo(() => {
-    const empresas = new Set(cargos.map(c => c.empresa.nombre).filter(Boolean));
+    const empresas = new Set(cargosDisponibles.map(c => c.empresa.nombre).filter(Boolean));
     return Array.from(empresas).sort();
-  }, [cargos]);
-
-  // Filtrar cargos
-  const cargosFiltrados = useMemo(() => {
-    return cargos.filter((cargo) => {
-      // Filtro de búsqueda por texto (título, descripción, empresa)
-      if (filtros.busqueda) {
-        const busquedaLower = filtros.busqueda.toLowerCase();
-        const coincide =
-          cargo.titulo.toLowerCase().includes(busquedaLower) ||
-          cargo.descripcion?.toLowerCase().includes(busquedaLower) ||
-          cargo.empresa.nombre.toLowerCase().includes(busquedaLower) ||
-          cargo.ubicacion?.toLowerCase().includes(busquedaLower);
-        if (!coincide) return false;
-      }
-
-      // Filtro de ubicación
-      if (filtros.ubicacion && cargo.ubicacion !== filtros.ubicacion) {
-        return false;
-      }
-
-      // Filtro de tipo de contrato
-      if (filtros.tipoContrato && cargo.tipoContrato !== filtros.tipoContrato) {
-        return false;
-      }
-
-      // Filtro de modalidad
-      if (filtros.modalidad && cargo.modalidad !== filtros.modalidad) {
-        return false;
-      }
-
-      // Filtro de empresa
-      if (filtros.empresa && cargo.empresa.nombre !== filtros.empresa) {
-        return false;
-      }
-
-      // Filtro de salario mínimo
-      if (filtros.salarioMin !== null && cargo.salarioEstimado) {
-        if (cargo.salarioEstimado < filtros.salarioMin) {
-          return false;
-        }
-      }
-
-      // Filtro de salario máximo
-      if (filtros.salarioMax !== null && cargo.salarioEstimado) {
-        if (cargo.salarioEstimado > filtros.salarioMax) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [cargos, filtros]);
-
-  // Notificar cambios en los resultados
-  useEffect(() => {
-    onResultados(cargosFiltrados);
-  }, [cargosFiltrados, onResultados]);
+  }, [cargosDisponibles]);
 
   // Handlers
   const handleBusquedaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFiltros(prev => ({ ...prev, busqueda: e.target.value }));
-  }, []);
-
-  const handleFiltroChange = useCallback((campo: keyof FiltrosCargo, valor: string | number | null) => {
-    setFiltros(prev => ({ ...prev, [campo]: valor }));
-  }, []);
-
-  const handleRangoSalarioChange = useCallback((valor: string) => {
-    setRangoSalarioSeleccionado(valor);
-    const rango = rangosSalario.find(r => r.value === valor);
-    if (rango) {
-      setFiltros(prev => ({
-        ...prev,
-        salarioMin: rango.min,
-        salarioMax: rango.max,
-      }));
-    }
-  }, []);
-
-  const limpiarFiltros = useCallback(() => {
-    setFiltros(filtrosIniciales);
-    setRangoSalarioSeleccionado("");
-  }, []);
-
-  // Contar filtros activos
-  const filtrosActivos = useMemo(() => {
-    let count = 0;
-    if (filtros.ubicacion) count++;
-    if (filtros.tipoContrato) count++;
-    if (filtros.modalidad) count++;
-    if (filtros.empresa) count++;
-    if (filtros.salarioMin !== null || filtros.salarioMax !== null) count++;
-    return count;
-  }, [filtros]);
+    onFiltroChange("busqueda", e.target.value);
+  }, [onFiltroChange]);
 
   return (
     <div className="space-y-4">
@@ -175,7 +90,11 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
           {/* Campo de búsqueda */}
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400" />
+              {loading ? (
+                <Loader2 className="h-5 w-5 text-orange-500 animate-spin" />
+              ) : (
+                <Search className="h-5 w-5 text-slate-400" />
+              )}
             </div>
             <input
               type="text"
@@ -186,7 +105,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             />
             {filtros.busqueda && (
               <button
-                onClick={() => handleFiltroChange("busqueda", "")}
+                onClick={() => onFiltroChange("busqueda", "")}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center"
               >
                 <X className="h-5 w-5 text-slate-400 hover:text-slate-600" />
@@ -200,7 +119,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             <div className="relative">
               <select
                 value={filtros.ubicacion}
-                onChange={(e) => handleFiltroChange("ubicacion", e.target.value)}
+                onChange={(e) => onFiltroChange("ubicacion", e.target.value)}
                 className="appearance-none pl-10 pr-10 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white cursor-pointer min-w-[180px]"
               >
                 <option value="">Ubicación</option>
@@ -218,7 +137,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             <div className="relative">
               <select
                 value={filtros.tipoContrato}
-                onChange={(e) => handleFiltroChange("tipoContrato", e.target.value)}
+                onChange={(e) => onFiltroChange("tipoContrato", e.target.value)}
                 className="appearance-none pl-10 pr-10 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white cursor-pointer min-w-[180px]"
               >
                 {tiposContrato.map((tipo) => (
@@ -271,7 +190,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
                     <div className="relative">
                       <select
                         value={filtros.ubicacion}
-                        onChange={(e) => handleFiltroChange("ubicacion", e.target.value)}
+                        onChange={(e) => onFiltroChange("ubicacion", e.target.value)}
                         className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
                       >
                         <option value="">Todas las ubicaciones</option>
@@ -294,7 +213,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
                     <div className="relative">
                       <select
                         value={filtros.tipoContrato}
-                        onChange={(e) => handleFiltroChange("tipoContrato", e.target.value)}
+                        onChange={(e) => onFiltroChange("tipoContrato", e.target.value)}
                         className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
                       >
                         {tiposContrato.map((tipo) => (
@@ -316,7 +235,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
                     <div className="relative">
                       <select
                         value={filtros.modalidad}
-                        onChange={(e) => handleFiltroChange("modalidad", e.target.value)}
+                        onChange={(e) => onFiltroChange("modalidad", e.target.value)}
                         className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
                       >
                         {modalidades.map((modalidad) => (
@@ -337,11 +256,11 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
                     </label>
                     <div className="relative">
                       <select
-                        value={rangoSalarioSeleccionado}
-                        onChange={(e) => handleRangoSalarioChange(e.target.value)}
+                        value={rangoSalario}
+                        onChange={(e) => onRangoSalarioChange(e.target.value)}
                         className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
                       >
-                        {rangosSalario.map((rango) => (
+                        {RANGOS_SALARIO.map((rango) => (
                           <option key={rango.value} value={rango.value}>
                             {rango.label}
                           </option>
@@ -360,7 +279,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
                     <div className="relative">
                       <select
                         value={filtros.empresa}
-                        onChange={(e) => handleFiltroChange("empresa", e.target.value)}
+                        onChange={(e) => onFiltroChange("empresa", e.target.value)}
                         className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
                       >
                         <option value="">Todas las empresas</option>
@@ -380,7 +299,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
                 {filtrosActivos > 0 && (
                   <div className="mt-4 flex justify-end">
                     <button
-                      onClick={limpiarFiltros}
+                      onClick={onLimpiarFiltros}
                       className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
                     >
                       <X className="h-4 w-4" />
@@ -397,16 +316,16 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
       {/* Resumen de resultados y filtros activos */}
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-slate-600">
-          <span className="font-semibold text-slate-900">{cargosFiltrados.length}</span>
-          {" "}cargo{cargosFiltrados.length !== 1 ? "s" : ""} encontrado{cargosFiltrados.length !== 1 ? "s" : ""}
+          <span className="font-semibold text-slate-900">{totalResultados}</span>
+          {" "}cargo{totalResultados !== 1 ? "s" : ""} encontrado{totalResultados !== 1 ? "s" : ""}
         </span>
 
         {/* Tags de filtros activos */}
         {filtros.busqueda && (
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-            Búsqueda: "{filtros.busqueda}"
+            Búsqueda: &quot;{filtros.busqueda}&quot;
             <button
-              onClick={() => handleFiltroChange("busqueda", "")}
+              onClick={() => onFiltroChange("busqueda", "")}
               className="hover:bg-orange-200 rounded-full p-0.5"
             >
               <X className="h-3.5 w-3.5" />
@@ -418,7 +337,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             <MapPin className="h-3.5 w-3.5" />
             {filtros.ubicacion}
             <button
-              onClick={() => handleFiltroChange("ubicacion", "")}
+              onClick={() => onFiltroChange("ubicacion", "")}
               className="hover:bg-blue-200 rounded-full p-0.5"
             >
               <X className="h-3.5 w-3.5" />
@@ -430,7 +349,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             <Clock className="h-3.5 w-3.5" />
             {tiposContrato.find(t => t.value === filtros.tipoContrato)?.label}
             <button
-              onClick={() => handleFiltroChange("tipoContrato", "")}
+              onClick={() => onFiltroChange("tipoContrato", "")}
               className="hover:bg-green-200 rounded-full p-0.5"
             >
               <X className="h-3.5 w-3.5" />
@@ -442,7 +361,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             <Briefcase className="h-3.5 w-3.5" />
             {modalidades.find(m => m.value === filtros.modalidad)?.label}
             <button
-              onClick={() => handleFiltroChange("modalidad", "")}
+              onClick={() => onFiltroChange("modalidad", "")}
               className="hover:bg-purple-200 rounded-full p-0.5"
             >
               <X className="h-3.5 w-3.5" />
@@ -454,7 +373,7 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
             <Building2 className="h-3.5 w-3.5" />
             {filtros.empresa}
             <button
-              onClick={() => handleFiltroChange("empresa", "")}
+              onClick={() => onFiltroChange("empresa", "")}
               className="hover:bg-amber-200 rounded-full p-0.5"
             >
               <X className="h-3.5 w-3.5" />
@@ -464,11 +383,9 @@ export default function BuscadorCargos({ cargos, onResultados }: BuscadorCargosP
         {(filtros.salarioMin !== null || filtros.salarioMax !== null) && (
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
             <DollarSign className="h-3.5 w-3.5" />
-            {rangosSalario.find(r => r.value === rangoSalarioSeleccionado)?.label}
+            {RANGOS_SALARIO.find(r => r.value === rangoSalario)?.label}
             <button
-              onClick={() => {
-                handleRangoSalarioChange("");
-              }}
+              onClick={() => onRangoSalarioChange("")}
               className="hover:bg-emerald-200 rounded-full p-0.5"
             >
               <X className="h-3.5 w-3.5" />

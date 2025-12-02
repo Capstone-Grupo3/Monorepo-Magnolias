@@ -20,6 +20,9 @@ export type {
   CreateCargoDTO,
   TipoContrato,
   Modalidad,
+  FiltrosCargo,
+  PaginationMeta,
+  CargosPaginatedResponse,
 } from "./cargo.types";
 
 // Postulación

@@ -2,15 +2,82 @@
  * Servicio de Cargos/Vacantes
  */
 
-import { Cargo, CargoDetalle, CreateCargoDTO } from "@/types";
+import { 
+  Cargo, 
+  CargoDetalle, 
+  CreateCargoDTO, 
+  FiltrosCargo, 
+  CargosPaginatedResponse 
+} from "@/types";
 import apiService from "./api.service";
 
 class CargoService {
   /**
-   * Obtener todos los cargos activos
+   * Construir query string a partir de filtros
+   */
+  private buildQueryString(filtros: FiltrosCargo): string {
+    const params = new URLSearchParams();
+
+    // Solo agregar parámetros que tengan valor
+    if (filtros.busqueda?.trim()) {
+      params.append("busqueda", filtros.busqueda.trim());
+    }
+    if (filtros.ubicacion?.trim()) {
+      params.append("ubicacion", filtros.ubicacion.trim());
+    }
+    if (filtros.tipoContrato) {
+      params.append("tipoContrato", filtros.tipoContrato);
+    }
+    if (filtros.modalidad) {
+      params.append("modalidad", filtros.modalidad);
+    }
+    if (filtros.estado) {
+      params.append("estado", filtros.estado);
+    }
+    if (filtros.empresa?.trim()) {
+      params.append("empresa", filtros.empresa.trim());
+    }
+    if (filtros.empresaId) {
+      params.append("empresaId", filtros.empresaId.toString());
+    }
+    if (filtros.salarioMin !== null && filtros.salarioMin !== undefined) {
+      params.append("salarioMin", filtros.salarioMin.toString());
+    }
+    if (filtros.salarioMax !== null && filtros.salarioMax !== undefined) {
+      params.append("salarioMax", filtros.salarioMax.toString());
+    }
+    if (filtros.page && filtros.page > 0) {
+      params.append("page", filtros.page.toString());
+    }
+    if (filtros.limit && filtros.limit > 0) {
+      params.append("limit", filtros.limit.toString());
+    }
+    if (filtros.sortBy) {
+      params.append("sortBy", filtros.sortBy);
+    }
+    if (filtros.sortOrder) {
+      params.append("sortOrder", filtros.sortOrder);
+    }
+
+    const queryString = params.toString();
+    return queryString ? `?${queryString}` : "";
+  }
+
+  /**
+   * Obtener cargos con filtros y paginación
+   */
+  async getCargosWithFilters(filtros: FiltrosCargo = {}): Promise<CargosPaginatedResponse> {
+    const queryString = this.buildQueryString(filtros);
+    return apiService.get<CargosPaginatedResponse>(`/cargos${queryString}`);
+  }
+
+  /**
+   * Obtener todos los cargos activos (sin paginación, para compatibilidad)
+   * @deprecated Usar getCargosWithFilters para mejor rendimiento
    */
   async getCargos(): Promise<Cargo[]> {
-    return apiService.get<Cargo[]>("/cargos");
+    const response = await this.getCargosWithFilters({ limit: 1000 });
+    return response.data;
   }
 
   /**
