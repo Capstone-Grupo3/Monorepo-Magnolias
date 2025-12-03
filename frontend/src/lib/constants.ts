@@ -10,9 +10,8 @@ import { TipoContrato, Modalidad, EstadoPostulacion } from "@/types";
 export const TIPO_CONTRATO_LABELS: Record<TipoContrato, string> = {
   FULL_TIME: "Tiempo Completo",
   PART_TIME: "Medio Tiempo",
-  CONTRACTOR: "Contratista",
-  TEMPORARY: "Temporal",
-  INTERNSHIP: "Pasantía",
+  PRACTICA: "Práctica",
+  FREELANCE: "Freelance",
 };
 
 /**
@@ -52,9 +51,8 @@ export const ESTADO_POSTULACION_COLORS: Record<EstadoPostulacion, string> = {
 export const TIPO_CONTRATO_OPTIONS: { value: TipoContrato; label: string }[] = [
   { value: "FULL_TIME", label: "Tiempo Completo" },
   { value: "PART_TIME", label: "Medio Tiempo" },
-  { value: "CONTRACTOR", label: "Contratista" },
-  { value: "TEMPORARY", label: "Temporal" },
-  { value: "INTERNSHIP", label: "Pasantía" },
+  { value: "PRACTICA", label: "Práctica" },
+  { value: "FREELANCE", label: "Freelance" },
 ];
 
 /**
