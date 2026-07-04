@@ -177,7 +177,7 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen surface-page flex">
       {/* Componente para manejar mensaje de registro exitoso */}
       <Suspense fallback={null}>
         <RegistrationSuccess onShow={setShowSuccessMessage} />
@@ -217,15 +217,15 @@ function LoginPageContent() {
 
             {/* Mensaje de error de email no verificado */}
             {emailNotVerifiedError && (
-              <div className="mb-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
-                <p className="text-sm text-yellow-800 mb-3">
+              <div className="mb-4 warning-soft rounded-xl p-4 border border-warning">
+                <p className="text-sm text-warning mb-3">
                   Tu correo electrónico no ha sido verificado. ¿No recibiste el correo de verificación?
                 </p>
                 <button
                   type="button"
                   onClick={handleResendVerification}
                   disabled={resendingEmail}
-                  className="w-full bg-yellow-600 text-white py-2 rounded-lg font-semibold hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full warning-bg text-white py-2 rounded-lg font-semibold hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {resendingEmail ? "Reenviando..." : "Reenviar correo de verificación"}
                 </button>
@@ -261,10 +261,10 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen surface-page flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
+          <p className="text-secondary">Cargando...</p>
         </div>
       </div>
     }>

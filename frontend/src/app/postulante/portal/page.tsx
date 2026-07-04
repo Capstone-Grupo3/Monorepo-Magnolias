@@ -15,21 +15,16 @@ import {
   X,
 } from "lucide-react";
 
-// Importar tipos centralizados
 import { Cargo } from "@/types";
 
-// Importar hook personalizado
 import { usePostulantePortal } from "@/hooks/usePostulantePortal";
 import { useCargoFilters } from "@/hooks/useCargoFilters";
 
-// Importar servicios
 import { postulanteService } from "@/services/postulante.service";
 
-// Importar utilidades
 import { formatDate, getEstadoColor, formatCurrency } from "@/lib/formatters";
 import { validarRUT, formatearRUT } from "@/lib/validators";
 
-// Importar componentes compartidos
 import {
   DashboardHeader,
   LoadingSpinner,
@@ -40,20 +35,15 @@ import {
 import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner";
 import BuscadorCargosV2 from "@/components/postulante/BuscadorCargosV2";
 
-// Componente interno que usa useSearchParams
 function PortalContent() {
-  // Hook de notificaciones toast
   const toast = useToast();
 
-  // Estado para verificación de email
   const [emailVerificado, setEmailVerificado] = useState(true);
   const [userEmail, setUserEmail] = useState("");
 
-  // Usar hook personalizado para postulante y postulaciones
   const { postulante, postulaciones, loading: loadingPostulante, crearPostulacion, logout } =
     usePostulantePortal();
 
-  // Hook para filtros de cargos con sincronización de URL
   const {
     cargos,
     pagination,
@@ -67,7 +57,6 @@ function PortalContent() {
     limpiarFiltros,
   } = useCargoFilters({ defaultLimit: 12 });
 
-  // Verificar estado de email al cargar
   useEffect(() => {
     if (typeof window !== "undefined") {
       const verificado = localStorage.getItem("emailVerificado") === "true";
@@ -77,7 +66,6 @@ function PortalContent() {
     }
   }, []);
 
-  // Estados locales de UI
   const [activeTab, setActiveTab] = useState<
     "cargos" | "postulaciones" | "perfil"
   >("cargos");
@@ -88,7 +76,6 @@ function PortalContent() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvPreview, setCvPreview] = useState<string>("");
 
-  // Estados para edición de perfil
   const [editandoPerfil, setEditandoPerfil] = useState(false);
   const [perfilEditado, setPerfilEditado] = useState({
     nombre: "",
@@ -100,7 +87,6 @@ function PortalContent() {
   const [errorRut, setErrorRut] = useState("");
   const [guardandoPerfil, setGuardandoPerfil] = useState(false);
 
-  // Inicializar datos de perfil cuando cargue el postulante
   useEffect(() => {
     if (postulante) {
       setPerfilEditado({
@@ -125,7 +111,6 @@ function PortalContent() {
   const handleCancelarEdicion = () => {
     setEditandoPerfil(false);
     setErrorRut("");
-    // Restaurar valores originales
     if (postulante) {
       setPerfilEditado({
         nombre: postulante.nombre || "",
@@ -140,7 +125,7 @@ function PortalContent() {
   const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rutFormateado = formatearRUT(e.target.value);
     setPerfilEditado({ ...perfilEditado, rut: rutFormateado });
-    
+
     if (rutFormateado && !validarRUT(rutFormateado)) {
       setErrorRut("RUT inválido");
     } else {
@@ -151,7 +136,6 @@ function PortalContent() {
   const handleGuardarPerfil = async () => {
     if (!postulante) return;
 
-    // Validar RUT si está presente
     if (perfilEditado.rut && !validarRUT(perfilEditado.rut)) {
       setErrorRut("Por favor ingresa un RUT válido");
       return;
@@ -160,14 +144,12 @@ function PortalContent() {
     setGuardandoPerfil(true);
     try {
       await postulanteService.updatePostulante(postulante.id, perfilEditado);
-      
-      // Actualizar localStorage si es necesario
+
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
       localStorage.setItem("user", JSON.stringify({ ...userData, ...perfilEditado }));
-      
+
       toast.success("¡Perfil actualizado!", "Tus datos han sido guardados correctamente.");
       setEditandoPerfil(false);
-      // Recargar página para actualizar datos
       window.location.reload();
     } catch (error) {
       console.error("Error al guardar perfil:", error);
@@ -194,13 +176,11 @@ function PortalContent() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tipo de archivo
       if (file.type !== "application/pdf") {
         toast.warning("Formato no válido", "Solo se permiten archivos PDF");
         return;
       }
 
-      // Validar tamaño (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.warning("Archivo muy grande", "El archivo no debe superar 5MB");
         return;
@@ -214,7 +194,6 @@ function PortalContent() {
   const handleEnviarPostulacion = async () => {
     if (!cargoSeleccionado || !postulante) return;
 
-    // Validar que todas las preguntas estén respondidas
     const preguntas = cargoSeleccionado.preguntasJson?.preguntas || [];
     if (preguntas.length > 0) {
       const todasRespondidas = preguntas.every((_: any, index: number) =>
@@ -228,7 +207,6 @@ function PortalContent() {
 
     setSubmitting(true);
     try {
-      // Usar el hook que maneja el servicio correctamente
       await crearPostulacion(cargoSeleccionado.id, respuestas, cvFile || undefined);
 
       toast.success(
@@ -244,7 +222,6 @@ function PortalContent() {
     }
   };
 
-  // Handler para cambiar filtros (adaptador para el componente)
   const handleFiltroChange = useCallback((campo: string, valor: string | number | null) => {
     setFiltro(campo as keyof typeof filtros, valor as any);
   }, [setFiltro]);
@@ -254,7 +231,7 @@ function PortalContent() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-orange-50">
+    <div className="min-h-screen surface-page">
       <DashboardHeader
         icon={Briefcase}
         title="Portal de Postulante"
@@ -262,23 +239,21 @@ function PortalContent() {
         actions={<LogoutButton onLogout={handleLogout} />}
       />
 
-      {/* Email Verification Banner */}
       {!emailVerificado && userEmail && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <EmailVerificationBanner userEmail={userEmail} userType="postulante" />
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 shadow-xs">
+      <div className="surface-card border-b border-border-subtle">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <button
               onClick={() => setActiveTab("cargos")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "cargos"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -290,8 +265,8 @@ function PortalContent() {
               onClick={() => setActiveTab("postulaciones")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "postulaciones"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -303,8 +278,8 @@ function PortalContent() {
               onClick={() => setActiveTab("perfil")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "perfil"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -316,19 +291,15 @@ function PortalContent() {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* cargos Tab */}
         {activeTab === "cargos" && (
           <div className="space-y-6">
-            {/* Título de la sección */}
             <div className="flex justify-between items-center">
-              <h2 className="text-3xl font-bold text-slate-900">
+              <h2 className="text-3xl font-bold text-primary dark:text-white">
                 Buscar Oportunidades
               </h2>
             </div>
 
-            {/* Componente de búsqueda y filtros con sincronización de URL */}
             <BuscadorCargosV2
               cargosDisponibles={cargos}
               filtros={{
@@ -349,56 +320,55 @@ function PortalContent() {
               onLimpiarFiltros={limpiarFiltros}
             />
 
-            {/* Grid de cargos filtrados */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
               {cargos.map((cargo) => (
                 <div
                   key={cargo.id}
-                  className="bg-white rounded-2xl shadow-md border border-slate-200 hover:shadow-xl hover:border-orange-200 transition-all p-6 group"
+                  className="surface-card rounded-2xl border border-border-subtle hover:shadow-lg hover:border-primary/30 transition-all p-6 group"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
+                      <h3 className="text-xl font-bold text-primary dark:text-white mb-2 group-hover:text-primary transition-colors">
                         {cargo.titulo}
                       </h3>
-                      <p className="text-slate-600 font-semibold">
+                      <p className="text-secondary font-semibold">
                         {cargo.empresa.nombre}
                       </p>
                     </div>
-                    <div className="w-14 h-14 rounded-xl bg-linear-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-sm">
-                      <Briefcase className="w-7 h-7 text-orange-500" />
+                    <div className="w-14 h-14 rounded-xl primary-soft flex items-center justify-center shadow-sm">
+                      <Briefcase className="w-7 h-7 text-primary" />
                     </div>
                   </div>
 
-                  <p className="text-slate-600 mb-4 line-clamp-3 text-sm leading-relaxed">
+                  <p className="text-secondary mb-4 line-clamp-3 text-sm leading-relaxed">
                     {cargo.descripcion}
                   </p>
 
                   <div className="space-y-2.5 mb-5">
-                    <div className="flex items-center gap-2.5 text-slate-700">
-                      <div className="bg-orange-50 p-1.5 rounded-lg">
-                        <MapPin size={16} className="text-orange-500" />
+                    <div className="flex items-center gap-2.5 text-secondary">
+                      <div className="primary-soft p-1.5 rounded-lg">
+                        <MapPin size={16} className="text-primary" />
                       </div>
                       <span className="text-sm font-medium">{cargo.ubicacion}</span>
                       {cargo.modalidad && (
-                        <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
+                        <span className="text-xs surface-muted text-muted px-2 py-0.5 rounded-full">
                           {cargo.modalidad === "REMOTO" ? "Remoto" : cargo.modalidad === "HIBRIDO" ? "Híbrido" : "Presencial"}
                         </span>
                       )}
                     </div>
                     {cargo.salarioEstimado && (
-                      <div className="flex items-center gap-2.5 text-slate-700">
-                        <div className="bg-green-50 p-1.5 rounded-lg">
-                          <DollarSign size={16} className="text-green-600" />
+                      <div className="flex items-center gap-2.5 text-secondary">
+                        <div className="success-soft p-1.5 rounded-lg">
+                          <DollarSign size={16} className="text-success" />
                         </div>
                         <span className="text-sm font-medium">
                           {formatCurrency(cargo.salarioEstimado)}
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2.5 text-slate-700">
-                      <div className="bg-blue-50 p-1.5 rounded-lg">
-                        <Clock size={16} className="text-blue-600" />
+                    <div className="flex items-center gap-2.5 text-secondary">
+                      <div className="primary-soft p-1.5 rounded-lg">
+                        <Clock size={16} className="text-primary" />
                       </div>
                       <span className="text-sm font-medium">
                         {cargo.tipoContrato === "FULL_TIME" ? "Tiempo Completo" :
@@ -411,7 +381,7 @@ function PortalContent() {
 
                   <button
                     onClick={() => handlePostular(cargo)}
-                    className="w-full bg-linear-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-md hover:shadow-lg"
+                    className="w-full primary-bg text-white py-3 rounded-xl hover:primary-bg-hover transition-all font-semibold shadow-md hover:shadow-lg"
                   >
                     Postular Ahora
                   </button>
@@ -419,20 +389,20 @@ function PortalContent() {
               ))}
 
               {cargos.length === 0 && !loadingCargos && (
-                <div className="col-span-2 text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-200">
-                  <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-10 h-10 text-slate-400" />
+                <div className="col-span-2 text-center py-16 surface-card rounded-2xl border border-border-subtle">
+                  <div className="surface-muted w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-10 h-10 text-muted" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                  <h3 className="text-2xl font-bold text-primary dark:text-white mb-2">
                     No se encontraron resultados
                   </h3>
-                  <p className="text-slate-600 mb-4">
+                  <p className="text-secondary mb-4">
                     Intenta ajustar los filtros o buscar con otras palabras clave
                   </p>
                   {filtrosActivos > 0 && (
                     <button
                       onClick={limpiarFiltros}
-                      className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                      className="px-6 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-all"
                     >
                       Limpiar filtros
                     </button>
@@ -447,7 +417,6 @@ function PortalContent() {
               )}
             </div>
 
-            {/* Paginación */}
             {pagination && pagination.totalPages > 1 && (
               <div className="mt-8">
                 <Paginacion
@@ -460,10 +429,9 @@ function PortalContent() {
           </div>
         )}
 
-        {/* Postulaciones Tab */}
         {activeTab === "postulaciones" && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-primary dark:text-white">
               Mis Postulaciones ({postulaciones.length})
             </h2>
 
@@ -471,19 +439,19 @@ function PortalContent() {
               {postulaciones.map((postulacion) => (
                 <div
                   key={postulacion.id}
-                  className="bg-white rounded-xl shadow-xs border p-6"
+                  className="surface-card rounded-xl border border-border-subtle p-6"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-800 mb-1">
+                      <h3 className="text-xl font-bold text-primary dark:text-white mb-1">
                         {postulacion.cargo.titulo}
                       </h3>
-                      <p className="text-gray-600 mb-3">
+                      <p className="text-secondary mb-3">
                         {postulacion.cargo.empresa.nombre}
                       </p>
 
                       <div className="flex flex-wrap gap-4">
-                        <div className="flex items-center gap-2 text-gray-600">
+                        <div className="flex items-center gap-2 text-secondary">
                           <Clock size={16} />
                           <span className="text-sm">
                             {formatDate(postulacion.fechaPostulacion)}
@@ -502,10 +470,10 @@ function PortalContent() {
                     {postulacion.scoreCompatibilidad && (
                       <div className="text-center">
                         <div className="flex items-center gap-2 mb-1">
-                          <TrendingUp className="text-blue-600" size={20} />
-                          <span className="text-sm text-gray-600">Score</span>
+                          <TrendingUp className="text-primary" size={20} />
+                          <span className="text-sm text-secondary">Score</span>
                         </div>
-                        <div className="text-3xl font-bold text-blue-600">
+                        <div className="text-3xl font-bold text-primary">
                           {postulacion.scoreCompatibilidad}%
                         </div>
                       </div>
@@ -516,17 +484,16 @@ function PortalContent() {
 
               {postulaciones.length === 0 && (
                 <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  <FileText className="w-16 h-16 text-muted mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-primary dark:text-white mb-2">
                     No tienes postulaciones aún
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Explora las cargos disponibles y postula a las que te
-                    interesen
+                  <p className="text-secondary mb-4">
+                    Explora las cargos disponibles y postula a las que te interesen
                   </p>
                   <button
                     onClick={() => setActiveTab("cargos")}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                    className="px-6 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-all"
                   >
                     Ver cargos
                   </button>
@@ -536,15 +503,14 @@ function PortalContent() {
           </div>
         )}
 
-        {/* Perfil Tab */}
         {activeTab === "perfil" && postulante && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">Mi Perfil</h2>
+              <h2 className="text-2xl font-bold text-primary dark:text-white">Mi Perfil</h2>
               {!editandoPerfil ? (
                 <button
                   onClick={handleEditarPerfil}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                  className="flex items-center gap-2 px-4 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-all"
                 >
                   <Edit2 className="w-4 h-4" />
                   Editar Perfil
@@ -554,7 +520,7 @@ function PortalContent() {
                   <button
                     onClick={handleCancelarEdicion}
                     disabled={guardandoPerfil}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 surface-muted text-secondary rounded-lg hover:bg-surface-hover transition-all disabled:opacity-50"
                   >
                     <X className="w-4 h-4" />
                     Cancelar
@@ -562,7 +528,7 @@ function PortalContent() {
                   <button
                     onClick={handleGuardarPerfil}
                     disabled={guardandoPerfil || !!errorRut}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-50"
                   >
                     <Save className="w-4 h-4" />
                     {guardandoPerfil ? "Guardando..." : "Guardar"}
@@ -571,10 +537,10 @@ function PortalContent() {
               )}
             </div>
 
-            <div className="bg-white rounded-xl shadow-xs border p-6">
+            <div className="surface-card rounded-xl border border-border-subtle p-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Nombre Completo
                   </label>
                   {editandoPerfil ? (
@@ -584,24 +550,24 @@ function PortalContent() {
                       onChange={(e) =>
                         setPerfilEditado({ ...perfilEditado, nombre: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
                     />
                   ) : (
-                    <p className="text-lg text-gray-800">{postulante.nombre}</p>
+                    <p className="text-lg text-primary dark:text-white">{postulante.nombre}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Correo Electrónico
                   </label>
-                  <p className="text-lg text-gray-800">{postulante.correo}</p>
-                  <p className="text-xs text-gray-500 mt-1">No editable</p>
+                  <p className="text-lg text-primary dark:text-white">{postulante.correo}</p>
+                  <p className="text-xs text-muted mt-1">No editable</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    RUT <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-secondary mb-2">
+                    RUT <span className="text-error">*</span>
                   </label>
                   {editandoPerfil ? (
                     <div>
@@ -610,23 +576,23 @@ function PortalContent() {
                         value={perfilEditado.rut}
                         onChange={handleRutChange}
                         placeholder="12.345.678-9"
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                          errorRut ? "border-red-500" : "border-gray-300"
+                        className={`w-full px-4 py-2 border rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary ${
+                          errorRut ? "border-error" : "border-border-default"
                         }`}
                       />
                       {errorRut && (
-                        <p className="text-sm text-red-600 mt-1">{errorRut}</p>
+                        <p className="text-sm text-error mt-1">{errorRut}</p>
                       )}
                     </div>
                   ) : (
-                    <p className="text-lg text-gray-800">
-                      {postulante.rut || <span className="text-gray-400 italic">No especificado</span>}
+                    <p className="text-lg text-primary dark:text-white">
+                      {postulante.rut || <span className="text-muted italic">No especificado</span>}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Teléfono
                   </label>
                   {editandoPerfil ? (
@@ -637,17 +603,17 @@ function PortalContent() {
                         setPerfilEditado({ ...perfilEditado, telefono: e.target.value })
                       }
                       placeholder="+56 9 1234 5678"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
                     />
                   ) : (
-                    <p className="text-lg text-gray-800">
-                      {postulante.telefono || <span className="text-gray-400 italic">No especificado</span>}
+                    <p className="text-lg text-primary dark:text-white">
+                      {postulante.telefono || <span className="text-muted italic">No especificado</span>}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Años de Experiencia
                   </label>
                   {editandoPerfil ? (
@@ -662,19 +628,19 @@ function PortalContent() {
                           experienciaAnios: parseInt(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
                     />
                   ) : (
-                    <p className="text-lg text-gray-800">
+                    <p className="text-lg text-primary dark:text-white">
                       {postulante.experienciaAnios && postulante.experienciaAnios > 0
                         ? `${postulante.experienciaAnios} años`
-                        : <span className="text-gray-400 italic">No especificado</span>}
+                        : <span className="text-muted italic">No especificado</span>}
                     </p>
                   )}
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Perfil de LinkedIn
                   </label>
                   {editandoPerfil ? (
@@ -685,53 +651,45 @@ function PortalContent() {
                         setPerfilEditado({ ...perfilEditado, linkedinUrl: e.target.value })
                       }
                       placeholder="https://www.linkedin.com/in/tu-perfil"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
                     />
                   ) : postulante.linkedinUrl ? (
                     <a
                       href={postulante.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {postulante.linkedinUrl}
                     </a>
                   ) : (
-                    <p className="text-gray-400 italic">No especificado</p>
+                    <p className="text-muted italic">No especificado</p>
                   )}
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">
+              <div className="mt-6 pt-6 border-t border-border-subtle">
+                <h3 className="text-lg font-bold text-primary dark:text-white mb-4">
                   Estadísticas
                 </h3>
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-center p-4 primary-soft rounded-xl">
+                    <div className="text-3xl font-bold text-primary">
                       {postulaciones.length}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      Postulaciones
-                    </div>
+                    <div className="text-sm text-secondary mt-1">Postulaciones</div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-3xl font-bold text-green-600">
-                      {
-                        postulaciones.filter((p) => p.estado === "Aprobado")
-                          .length
-                      }
+                  <div className="text-center p-4 success-soft rounded-xl">
+                    <div className="text-3xl font-bold text-success">
+                      {postulaciones.filter((p) => p.estado === "Aprobado").length}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Aprobadas</div>
+                    <div className="text-sm text-secondary mt-1">Aprobadas</div>
                   </div>
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <div className="text-3xl font-bold text-yellow-600">
-                      {
-                        postulaciones.filter((p) => p.estado === "Pendiente")
-                          .length
-                      }
+                  <div className="text-center p-4 warning-soft rounded-xl">
+                    <div className="text-3xl font-bold text-warning">
+                      {postulaciones.filter((p) => p.estado === "Pendiente").length}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Pendientes</div>
+                    <div className="text-sm text-secondary mt-1">Pendientes</div>
                   </div>
                 </div>
               </div>
@@ -740,29 +698,34 @@ function PortalContent() {
         )}
       </main>
 
-      {/* Modal de Postulación */}
       {showModal && cargoSeleccionado && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full my-8">
-            <div className="bg-white border-b px-6 py-4 flex justify-between items-center rounded-t-xl">
-              <h3 className="text-2xl font-bold text-gray-800">
+        <div className="fixed inset-0 surface-overlay/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-postular-title"
+            className="surface-card rounded-2xl shadow-2xl max-w-2xl w-full my-8"
+          >
+            <div className="border-b border-border-subtle px-6 py-4 flex justify-between items-center">
+              <h3 id="modal-postular-title" className="text-2xl font-bold text-primary dark:text-white">
                 Postular a {cargoSeleccionado.titulo}
               </h3>
               <button
                 onClick={handleCerrarModal}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-muted hover:text-secondary dark:hover:text-gray-300 text-2xl leading-none p-1 hover:bg-surface-muted rounded-lg transition-colors"
                 disabled={submitting}
+                aria-label="Cerrar modal"
               >
                 ×
               </button>
             </div>
 
             <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 mb-2">
+              <div className="primary-soft border border-primary/20 rounded-xl p-4">
+                <h4 className="font-semibold text-primary mb-2">
                   {cargoSeleccionado.empresa.nombre}
                 </h4>
-                <p className="text-sm text-blue-700">
+                <p className="text-sm text-primary/80">
                   {cargoSeleccionado.ubicacion} •{" "}
                   {cargoSeleccionado.tipoContrato}
                 </p>
@@ -771,10 +734,10 @@ function PortalContent() {
               {cargoSeleccionado.preguntasJson?.preguntas?.length > 0 ? (
                 <>
                   <div>
-                    <h4 className="font-semibold text-gray-800 mb-3">
+                    <h4 className="font-semibold text-primary dark:text-white mb-3">
                       Responde las siguientes preguntas:
                     </h4>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <p className="text-sm text-secondary mb-4">
                       Estas respuestas serán analizadas por IA para evaluar tu
                       compatibilidad con el cargo.
                     </p>
@@ -783,9 +746,9 @@ function PortalContent() {
                   {cargoSeleccionado.preguntasJson.preguntas.map(
                     (pregunta: any, index: number) => (
                       <div key={index} className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-secondary">
                           {index + 1}. {pregunta.pregunta || pregunta}
-                          <span className="text-red-500">*</span>
+                          <span className="text-error">*</span>
                         </label>
                         <textarea
                           value={respuestas[`pregunta_${index + 1}`] || ""}
@@ -795,7 +758,7 @@ function PortalContent() {
                               [`pregunta_${index + 1}`]: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary"
                           rows={4}
                           placeholder="Escribe tu respuesta aquí..."
                           disabled={submitting}
@@ -805,59 +768,56 @@ function PortalContent() {
                   )}
                 </>
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                  <p className="text-gray-600">
-                    Esta cargo no tiene preguntas específicas. Puedes postular
-                    directamente.
+                <div className="surface-muted border border-border-subtle rounded-xl p-4 text-center">
+                  <p className="text-secondary">
+                    Esta cargo no tiene preguntas específicas. Puedes postular directamente.
                   </p>
                 </div>
               )}
 
-              {/* Campo para adjuntar CV */}
-              <div className="space-y-3 pt-6 mt-6 border-t-2 border-gray-300">
+              <div className="space-y-3 pt-6 mt-6 border-t-2 border-border-subtle">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-base font-semibold text-gray-800 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-orange-600" />
+                  <label className="text-base font-semibold text-primary dark:text-white flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
                     Adjuntar CV (Opcional)
                   </label>
-                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  <span className="text-xs font-medium text-muted surface-muted px-2 py-1 rounded">
                     PDF - Max 5MB
                   </span>
                 </div>
-                
-                <div className="relative bg-linear-to-r from-orange-50 to-orange-100 border-2 border-dashed border-orange-300 rounded-lg p-4 hover:border-orange-500 transition-all">
+
+                <div className="relative primary-soft border-2 border-dashed border-primary/30 rounded-xl p-4 hover:border-primary/50 transition-all">
                   <input
                     type="file"
                     accept=".pdf"
                     onChange={handleFileChange}
                     disabled={submitting}
-                    className="block w-full text-sm text-gray-700
+                    className="block w-full text-sm text-secondary
                       file:mr-4 file:py-2.5 file:px-6
                       file:rounded-lg file:border-0
                       file:text-sm file:font-bold
-                      file:bg-linear-to-r file:from-orange-500 file:to-orange-600
-                      file:text-white
-                      hover:file:from-orange-600 hover:file:to-orange-700
+                      file:primary-bg file:text-white
+                      hover:file:primary-bg-hover
                       file:shadow-md
                       cursor-pointer
                       focus:outline-none"
                   />
-                  <p className="text-xs text-gray-600 mt-2 text-center">
-                    📎 Haz clic en "Seleccionar archivo" o arrastra tu CV aquí
+                  <p className="text-xs text-secondary mt-2 text-center">
+                    Haz clic en &quot;Seleccionar archivo&quot; o arrastra tu CV aquí
                   </p>
                 </div>
 
                 {cvPreview && (
-                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between success-soft border border-success/30 rounded-xl p-3">
                     <div className="flex items-center gap-2">
-                      <div className="bg-green-100 p-2 rounded-lg">
-                        <FileText className="w-5 h-5 text-green-600" />
+                      <div className="success-soft p-2 rounded-lg">
+                        <FileText className="w-5 h-5 text-success" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-green-900">
+                        <p className="text-sm font-medium text-success">
                           {cvPreview}
                         </p>
-                        <p className="text-xs text-green-700">
+                        <p className="text-xs text-success/80">
                           Archivo listo para enviar
                         </p>
                       </div>
@@ -869,32 +829,32 @@ function PortalContent() {
                         setCvPreview("");
                       }}
                       disabled={submitting}
-                      className="text-red-500 hover:text-red-700 font-medium text-sm"
+                      className="text-error hover:text-error/80 font-medium text-sm"
                     >
                       Remover
                     </button>
                   </div>
                 )}
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-xs text-blue-700">
-                    💡 <strong>Tip:</strong> Adjuntar tu CV permite que la IA realice un análisis más completo y preciso de tu postulación.
+                <div className="primary-soft border border-primary/20 rounded-xl p-3">
+                  <p className="text-xs text-primary/80">
+                    <strong>Tip:</strong> Adjuntar tu CV permite que la IA realice un análisis más completo y preciso de tu postulación.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border-t px-6 py-4 flex gap-3 justify-end rounded-b-xl">
+            <div className="border-t border-border-subtle px-6 py-4 flex gap-3 justify-end">
               <button
                 onClick={handleCerrarModal}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all"
+                className="px-6 py-2 border border-border-default text-secondary rounded-lg hover:bg-surface-muted transition-all"
                 disabled={submitting}
               >
                 Cancelar
               </button>
               <button
                 onClick={handleEnviarPostulacion}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={submitting}
               >
                 {submitting ? "Enviando..." : "Enviar Postulación"}
@@ -907,7 +867,6 @@ function PortalContent() {
   );
 }
 
-// Componente principal con Suspense para useSearchParams
 export default function PortalCandidatoPage() {
   return (
     <Suspense fallback={<LoadingSpinner />}>

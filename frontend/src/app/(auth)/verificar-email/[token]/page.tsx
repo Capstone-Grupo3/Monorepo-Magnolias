@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { authService } from "@/services/auth.service";
 import { CheckCircle, XCircle, Loader2, Mail, ArrowLeft } from "lucide-react";
@@ -16,11 +16,7 @@ export default function VerificarEmailPage() {
   const [estado, setEstado] = useState<"cargando" | "exito" | "error">("cargando");
   const [mensaje, setMensaje] = useState("");
 
-  useEffect(() => {
-    verificarEmail();
-  }, [token, tipo]);
-
-  const verificarEmail = async () => {
+  const verificarEmail = useCallback(async () => {
     try {
       if (!tipo || (tipo !== "empresa" && tipo !== "postulante")) {
         setEstado("error");
@@ -50,17 +46,22 @@ export default function VerificarEmailPage() {
         "Error al verificar el email. El token puede haber expirado."
       );
     }
-  };
+  }, [token, tipo, router]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    verificarEmail();
+  }, [verificarEmail]);
 
   return (
-    <div className="min-h-screen bg-linear-to-r from-orange-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen surface-page flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-orange-100">
+        <div className="surface-card rounded-2xl shadow-xl p-8 border border-border-subtle">
           {/* Icono de estado */}
           <div className="flex justify-center mb-6">
             {estado === "cargando" && (
-              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center">
-                <Loader2 className="w-10 h-10 text-orange-600 animate-spin" />
+              <div className="w-20 h-20 primary-soft rounded-full flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
               </div>
             )}
             {estado === "exito" && (
@@ -87,8 +88,8 @@ export default function VerificarEmailPage() {
 
           {/* Estado específico */}
           {estado === "cargando" && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-              <p className="text-sm text-orange-800">
+              <div className="primary-soft rounded-lg p-4 text-center">
+              <p className="text-sm text-primary-soft-text">
                 Por favor espera mientras verificamos tu correo electrónico...
               </p>
             </div>
@@ -103,7 +104,7 @@ export default function VerificarEmailPage() {
               </div>
               <Link
                 href={`/login?tipo=${tipo}`}
-                className="flex items-center justify-center gap-2 w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+                className="flex items-center justify-center gap-2 w-full primary-bg text-white py-3 rounded-lg font-semibold hover:primary-bg-hover transition-colors"
               >
                 <Mail className="w-5 h-5" />
                 Ir al Login

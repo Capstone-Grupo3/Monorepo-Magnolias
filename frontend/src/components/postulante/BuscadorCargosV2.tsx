@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Cargo, PaginationMeta } from "@/types";
 import { RANGOS_SALARIO } from "@/hooks/useCargoFilters";
 
-// Opciones de filtros
 export const tiposContrato = [
   { value: "", label: "Todos los tipos" },
   { value: "FULL_TIME", label: "Tiempo Completo" },
@@ -34,19 +33,12 @@ interface FiltrosState {
 }
 
 interface BuscadorCargosProps {
-  /** Cargos disponibles para extraer ubicaciones/empresas únicas */
   cargosDisponibles?: Cargo[];
-  /** Filtros actuales desde la URL */
   filtros: FiltrosState;
-  /** Rango de salario seleccionado */
   rangoSalario: string;
-  /** Cantidad de filtros activos */
   filtrosActivos: number;
-  /** Total de resultados */
   totalResultados: number;
-  /** Estado de carga */
   loading?: boolean;
-  /** Callbacks para actualizar filtros */
   onFiltroChange: (campo: keyof FiltrosState, valor: string | number | null) => void;
   onRangoSalarioChange: (valor: string) => void;
   onLimpiarFiltros: () => void;
@@ -65,35 +57,30 @@ export default function BuscadorCargos({
 }: BuscadorCargosProps) {
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
 
-  // Obtener ubicaciones únicas de los cargos
   const ubicacionesUnicas = useMemo(() => {
     const ubicaciones = new Set(cargosDisponibles.map(c => c.ubicacion).filter(Boolean));
     return Array.from(ubicaciones).sort();
   }, [cargosDisponibles]);
 
-  // Obtener empresas únicas de los cargos
   const empresasUnicas = useMemo(() => {
     const empresas = new Set(cargosDisponibles.map(c => c.empresa.nombre).filter(Boolean));
     return Array.from(empresas).sort();
   }, [cargosDisponibles]);
 
-  // Handlers
   const handleBusquedaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onFiltroChange("busqueda", e.target.value);
   }, [onFiltroChange]);
 
   return (
     <div className="space-y-4">
-      {/* Barra de búsqueda principal */}
-      <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-4">
+      <div className="surface-card rounded-2xl border border-border-subtle p-4">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Campo de búsqueda */}
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               {loading ? (
-                <Loader2 className="h-5 w-5 text-orange-500 animate-spin" />
+                <Loader2 className="h-5 w-5 text-primary animate-spin" />
               ) : (
-                <Search className="h-5 w-5 text-slate-400" />
+                <Search className="h-5 w-5 text-muted" />
               )}
             </div>
             <input
@@ -101,26 +88,25 @@ export default function BuscadorCargos({
               placeholder="Buscar por cargo, empresa o palabras clave..."
               value={filtros.busqueda}
               onChange={handleBusquedaChange}
-              className="w-full pl-12 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-800 placeholder:text-slate-400"
+              className="w-full pl-12 pr-4 py-3.5 border border-border-default rounded-xl bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-primary transition-all"
             />
             {filtros.busqueda && (
               <button
                 onClick={() => onFiltroChange("busqueda", "")}
                 className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                aria-label="Limpiar búsqueda"
               >
-                <X className="h-5 w-5 text-slate-400 hover:text-slate-600" />
+                <X className="h-5 w-5 text-muted hover:text-secondary" />
               </button>
             )}
           </div>
 
-          {/* Filtros rápidos en desktop */}
           <div className="hidden lg:flex gap-3">
-            {/* Ubicación */}
             <div className="relative">
               <select
                 value={filtros.ubicacion}
                 onChange={(e) => onFiltroChange("ubicacion", e.target.value)}
-                className="appearance-none pl-10 pr-10 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white cursor-pointer min-w-[180px]"
+                className="appearance-none pl-10 pr-10 py-3.5 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all cursor-pointer min-w-[180px]"
               >
                 <option value="">Ubicación</option>
                 {ubicacionesUnicas.map((ubicacion) => (
@@ -129,16 +115,15 @@ export default function BuscadorCargos({
                   </option>
                 ))}
               </select>
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
             </div>
 
-            {/* Tipo de contrato */}
             <div className="relative">
               <select
                 value={filtros.tipoContrato}
                 onChange={(e) => onFiltroChange("tipoContrato", e.target.value)}
-                className="appearance-none pl-10 pr-10 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white cursor-pointer min-w-[180px]"
+                className="appearance-none pl-10 pr-10 py-3.5 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all cursor-pointer min-w-[180px]"
               >
                 {tiposContrato.map((tipo) => (
                   <option key={tipo.value} value={tipo.value}>
@@ -146,31 +131,29 @@ export default function BuscadorCargos({
                   </option>
                 ))}
               </select>
-              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
             </div>
           </div>
 
-          {/* Botón de filtros avanzados */}
           <button
             onClick={() => setMostrarFiltrosAvanzados(!mostrarFiltrosAvanzados)}
             className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border transition-all font-medium ${
               mostrarFiltrosAvanzados || filtrosActivos > 0
-                ? "bg-orange-50 border-orange-200 text-orange-600"
-                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                ? "primary-soft border-primary text-primary"
+                : "surface-muted border-border-default text-secondary hover:bg-surface-hover"
             }`}
           >
             <SlidersHorizontal className="h-5 w-5" />
             <span className="hidden sm:inline">Filtros</span>
             {filtrosActivos > 0 && (
-              <span className="bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="primary-bg text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {filtrosActivos}
               </span>
             )}
           </button>
         </div>
 
-        {/* Panel de filtros avanzados */}
         <AnimatePresence>
           {mostrarFiltrosAvanzados && (
             <motion.div
@@ -180,18 +163,17 @@ export default function BuscadorCargos({
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="pt-4 mt-4 border-t border-slate-200">
+              <div className="pt-4 mt-4 border-t border-border-subtle">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Ubicación (mobile) */}
                   <div className="lg:hidden">
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-secondary mb-1.5">
                       Ubicación
                     </label>
                     <div className="relative">
                       <select
                         value={filtros.ubicacion}
                         onChange={(e) => onFiltroChange("ubicacion", e.target.value)}
-                        className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
+                        className="w-full appearance-none pl-10 pr-10 py-3 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       >
                         <option value="">Todas las ubicaciones</option>
                         {ubicacionesUnicas.map((ubicacion) => (
@@ -200,21 +182,20 @@ export default function BuscadorCargos({
                           </option>
                         ))}
                       </select>
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
                     </div>
                   </div>
 
-                  {/* Tipo de contrato (mobile) */}
                   <div className="lg:hidden">
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-secondary mb-1.5">
                       Tipo de Contrato
                     </label>
                     <div className="relative">
                       <select
                         value={filtros.tipoContrato}
                         onChange={(e) => onFiltroChange("tipoContrato", e.target.value)}
-                        className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
+                        className="w-full appearance-none pl-10 pr-10 py-3 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       >
                         {tiposContrato.map((tipo) => (
                           <option key={tipo.value} value={tipo.value}>
@@ -222,21 +203,20 @@ export default function BuscadorCargos({
                           </option>
                         ))}
                       </select>
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
                     </div>
                   </div>
 
-                  {/* Modalidad */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-secondary mb-1.5">
                       Modalidad
                     </label>
                     <div className="relative">
                       <select
                         value={filtros.modalidad}
                         onChange={(e) => onFiltroChange("modalidad", e.target.value)}
-                        className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
+                        className="w-full appearance-none pl-10 pr-10 py-3 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       >
                         {modalidades.map((modalidad) => (
                           <option key={modalidad.value} value={modalidad.value}>
@@ -244,21 +224,20 @@ export default function BuscadorCargos({
                           </option>
                         ))}
                       </select>
-                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                      <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
                     </div>
                   </div>
 
-                  {/* Rango de salario */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-secondary mb-1.5">
                       Rango Salarial
                     </label>
                     <div className="relative">
                       <select
                         value={rangoSalario}
                         onChange={(e) => onRangoSalarioChange(e.target.value)}
-                        className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
+                        className="w-full appearance-none pl-10 pr-10 py-3 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       >
                         {RANGOS_SALARIO.map((rango) => (
                           <option key={rango.value} value={rango.value}>
@@ -266,21 +245,20 @@ export default function BuscadorCargos({
                           </option>
                         ))}
                       </select>
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
                     </div>
                   </div>
 
-                  {/* Empresa */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-secondary mb-1.5">
                       Empresa
                     </label>
                     <div className="relative">
                       <select
                         value={filtros.empresa}
                         onChange={(e) => onFiltroChange("empresa", e.target.value)}
-                        className="w-full appearance-none pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-700 bg-white"
+                        className="w-full appearance-none pl-10 pr-10 py-3 border border-border-default rounded-xl bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                       >
                         <option value="">Todas las empresas</option>
                         {empresasUnicas.map((empresa) => (
@@ -289,18 +267,17 @@ export default function BuscadorCargos({
                           </option>
                         ))}
                       </select>
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted pointer-events-none" />
                     </div>
                   </div>
                 </div>
 
-                {/* Botón limpiar filtros */}
                 {filtrosActivos > 0 && (
                   <div className="mt-4 flex justify-end">
                     <button
                       onClick={onLimpiarFiltros}
-                      className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                      className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                     >
                       <X className="h-4 w-4" />
                       Limpiar todos los filtros
@@ -313,80 +290,84 @@ export default function BuscadorCargos({
         </AnimatePresence>
       </div>
 
-      {/* Resumen de resultados y filtros activos */}
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-slate-600">
-          <span className="font-semibold text-slate-900">{totalResultados}</span>
+        <span className="text-secondary">
+          <span className="font-semibold text-primary">{totalResultados}</span>
           {" "}cargo{totalResultados !== 1 ? "s" : ""} encontrado{totalResultados !== 1 ? "s" : ""}
         </span>
 
-        {/* Tags de filtros activos */}
         {filtros.busqueda && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 primary-soft text-primary rounded-full text-sm font-medium">
             Búsqueda: &quot;{filtros.busqueda}&quot;
             <button
               onClick={() => onFiltroChange("busqueda", "")}
-              className="hover:bg-orange-200 rounded-full p-0.5"
+              className="hover:bg-primary/20 rounded-full p-0.5"
+              aria-label="Quitar filtro de búsqueda"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </span>
         )}
         {filtros.ubicacion && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-soft text-blue rounded-full text-sm font-medium">
             <MapPin className="h-3.5 w-3.5" />
             {filtros.ubicacion}
             <button
               onClick={() => onFiltroChange("ubicacion", "")}
-              className="hover:bg-blue-200 rounded-full p-0.5"
+              className="hover:bg-blue-soft/80 rounded-full p-0.5"
+              aria-label="Quitar filtro de ubicación"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </span>
         )}
         {filtros.tipoContrato && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 success-soft text-success rounded-full text-sm font-medium">
             <Clock className="h-3.5 w-3.5" />
             {tiposContrato.find(t => t.value === filtros.tipoContrato)?.label}
             <button
               onClick={() => onFiltroChange("tipoContrato", "")}
-              className="hover:bg-green-200 rounded-full p-0.5"
+              className="hover:bg-success/20 rounded-full p-0.5"
+              aria-label="Quitar filtro de tipo de contrato"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </span>
         )}
         {filtros.modalidad && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 primary-soft text-primary rounded-full text-sm font-medium">
             <Briefcase className="h-3.5 w-3.5" />
             {modalidades.find(m => m.value === filtros.modalidad)?.label}
             <button
               onClick={() => onFiltroChange("modalidad", "")}
-              className="hover:bg-purple-200 rounded-full p-0.5"
+              className="hover:bg-primary/20 rounded-full p-0.5"
+              aria-label="Quitar filtro de modalidad"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </span>
         )}
         {filtros.empresa && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 warning-soft text-warning rounded-full text-sm font-medium">
             <Building2 className="h-3.5 w-3.5" />
             {filtros.empresa}
             <button
               onClick={() => onFiltroChange("empresa", "")}
-              className="hover:bg-amber-200 rounded-full p-0.5"
+              className="hover:bg-warning/20 rounded-full p-0.5"
+              aria-label="Quitar filtro de empresa"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </span>
         )}
         {(filtros.salarioMin !== null || filtros.salarioMax !== null) && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 success-soft text-success rounded-full text-sm font-medium">
             <DollarSign className="h-3.5 w-3.5" />
             {RANGOS_SALARIO.find(r => r.value === rangoSalario)?.label}
             <button
               onClick={() => onRangoSalarioChange("")}
-              className="hover:bg-emerald-200 rounded-full p-0.5"
+              className="hover:bg-success/20 rounded-full p-0.5"
+              aria-label="Quitar filtro de rango salarial"
             >
               <X className="h-3.5 w-3.5" />
             </button>

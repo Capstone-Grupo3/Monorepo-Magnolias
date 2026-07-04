@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Search,
   Download,
@@ -29,17 +30,14 @@ export default function EmpresasView() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  // Filtros
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState("");
 
-  // Modales
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Formulario
   const [form, setForm] = useState<UpdateEmpresaDto>({});
 
   const loadEmpresas = async () => {
@@ -155,18 +153,17 @@ export default function EmpresasView() {
   if (loading && empresas.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Filtros y búsqueda */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+      <div className="surface-card rounded-xl border border-border-subtle p-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-secondary mb-1">
               Buscar
             </label>
             <div className="relative">
@@ -176,14 +173,14 @@ export default function EmpresasView() {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Nombre, correo o RUT..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-2.5 w-5 h-5 text-muted" />
             </div>
           </div>
 
           <div className="w-40">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-secondary mb-1">
               Estado
             </label>
             <select
@@ -192,7 +189,7 @@ export default function EmpresasView() {
                 setEstadoFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="">Todos</option>
               <option value="ACTIVO">Activo</option>
@@ -203,14 +200,14 @@ export default function EmpresasView() {
           <div className="flex gap-2">
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+              className="px-4 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-colors flex items-center gap-2"
             >
               <Search className="w-4 h-4" />
               Buscar
             </button>
             <button
               onClick={handleExport}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              className="px-4 py-2 bg-success text-white rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Exportar
@@ -218,7 +215,7 @@ export default function EmpresasView() {
             <button
               onClick={loadEmpresas}
               disabled={loading}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 flex items-center gap-2"
+              className="px-4 py-2 border border-border-default rounded-lg hover:bg-surface-muted text-secondary transition-colors flex items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </button>
@@ -226,121 +223,121 @@ export default function EmpresasView() {
         </div>
       </div>
 
-      {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Building2 className="w-5 h-5 text-purple-600" />
+            <div className="p-2 primary-soft rounded-lg">
+              <Building2 className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Empresas</p>
-              <p className="text-xl font-bold">{total}</p>
+              <p className="text-sm text-muted">Total Empresas</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{total}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+            <div className="p-2 success-soft rounded-lg">
+              <CheckCircle className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Activas</p>
-              <p className="text-xl font-bold">{empresas.filter((e) => e.estado === "ACTIVO").length}</p>
+              <p className="text-sm text-muted">Activas</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{empresas.filter((e) => e.estado === "ACTIVO").length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <XCircle className="w-5 h-5 text-red-600" />
+            <div className="p-2 error-soft rounded-lg">
+              <XCircle className="w-5 h-5 text-error" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Inactivas</p>
-              <p className="text-xl font-bold">{empresas.filter((e) => e.estado === "INACTIVO").length}</p>
+              <p className="text-sm text-muted">Inactivas</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{empresas.filter((e) => e.estado === "INACTIVO").length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden">
+      <div className="surface-card rounded-xl border border-border-subtle overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+          <table className="min-w-full divide-y divide-border-subtle">
+            <thead className="surface-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Empresa</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">RUT</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Correo</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">LinkedIn</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cargos</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Empresa</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">RUT</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Correo</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">LinkedIn</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Cargos</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-border-subtle">
               {empresas.map((empresa) => (
-                <tr key={empresa.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{empresa.id}</td>
+                <tr key={empresa.id} className="hover:bg-surface-muted transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-muted">{empresa.id}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       {empresa.logoUrl ? (
-                        <img 
-                          src={empresa.logoUrl} 
-                          alt={empresa.nombre} 
+                        <Image
+                          src={empresa.logoUrl}
+                          alt={empresa.nombre}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Building2 className="w-5 h-5 text-purple-600" />
+                        <div className="w-10 h-10 primary-soft rounded-full flex items-center justify-center">
+                          <Building2 className="w-5 h-5 text-primary" />
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{empresa.nombre}</p>
+                        <p className="font-semibold text-primary dark:text-white">{empresa.nombre}</p>
                         {empresa.descripcion && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{empresa.descripcion}</p>
+                          <p className="text-xs text-muted truncate max-w-[200px]">{empresa.descripcion}</p>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary">
                     {empresa.rut || "N/A"}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-gray-600 text-sm">
-                      <Mail className="w-3 h-3" />
+                    <div className="flex items-center gap-1 text-secondary text-sm">
+                      <Mail className="w-3 h-3 text-muted" />
                       {empresa.correo}
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {empresa.linkedinUrl ? (
-                      <a 
-                        href={empresa.linkedinUrl} 
-                        target="_blank" 
+                      <a
+                        href={empresa.linkedinUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-blue-600 hover:underline text-sm"
+                        className="flex items-center gap-1 text-primary hover:underline text-sm"
                       >
                         <Linkedin className="w-3 h-3" />
                         Ver perfil
                       </a>
                     ) : (
-                      <span className="text-gray-400 text-sm">N/A</span>
+                      <span className="text-muted text-sm">N/A</span>
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <Briefcase className="w-4 h-4" />
-                      <span className="font-medium">{empresa.totalCargos}</span>
+                    <div className="flex items-center gap-1 text-secondary">
+                      <Briefcase className="w-4 h-4 text-muted" />
+                      <span className="font-semibold">{empresa.totalCargos}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <button
                       onClick={() => handleToggleEstado(empresa)}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                      className={`px-3 py-1 text-xs font-semibold rounded-full ${
                         empresa.estado === "ACTIVO"
-                          ? "bg-green-100 text-green-800 hover:bg-green-200"
-                          : "bg-red-100 text-red-800 hover:bg-red-200"
+                          ? "success-soft text-success hover:bg-success/10"
+                          : "error-soft text-error hover:bg-error/10"
                       }`}
                     >
                       {empresa.estado === "ACTIVO" ? "Activo" : "Inactivo"}
@@ -350,14 +347,14 @@ export default function EmpresasView() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(empresa)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                        className="p-1.5 text-primary hover:bg-primary-soft rounded transition-colors"
                         title="Editar"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(empresa)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                        className="p-1.5 text-error hover:bg-error-soft rounded transition-colors"
                         title="Desactivar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -370,27 +367,26 @@ export default function EmpresasView() {
           </table>
         </div>
 
-        {/* Paginación */}
-        <div className="px-4 py-3 border-t flex items-center justify-between">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="px-4 py-3 border-t border-border-subtle flex items-center justify-between">
+          <div className="text-sm text-muted">
             Mostrando {(page - 1) * 25 + 1} - {Math.min(page * 25, total)} de {total} empresas
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 border rounded hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 border border-border-default rounded hover:bg-surface-muted text-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               Anterior
             </button>
-            <span className="px-3 py-1 text-gray-600">
+            <span className="px-3 py-1 text-secondary">
               Página {page} de {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1 border rounded hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 border border-border-default rounded hover:bg-surface-muted text-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
             >
               Siguiente
               <ChevronRight className="w-4 h-4" />
@@ -399,7 +395,6 @@ export default function EmpresasView() {
         </div>
       </div>
 
-      {/* Modal Editar */}
       <AdminModal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
@@ -413,7 +408,7 @@ export default function EmpresasView() {
               type="text"
               value={form.nombre || ""}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             />
           </FormField>
@@ -423,7 +418,7 @@ export default function EmpresasView() {
               type="email"
               value={form.correo || ""}
               onChange={(e) => setForm({ ...form, correo: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             />
           </FormField>
@@ -433,7 +428,7 @@ export default function EmpresasView() {
               type="text"
               value={form.rut || ""}
               onChange={(e) => setForm({ ...form, rut: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               placeholder="12.345.678-9"
             />
           </FormField>
@@ -443,7 +438,7 @@ export default function EmpresasView() {
               value={form.descripcion || ""}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               placeholder="Descripción de la empresa..."
             />
           </FormField>
@@ -453,7 +448,7 @@ export default function EmpresasView() {
               type="url"
               value={form.linkedinUrl || ""}
               onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               placeholder="https://linkedin.com/company/..."
             />
           </FormField>
@@ -462,7 +457,7 @@ export default function EmpresasView() {
             <select
               value={form.estado || "ACTIVO"}
               onChange={(e) => setForm({ ...form, estado: e.target.value as "ACTIVO" | "INACTIVO" })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
             >
               <option value="ACTIVO">Activo</option>
               <option value="INACTIVO">Inactivo</option>
@@ -471,7 +466,6 @@ export default function EmpresasView() {
         </div>
       </AdminModal>
 
-      {/* Modal Eliminar/Desactivar */}
       <ConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -485,6 +479,3 @@ export default function EmpresasView() {
     </div>
   );
 }
-
-
-

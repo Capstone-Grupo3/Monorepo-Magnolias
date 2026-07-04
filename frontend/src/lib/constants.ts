@@ -40,7 +40,7 @@ export const ESTADO_POSTULACION_LABELS: Record<EstadoPostulacion, string> = {
 export const ESTADO_POSTULACION_COLORS: Record<EstadoPostulacion, string> = {
   PENDIENTE: "bg-yellow-100 text-yellow-800",
   EN_REVISION: "bg-blue-100 text-blue-800",
-  EVALUADO: "bg-purple-100 text-purple-800",
+  EVALUADO: "primary-soft",
   RECHAZADO: "bg-red-100 text-red-800",
   SELECCIONADO: "bg-green-100 text-green-800",
 };

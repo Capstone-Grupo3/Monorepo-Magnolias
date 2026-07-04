@@ -176,7 +176,7 @@ export default function RegistroPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen surface-page flex">
       <RegistroBrandingSection />
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
@@ -190,15 +190,15 @@ export default function RegistroPage() {
           />
 
           {successMessage && (
-            <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
-              <span className="text-green-500 font-bold">✓</span>
+            <div className="success-soft rounded-xl px-4 py-3 mb-6 flex items-start gap-2 border border-success">
+              <span className="success font-bold">✓</span>
               <span>{successMessage}</span>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
-              <span className="text-red-500 font-bold">⚠</span>
+            <div className="error-soft rounded-xl px-4 py-3 mb-6 flex items-start gap-2 border border-error">
+              <span className="font-bold">⚠</span>
               <span>{error}</span>
             </div>
           )}

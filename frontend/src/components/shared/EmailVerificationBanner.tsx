@@ -36,21 +36,21 @@ export default function EmailVerificationBanner({ userEmail, userType }: EmailVe
   if (isDismissed) return null;
 
   return (
-    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+    <div className="warning-soft border-l-4 border-warning p-4 mb-6">
       <div className="flex items-start">
         <div className="shrink-0">
-          <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+          <svg className="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
         </div>
         <div className="ml-3 flex-1">
-          <p className="text-sm text-yellow-700">
+          <p className="text-sm text-warning">
             <strong>⚠️ Tu correo electrónico no ha sido verificado.</strong>
             {' '}Por favor verifica tu email para acceder a todas las funcionalidades de la plataforma.
           </p>
           
           {message && (
-            <p className={`mt-2 text-sm ${message.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+            <p className={`mt-2 text-sm ${message.type === 'success' ? 'text-success' : 'text-error'}`}>
               {message.text}
             </p>
           )}
@@ -59,13 +59,13 @@ export default function EmailVerificationBanner({ userEmail, userType }: EmailVe
             <button
               onClick={handleResendVerification}
               disabled={isLoading}
-              className="text-sm font-medium text-yellow-700 hover:text-yellow-800 underline disabled:opacity-50"
+              className="text-sm font-medium text-warning hover:opacity-80 underline disabled:opacity-50"
             >
               {isLoading ? 'Enviando...' : 'Reenviar correo de verificación'}
             </button>
             <button
               onClick={() => setIsDismissed(true)}
-              className="text-sm font-medium text-yellow-700 hover:text-yellow-800"
+              className="text-sm font-medium text-warning hover:opacity-80"
             >
               Recordarme más tarde
             </button>
@@ -74,10 +74,11 @@ export default function EmailVerificationBanner({ userEmail, userType }: EmailVe
         <div className="ml-auto pl-3">
           <button
             onClick={() => setIsDismissed(true)}
-            className="inline-flex text-yellow-400 hover:text-yellow-500"
+            className="inline-flex text-warning hover:opacity-80"
+            aria-label="Cerrar aviso"
           >
             <span className="sr-only">Cerrar</span>
-            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           </button>

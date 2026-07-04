@@ -1,7 +1,10 @@
 "use client";
 
+import { useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, AlertTriangle, Trash2, Loader2 } from "lucide-react";
+import { AlertTriangle, XCircle, CheckCircle, Info, Loader2 } from "lucide-react";
+
+type ConfirmType = "danger" | "warning" | "info" | "success";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -11,9 +14,44 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  type?: "danger" | "warning" | "info";
+  type?: ConfirmType;
   loading?: boolean;
 }
+
+const typeConfig: Record<ConfirmType, { icon: React.ComponentType<{ size?: number }>; bg: string; border: string; text: string; btnBg: string; btnHover: string }> = {
+  danger: {
+    icon: XCircle,
+    bg: "error-soft",
+    border: "border-error",
+    text: "error",
+    btnBg: "error-bg",
+    btnHover: "opacity-90",
+  },
+  warning: {
+    icon: AlertTriangle,
+    bg: "warning-soft",
+    border: "border-warning",
+    text: "warning",
+    btnBg: "warning-bg",
+    btnHover: "opacity-90",
+  },
+  info: {
+    icon: Info,
+    bg: "primary-soft",
+    border: "border-primary",
+    text: "primary",
+    btnBg: "primary-bg",
+    btnHover: "primary-bg-hover",
+  },
+  success: {
+    icon: CheckCircle,
+    bg: "success-soft",
+    border: "border-success",
+    text: "success",
+    btnBg: "success-bg",
+    btnHover: "opacity-90",
+  },
+};
 
 export default function ConfirmModal({
   isOpen,
@@ -26,25 +64,21 @@ export default function ConfirmModal({
   type = "danger",
   loading = false,
 }: ConfirmModalProps) {
-  const typeStyles = {
-    danger: {
-      icon: <Trash2 className="w-6 h-6 text-red-600" />,
-      iconBg: "bg-red-100",
-      button: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
-    },
-    warning: {
-      icon: <AlertTriangle className="w-6 h-6 text-yellow-600" />,
-      iconBg: "bg-yellow-100",
-      button: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500",
-    },
-    info: {
-      icon: <AlertTriangle className="w-6 h-6 text-blue-600" />,
-      iconBg: "bg-blue-100",
-      button: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
-    },
-  };
+  const config = typeConfig[type];
+  const Icon = config.icon;
+  const modalRef = useRef<HTMLDivElement>(null);
+  const titleId = `confirm-modal-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
-  const styles = typeStyles[type];
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    document.addEventListener("keydown", handleKeyDown);
+    modalRef.current?.focus();
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleKeyDown]);
 
   return (
     <AnimatePresence>
@@ -56,7 +90,7 @@ export default function ConfirmModal({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 surface-overlay/50 backdrop-blur-sm"
               onClick={onClose}
             />
 
@@ -65,46 +99,43 @@ export default function ConfirmModal({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+              ref={modalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              tabIndex={-1}
+              className="relative surface-card dark:surface-card rounded-xl shadow-2xl w-full max-w-md"
             >
-              <div className="flex items-start gap-4">
-                {/* Icono */}
-                <div className={`shrink-0 p-3 rounded-full ${styles.iconBg}`}>
-                  {styles.icon}
+              <div className="p-6 text-center">
+                {/* Icon */}
+                <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${config.bg} ${config.border} ${config.text}`}>
+                  <Icon size={32} />
                 </div>
 
-                {/* Contenido */}
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{message}</p>
+                {/* Title */}
+                <h3 id={titleId} className="text-lg font-semibold text-primary dark:text-white mb-2">{title}</h3>
+
+                {/* Message */}
+                <p className="text-secondary dark:text-gray-300 mb-6">{message}</p>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={onClose}
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 text-secondary dark:text-gray-300 surface-card border border-border-default rounded-lg hover:bg-surface-muted dark:hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 transition-colors"
+                  >
+                    {cancelText}
+                  </button>
+                  <button
+                    onClick={onConfirm}
+                    disabled={loading}
+                    className={`flex-1 px-4 py-2 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 flex items-center justify-center gap-2 ${config.btnBg} hover:${config.btnHover} transition-colors`}
+                  >
+                    {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {confirmText}
+                  </button>
                 </div>
-
-                {/* Botón cerrar */}
-                <button
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-500 dark:text-gray-400 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Botones */}
-              <div className="mt-6 flex gap-3 justify-end">
-                <button
-                  onClick={onClose}
-                  disabled={loading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-                >
-                  {cancelText}
-                </button>
-                <button
-                  onClick={onConfirm}
-                  disabled={loading}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 flex items-center gap-2 ${styles.button}`}
-                >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {confirmText}
-                </button>
               </div>
             </motion.div>
           </div>
@@ -113,4 +144,3 @@ export default function ConfirmModal({
     </AnimatePresence>
   );
 }
-

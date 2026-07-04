@@ -48,28 +48,27 @@ export default function VisualizacionReporte({
       );
     if (posicion === 3)
       return (
-        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-r from-orange-400 to-orange-600 text-white font-bold text-lg shadow-lg">
+        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-r from-yellow-600 to-orange-600 text-white font-bold text-lg shadow-lg">
           🥉
         </span>
       );
     return (
-      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-r from-purple-500 to-indigo-600 text-white font-bold">
+      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full primary-bg text-white font-bold">
         {posicion}
       </span>
     );
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      {/* Header del Reporte */}
-      <div className="bg-linear-to-r from-purple-600 to-indigo-600 text-white p-8">
+    <div className="surface-card rounded-xl border border-border-subtle overflow-hidden">
+      <div className="primary-bg text-white p-8">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-3xl font-bold mb-2">
               📊 Reporte de Ranking de Candidatos
             </h2>
-            <p className="text-purple-100 text-lg">{reporte.cargo.titulo}</p>
-            <p className="text-purple-200 text-sm mt-1">
+            <p className="text-white/80 text-lg">{reporte.cargo.titulo}</p>
+            <p className="text-white/60 text-sm mt-1">
               {reporte.empresa.nombre} | Generado el {formatFecha(reporte.fechaGeneracion)}
             </p>
           </div>
@@ -84,54 +83,52 @@ export default function VisualizacionReporte({
         </div>
       </div>
 
-      {/* Estadísticas Rápidas */}
-      <div className="grid grid-cols-4 gap-4 p-6 bg-gray-50 border-b">
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+      <div className="grid grid-cols-4 gap-4 p-6 surface-muted border-b border-border-subtle">
+        <div className="surface-card rounded-xl p-4 border border-border-subtle">
+          <div className="flex items-center gap-2 text-secondary text-sm mb-1">
             <Users className="w-4 h-4" />
             Total Postulantes
           </div>
-          <div className="text-3xl font-bold text-purple-600">
+          <div className="text-3xl font-bold text-primary">
             {reporte.estadisticas.totalPostulantes}
           </div>
         </div>
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+        <div className="surface-card rounded-xl p-4 border border-border-subtle">
+          <div className="flex items-center gap-2 text-secondary text-sm mb-1">
             <TrendingUp className="w-4 h-4" />
             Score Promedio
           </div>
-          <div className="text-3xl font-bold text-indigo-600">
+          <div className="text-3xl font-bold text-primary">
             {reporte.estadisticas.promedioScore}
           </div>
         </div>
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+        <div className="surface-card rounded-xl p-4 border border-border-subtle">
+          <div className="flex items-center gap-2 text-secondary text-sm mb-1">
             <Trophy className="w-4 h-4" />
             Candidatos Top
           </div>
-          <div className="text-3xl font-bold text-green-600">
+          <div className="text-3xl font-bold text-success">
             {reporte.estadisticas.candidatosTop}
           </div>
         </div>
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+        <div className="surface-card rounded-xl p-4 border border-border-subtle">
+          <div className="flex items-center gap-2 text-secondary text-sm mb-1">
             <Target className="w-4 h-4" />
             Completitud
           </div>
-          <div className="text-3xl font-bold text-blue-600">
+          <div className="text-3xl font-bold text-primary">
             {reporte.estadisticas.tasaCompletitud}%
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b bg-white">
+      <div className="flex border-b border-border-subtle surface-card">
         <button
           onClick={() => setActiveTab("resumen")}
           className={`flex-1 px-6 py-4 font-semibold transition-colors ${
             activeTab === "resumen"
-              ? "border-b-2 border-purple-600 text-purple-600 bg-purple-50"
-              : "text-gray-600 hover:text-purple-600 hover:bg-gray-50"
+              ? "border-b-2 border-primary text-primary surface-muted"
+              : "text-secondary hover:text-primary hover:surface-muted"
           }`}
         >
           ⭐ Resumen Ejecutivo
@@ -140,8 +137,8 @@ export default function VisualizacionReporte({
           onClick={() => setActiveTab("ranking")}
           className={`flex-1 px-6 py-4 font-semibold transition-colors ${
             activeTab === "ranking"
-              ? "border-b-2 border-purple-600 text-purple-600 bg-purple-50"
-              : "text-gray-600 hover:text-purple-600 hover:bg-gray-50"
+              ? "border-b-2 border-primary text-primary surface-muted"
+              : "text-secondary hover:text-primary hover:surface-muted"
           }`}
         >
           🏅 Ranking Completo
@@ -150,21 +147,18 @@ export default function VisualizacionReporte({
           onClick={() => setActiveTab("top3")}
           className={`flex-1 px-6 py-4 font-semibold transition-colors ${
             activeTab === "top3"
-              ? "border-b-2 border-purple-600 text-purple-600 bg-purple-50"
-              : "text-gray-600 hover:text-purple-600 hover:bg-gray-50"
+              ? "border-b-2 border-primary text-primary surface-muted"
+              : "text-secondary hover:text-primary hover:surface-muted"
           }`}
         >
           🔍 Top 3 Detallado
         </button>
       </div>
 
-      {/* Contenido */}
       <div className="p-6">
-        {/* Tab: Resumen Ejecutivo */}
         {activeTab === "resumen" && (
           <div className="space-y-6">
-            {/* Mejor Candidato */}
-            <div className="bg-linear-to-r from-purple-600 to-indigo-600 text-white rounded-xl p-8 shadow-lg">
+            <div className="primary-bg text-white rounded-xl p-8 shadow-lg">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-bold flex items-center gap-2">
                   <Trophy className="w-8 h-8" />
@@ -177,53 +171,49 @@ export default function VisualizacionReporte({
               <h2 className="text-3xl font-bold mb-2">
                 {reporte.resumenEjecutivo.mejorCandidato.nombre}
               </h2>
-              <p className="text-purple-100 text-lg">
+              <p className="text-white/80 text-lg">
                 Posición #{reporte.resumenEjecutivo.mejorCandidato.posicion}
               </p>
             </div>
 
-            {/* Razón Principal */}
-            <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-purple-600">
-              <h4 className="font-semibold text-purple-900 mb-3">
+            <div className="surface-muted rounded-xl p-6 border-l-4 border-primary">
+              <h4 className="font-semibold text-primary mb-3">
                 Razón Principal
               </h4>
-              <p className="text-gray-700">
+              <p className="text-secondary">
                 {reporte.resumenEjecutivo.razonPrincipal}
               </p>
             </div>
 
-            {/* Razones Secundarias */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h4 className="font-semibold text-purple-900 mb-4">
+            <div className="surface-card border border-border-subtle rounded-xl p-6">
+              <h4 className="font-semibold text-primary mb-4">
                 Razones Secundarias
               </h4>
               <ul className="space-y-3">
                 {reporte.resumenEjecutivo.razonesSecundarias.map((razon, idx) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <span className="shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                    <span className="shrink-0 w-6 h-6 primary-soft text-primary rounded-full flex items-center justify-center text-sm font-semibold">
                       {idx + 1}
                     </span>
-                    <span className="text-gray-700">{razon}</span>
+                    <span className="text-secondary">{razon}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Recomendación Final */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
-              <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+            <div className="primary-soft border-2 border-primary/20 rounded-xl p-6">
+              <h4 className="font-semibold text-primary mb-3 flex items-center gap-2">
                 <Award className="w-5 h-5" />
                 💡 Recomendación Final
               </h4>
-              <p className="text-gray-800 leading-relaxed">
+              <p className="text-primary leading-relaxed">
                 {reporte.resumenEjecutivo.recomendacionFinal}
               </p>
             </div>
 
-            {/* Recomendaciones de IA */}
             {reporte.recomendacionesIA.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h4 className="font-semibold text-purple-900 mb-4 flex items-center gap-2">
+              <div className="surface-card border border-border-subtle rounded-xl p-6">
+                <h4 className="font-semibold text-primary mb-4 flex items-center gap-2">
                   <Target className="w-5 h-5" />
                   🤖 Recomendaciones de IA
                 </h4>
@@ -231,9 +221,9 @@ export default function VisualizacionReporte({
                   {reporte.recomendacionesIA.map((rec, idx) => (
                     <li
                       key={idx}
-                      className="flex items-start gap-2 text-gray-700 bg-purple-50 p-3 rounded-lg"
+                      className="flex items-start gap-2 text-secondary primary-soft p-3 rounded-xl"
                     >
-                      <span className="text-purple-600">✓</span>
+                      <span className="text-primary">✓</span>
                       <span>{rec}</span>
                     </li>
                   ))}
@@ -243,23 +233,22 @@ export default function VisualizacionReporte({
           </div>
         )}
 
-        {/* Tab: Ranking Completo */}
         {activeTab === "ranking" && (
           <div className="space-y-3">
             {reporte.ranking.map((candidato) => (
               <div
                 key={candidato.id}
-                className="flex items-center gap-4 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="flex items-center gap-4 surface-card border border-border-subtle rounded-xl p-4 hover:shadow-md transition-shadow"
               >
                 <div className="shrink-0">
                   {getRankingBadge(candidato.posicion)}
                 </div>
 
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 text-lg">
+                  <h4 className="font-semibold text-primary text-lg">
                     {candidato.nombre}
                   </h4>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-4 mt-1 text-sm text-secondary">
                     <span className="flex items-center gap-1">
                       <Mail className="w-3 h-3" />
                       {candidato.correo}
@@ -274,22 +263,21 @@ export default function VisualizacionReporte({
                 </div>
 
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-purple-600">
+                  <div className="text-2xl font-bold text-primary">
                     {candidato.puntajeIa}
                   </div>
-                  <div className="text-xs text-gray-500">Puntaje IA</div>
+                  <div className="text-xs text-muted">Puntaje IA</div>
                   {candidato.matchingPorcentaje !== undefined && (
-                    <div className="mt-1 text-sm text-indigo-600">
+                    <div className="mt-1 text-sm text-primary">
                       {candidato.matchingPorcentaje}% matching
                     </div>
                   )}
                 </div>
 
-                {/* Barra de progreso */}
                 <div className="w-32">
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-2 surface-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-linear-to-r from-purple-500 to-indigo-600 transition-all"
+                      className="h-full primary-bg transition-all"
                       style={{ width: `${candidato.puntajeIa}%` }}
                     />
                   </div>
@@ -299,68 +287,65 @@ export default function VisualizacionReporte({
           </div>
         )}
 
-        {/* Tab: Top 3 Detallado */}
         {activeTab === "top3" && (
           <div className="space-y-6">
             {reporte.top3Detallado.map((candidato, index) => (
               <div
                 key={candidato.id}
-                className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
+                className="surface-card border-2 border-border-subtle rounded-xl p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     {getRankingBadge(candidato.posicion)}
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">
+                      <h3 className="text-xl font-bold text-primary">
                         {candidato.nombre}
                       </h3>
-                      <p className="text-sm text-gray-600">{candidato.correo}</p>
+                      <p className="text-sm text-secondary">{candidato.correo}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-4xl font-bold text-purple-600">
+                    <div className="text-4xl font-bold text-primary">
                       {candidato.puntajeIa}
                     </div>
-                    <div className="text-sm text-gray-500">Score</div>
+                    <div className="text-sm text-muted">Score</div>
                   </div>
                 </div>
 
-                {/* Información de contacto y experiencia */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   {candidato.telefono && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Phone className="w-4 h-4 text-purple-600" />
+                    <div className="flex items-center gap-2 text-sm text-secondary">
+                      <Phone className="w-4 h-4 text-primary" />
                       {candidato.telefono}
                     </div>
                   )}
                   {candidato.experienciaAnios !== undefined && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Briefcase className="w-4 h-4 text-purple-600" />
+                    <div className="flex items-center gap-2 text-sm text-secondary">
+                      <Briefcase className="w-4 h-4 text-primary" />
                       {candidato.experienciaAnios} años de experiencia
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <Target className="w-4 h-4 text-purple-600" />
+                  <div className="flex items-center gap-2 text-sm text-secondary">
+                    <Target className="w-4 h-4 text-primary" />
                     Matching: {candidato.matchingPorcentaje || 0}%
                   </div>
                   {candidato.fitCultural !== undefined && (
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <Users className="w-4 h-4 text-purple-600" />
+                    <div className="flex items-center gap-2 text-sm text-secondary">
+                      <Users className="w-4 h-4 text-primary" />
                       Fit Cultural: {candidato.fitCultural}%
                     </div>
                   )}
                 </div>
 
-                {/* Fortalezas */}
                 {candidato.fortalezas && candidato.fortalezas.length > 0 && (
                   <div className="mb-4">
-                    <h5 className="font-semibold text-purple-900 mb-2">
+                    <h5 className="font-semibold text-primary mb-2">
                       ✅ Fortalezas
                     </h5>
                     <ul className="space-y-1">
                       {candidato.fortalezas.map((fortaleza, idx) => (
-                        <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                          <span className="text-green-600">•</span>
+                        <li key={idx} className="text-sm text-secondary flex items-start gap-2">
+                          <span className="text-success">•</span>
                           {fortaleza}
                         </li>
                       ))}
@@ -368,17 +353,16 @@ export default function VisualizacionReporte({
                   </div>
                 )}
 
-                {/* Habilidades Clave */}
                 {candidato.habilidadesClave && candidato.habilidadesClave.length > 0 && (
                   <div className="mb-4">
-                    <h5 className="font-semibold text-purple-900 mb-2">
+                    <h5 className="font-semibold text-primary mb-2">
                       🎯 Habilidades Clave
                     </h5>
                     <div className="flex flex-wrap gap-2">
                       {candidato.habilidadesClave.map((skill, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                          className="px-3 py-1 primary-soft text-primary rounded-full text-sm font-medium"
                         >
                           {skill}
                         </span>
@@ -387,13 +371,12 @@ export default function VisualizacionReporte({
                   </div>
                 )}
 
-                {/* Feedback de IA */}
                 {candidato.feedbackIa && typeof candidato.feedbackIa === "string" && (
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <h5 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                  <div className="primary-soft border border-primary/20 rounded-xl p-4">
+                    <h5 className="font-semibold text-primary mb-2 flex items-center gap-2">
                       🤖 Feedback de IA
                     </h5>
-                    <p className="text-sm text-gray-700 leading-relaxed">
+                    <p className="text-sm text-secondary leading-relaxed">
                       {candidato.feedbackIa.substring(0, 400)}
                       {candidato.feedbackIa.length > 400 && "..."}
                     </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 
@@ -36,6 +36,20 @@ export default function AdminModal({
     xl: "max-w-4xl",
   };
 
+  const modalRef = useRef<HTMLDivElement>(null);
+  const titleId = `admin-modal-title-${title.replace(/\s+/g, "-").toLowerCase()}`;
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    document.addEventListener("keydown", handleKeyDown);
+    modalRef.current?.focus();
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleKeyDown]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (onSubmit) {
@@ -53,7 +67,7 @@ export default function AdminModal({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 surface-overlay/50 backdrop-blur-sm"
               onClick={onClose}
             />
 
@@ -62,16 +76,22 @@ export default function AdminModal({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full ${sizeClasses[size]}`}
+              ref={modalRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              tabIndex={-1}
+              className={`relative surface-card dark:surface-card rounded-xl shadow-2xl w-full ${sizeClasses[size]}`}
             >
               <form onSubmit={handleSubmit}>
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+                  <h3 id={titleId} className="text-lg font-semibold text-primary dark:text-white">{title}</h3>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500 dark:text-gray-400 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="text-muted hover:text-secondary dark:hover:text-gray-300 transition-colors p-1 hover:bg-surface-muted dark:hover:bg-surface-hover rounded-lg"
+                    aria-label="Cerrar modal"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -84,23 +104,23 @@ export default function AdminModal({
 
                 {/* Footer */}
                 {footer ? (
-                  <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-b-xl">
+                  <div className="px-6 py-4 border-t border-border-subtle surface-muted dark:surface-muted rounded-b-xl">
                     {footer}
                   </div>
                 ) : onSubmit ? (
-                  <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 rounded-b-xl flex justify-end gap-3">
+                  <div className="px-6 py-4 border-t border-border-subtle surface-muted dark:surface-muted rounded-b-xl flex justify-end gap-3">
                     <button
                       type="button"
                       onClick={onClose}
                       disabled={loading}
-                      className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                      className="px-4 py-2 text-secondary dark:text-gray-300 surface-muted hover:bg-surface-hover rounded-lg transition-colors disabled:opacity-50"
                     >
                       {cancelText}
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="px-4 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {submitText}
@@ -127,12 +147,12 @@ interface FormFieldProps {
 export function FormField({ label, required, error, children }: FormFieldProps) {
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label className="block text-sm font-medium text-secondary dark:text-gray-300">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-error ml-1">*</span>}
       </label>
       {children}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
     </div>
   );
 }
@@ -158,8 +178,8 @@ export function ModalFooterButtons({
   submitVariant = "primary",
 }: ModalFooterButtonsProps) {
   const submitStyles = {
-    primary: "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500",
-    danger: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
+    primary: "primary-bg hover:primary-bg-hover focus:ring-primary",
+    danger: "error-bg hover:opacity-90 focus:ring-error",
   };
 
   return (
@@ -168,7 +188,7 @@ export function ModalFooterButtons({
         type="button"
         onClick={onCancel}
         disabled={loading}
-        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+        className="px-4 py-2 text-sm font-medium text-secondary dark:text-gray-300 surface-card dark:surface-card border border-border-default rounded-lg hover:bg-surface-muted dark:hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
       >
         {cancelText}
       </button>
@@ -184,4 +204,3 @@ export function ModalFooterButtons({
     </div>
   );
 }
-

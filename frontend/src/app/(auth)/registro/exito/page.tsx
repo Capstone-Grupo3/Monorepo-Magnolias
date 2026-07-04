@@ -48,41 +48,41 @@ function ExitoRegistroContent() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-r from-green-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen surface-page flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-green-100">
+        <div className="surface-card rounded-2xl shadow-xl p-8 md:p-12 border border-border-subtle">
           {/* Icono de éxito */}
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 success-soft rounded-full flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 success" />
             </div>
           </div>
 
           {/* Título */}
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold text-center text-primary dark:text-white mb-4">
             ¡Registro Exitoso!
           </h1>
 
-          <p className="text-center text-gray-600 mb-8">
+          <p className="text-center text-secondary dark:text-gray-300 mb-8">
             Hemos enviado un correo de verificación a:
           </p>
 
           {/* Email destacado */}
-          <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 mb-8">
+          <div className="primary-soft rounded-xl p-4 mb-8">
             <div className="flex items-center justify-center gap-2">
-              <Mail className="w-5 h-5 text-orange-600" />
-              <span className="font-semibold text-orange-900">{correo}</span>
+              <Mail className="w-5 h-5 primary" />
+              <span className="font-semibold primary-soft-text">{correo}</span>
             </div>
           </div>
 
           {/* Instrucciones */}
           <div className="space-y-4 mb-8">
-            <h2 className="font-semibold text-gray-900 text-lg">
+            <h2 className="font-semibold text-primary dark:text-white text-lg">
               Próximos pasos:
             </h2>
-            <ol className="space-y-3 text-gray-700">
+            <ol className="space-y-3 text-secondary dark:text-gray-300">
               <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <span className="shrink-0 w-6 h-6 primary-bg text-white rounded-full flex items-center justify-center text-sm font-bold">
                   1
                 </span>
                 <span>
@@ -90,13 +90,13 @@ function ExitoRegistroContent() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <span className="shrink-0 w-6 h-6 primary-bg text-white rounded-full flex items-center justify-center text-sm font-bold">
                   2
                 </span>
                 <span>Haz clic en el enlace de verificación del correo</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="shrink-0 w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <span className="shrink-0 w-6 h-6 primary-bg text-white rounded-full flex items-center justify-center text-sm font-bold">
                   3
                 </span>
                 <span>Una vez verificado, podrás iniciar sesión en la plataforma</span>
@@ -105,8 +105,8 @@ function ExitoRegistroContent() {
           </div>
 
           {/* Aviso importante */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
+          <div className="primary-soft rounded-lg p-4 mb-6 border border-primary-soft">
+            <p className="text-sm primary-soft-text">
               <strong>Nota:</strong> Si no encuentras el correo, revisa tu carpeta
               de spam o correo no deseado. El enlace de verificación expira en 24
               horas.
@@ -118,8 +118,8 @@ function ExitoRegistroContent() {
             <div
               className={`mb-4 p-3 rounded-lg text-sm ${
                 resendMessage.includes("✓")
-                  ? "bg-green-50 text-green-800 border border-green-200"
-                  : "bg-yellow-50 text-yellow-800 border border-yellow-200"
+                  ? "success-soft border border-success"
+                  : "warning-soft border border-warning"
               }`}
             >
               {resendMessage}
@@ -131,11 +131,11 @@ function ExitoRegistroContent() {
             <button
               onClick={handleResendEmail}
               disabled={resendingEmail}
-              className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 surface-muted text-secondary py-3 rounded-lg font-semibold hover:bg-surface-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-border-subtle"
             >
               {resendingEmail ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                   Reenviando...
                 </>
               ) : (
@@ -148,7 +148,7 @@ function ExitoRegistroContent() {
 
             <Link
               href="/login"
-              className="flex items-center justify-center gap-2 w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+              className="flex items-center justify-center gap-2 w-full primary-bg text-white py-3 rounded-lg font-semibold hover:primary-bg-hover transition-colors"
             >
               Ir al Login
               <ArrowRight className="w-5 h-5" />
@@ -157,12 +157,12 @@ function ExitoRegistroContent() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 text-sm text-gray-600">
+        <div className="text-center mt-6 text-sm text-muted">
           <p>
             ¿Necesitas ayuda?{" "}
             <a
               href="mailto:soporte@aptconnect.cl"
-              className="text-orange-600 hover:underline font-semibold"
+              className="primary hover:underline font-semibold"
             >
               Contáctanos
             </a>
@@ -177,10 +177,10 @@ export default function ExitoRegistroPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="min-h-screen surface-page flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Cargando...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent mx-auto mb-4"></div>
+            <p className="text-secondary">Cargando...</p>
           </div>
         </div>
       }

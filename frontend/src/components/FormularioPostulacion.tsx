@@ -100,14 +100,14 @@ export default function FormularioPostulacion({
 
   if (success) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto text-center">
+      <div className="surface-card rounded-lg shadow-lg p-8 max-w-2xl mx-auto text-center border border-border-subtle">
         <div className="flex justify-center mb-4">
-          <CheckCircle className="w-16 h-16 text-green-500" />
+          <CheckCircle className="w-16 h-16 text-success" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+        <h2 className="text-2xl font-bold text-primary dark:text-white mb-2">
           ¡Postulación Enviada!
         </h2>
-        <p className="text-gray-600">
+        <p className="text-secondary">
           Tu postulación ha sido recibida exitosamente. El equipo de
           reclutamiento la revisará pronto.
         </p>
@@ -116,25 +116,26 @@ export default function FormularioPostulacion({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+    <div className="surface-card rounded-lg shadow-lg p-6 max-w-2xl mx-auto border border-border-subtle">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-primary dark:text-white">
             Postular a Cargo
           </h2>
-          <p className="text-gray-600 mt-1">{cargoTitulo}</p>
+          <p className="text-secondary mt-1">{cargoTitulo}</p>
         </div>
         <button
           onClick={onCancel}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-muted hover:text-secondary transition-colors"
+          aria-label="Cancelar"
         >
           <X size={24} />
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+        <div className="error-soft border border-error px-4 py-3 rounded-lg mb-6 text-sm">
           {error}
         </div>
       )}
@@ -142,17 +143,17 @@ export default function FormularioPostulacion({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Upload CV */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-secondary mb-2">
             Currículum Vitae *
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+          <div className="border-2 border-dashed border-default rounded-lg p-6 text-center hover:border-primary transition-colors">
             {!cvFile ? (
               <label className="cursor-pointer">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-sm text-gray-600 mb-2">
+                <Upload className="w-12 h-12 text-muted mx-auto mb-3" />
+                <p className="text-sm text-secondary mb-2">
                   Haz clic para subir tu CV
                 </p>
-                <p className="text-xs text-gray-500">PDF o Word (máx. 5MB)</p>
+                <p className="text-xs text-muted">PDF o Word (máx. 5MB)</p>
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx"
@@ -161,14 +162,14 @@ export default function FormularioPostulacion({
                 />
               </label>
             ) : (
-              <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between primary-soft p-4 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <File className="w-8 h-8 text-blue-600" />
+                  <File className="w-8 h-8 text-primary" />
                   <div className="text-left">
-                    <p className="text-sm font-medium text-gray-800">
+                    <p className="text-sm font-medium text-primary dark:text-white">
                       {cvFile.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted">
                       {(cvFile.size / 1024).toFixed(0)} KB
                     </p>
                   </div>
@@ -176,7 +177,8 @@ export default function FormularioPostulacion({
                 <button
                   type="button"
                   onClick={() => setCvFile(null)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-error hover:opacity-70"
+                  aria-label="Quitar archivo"
                 >
                   <X size={20} />
                 </button>
@@ -188,19 +190,19 @@ export default function FormularioPostulacion({
         {/* Preguntas Personalizadas */}
         {preguntas.length > 0 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-lg font-semibold text-primary dark:text-white">
               Preguntas del Empleador
             </h3>
             {preguntas.map((pregunta, index) => (
               <div key={index}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   {index + 1}. {pregunta.pregunta} *
                 </label>
                 <textarea
                   rows={4}
                   value={respuestas[index] || ""}
                   onChange={(e) => handleRespuestaChange(index, e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-border-default rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all surface-card text-primary"
                   placeholder="Escribe tu respuesta aquí..."
                   required
                 />
@@ -214,14 +216,14 @@ export default function FormularioPostulacion({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all"
+            className="flex-1 px-6 py-3 border border-border-default text-secondary rounded-lg font-medium hover:surface-hover transition-all"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-6 py-3 primary-bg text-white rounded-lg font-medium hover:primary-bg-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Enviando..." : "Enviar Postulación"}
           </button>

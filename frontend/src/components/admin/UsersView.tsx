@@ -26,19 +26,16 @@ export default function UsersView() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  
-  // Filtros
+
   const [search, setSearch] = useState("");
   const [tipoFilter, setTipoFilter] = useState<"" | "postulante" | "empresa">("");
   const [estadoFilter, setEstadoFilter] = useState("");
 
-  // Modales
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Formulario de edición
   const [editForm, setEditForm] = useState<UpdatePostulanteDto | UpdateEmpresaDto>({});
 
   const loadUsers = async () => {
@@ -108,13 +105,13 @@ export default function UsersView() {
   const handleToggleEstado = async (user: AdminUser) => {
     try {
       const nuevoEstado = user.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
-      
+
       if (user.tipo === "postulante") {
         await adminService.updatePostulante(user.id, { estado: nuevoEstado });
       } else {
         await adminService.updateEmpresa(user.id, { estado: nuevoEstado });
       }
-      
+
       success(
         `Usuario ${nuevoEstado === "ACTIVO" ? "activado" : "desactivado"} exitosamente`
       );
@@ -129,7 +126,7 @@ export default function UsersView() {
 
     try {
       setSaving(true);
-      
+
       if (selectedUser.tipo === "postulante") {
         await adminService.updatePostulante(selectedUser.id, editForm as UpdatePostulanteDto);
       } else {
@@ -151,7 +148,7 @@ export default function UsersView() {
 
     try {
       setSaving(true);
-      
+
       if (selectedUser.tipo === "postulante") {
         await adminService.deletePostulante(selectedUser.id);
       } else {
@@ -171,19 +168,17 @@ export default function UsersView() {
   if (loading && users.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Filtros y búsqueda */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div className="surface-card rounded-xl border border-border-subtle p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Búsqueda */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-secondary mb-2">
               Buscar
             </label>
             <div className="relative">
@@ -191,17 +186,16 @@ export default function UsersView() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Nombre, correo o RUT..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-2.5 w-5 h-5 text-muted" />
             </div>
           </div>
 
-          {/* Filtro tipo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-secondary mb-2">
               Tipo de Usuario
             </label>
             <select
@@ -210,7 +204,7 @@ export default function UsersView() {
                 setTipoFilter(e.target.value as "" | "postulante" | "empresa");
                 setPage(1);
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="">Todos</option>
               <option value="postulante">Postulantes</option>
@@ -218,9 +212,8 @@ export default function UsersView() {
             </select>
           </div>
 
-          {/* Filtro estado */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-secondary mb-2">
               Estado
             </label>
             <select
@@ -229,7 +222,7 @@ export default function UsersView() {
                 setEstadoFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="">Todos</option>
               <option value="ACTIVO">Activo</option>
@@ -241,21 +234,21 @@ export default function UsersView() {
         <div className="flex gap-4 mt-4">
           <button
             onClick={handleSearch}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            className="flex items-center gap-2 px-4 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-colors"
           >
             <Search className="w-4 h-4" />
             Buscar
           </button>
           <button
             onClick={loadUsers}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            className="flex items-center gap-2 px-4 py-2 border border-border-default rounded-lg hover:bg-surface-muted text-secondary transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Actualizar
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-lg hover:opacity-90 transition-colors"
           >
             <Download className="w-4 h-4" />
             Exportar CSV
@@ -263,102 +256,84 @@ export default function UsersView() {
         </div>
       </div>
 
-      {/* Información de resultados */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Mostrando <span className="font-medium">{users.length}</span> de{" "}
-          <span className="font-medium">{total}</span> usuarios
+        <p className="text-sm text-secondary">
+          Mostrando <span className="font-semibold">{users.length}</span> de{" "}
+          <span className="font-semibold">{total}</span> usuarios
         </p>
       </div>
 
-      {/* Tabla de usuarios */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="surface-card rounded-xl border border-border-subtle overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-900">
+          <table className="min-w-full divide-y divide-border-subtle">
+            <thead className="surface-muted">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Usuario
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  RUT
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Contacto
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Tipo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Fecha Registro
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Acciones
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Usuario</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">RUT</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Contacto</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Tipo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Fecha Registro</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-border-subtle">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={8} className="px-6 py-12 text-center text-muted">
                     No se encontraron usuarios
                   </td>
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={`${user.tipo}-${user.id}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <tr key={`${user.tipo}-${user.id}`} className="hover:bg-surface-muted transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
                       {user.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {user.tipo === "empresa" ? (
-                          <Building2 className="w-5 h-5 text-purple-600" />
+                          <Building2 className="w-5 h-5 text-primary" />
                         ) : (
-                          <User className="w-5 h-5 text-blue-600" />
+                          <User className="w-5 h-5 text-primary" />
                         )}
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-semibold text-primary dark:text-white">
                             {user.nombre}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
                       {user.rut || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{user.correo}</div>
+                      <div className="text-sm text-primary dark:text-white">{user.correo}</div>
                       {user.telefono && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.telefono}</div>
+                        <div className="text-sm text-muted">{user.telefono}</div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           user.tipo === "empresa"
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-blue-100 text-blue-800"
+                            ? "primary-soft text-primary"
+                            : "bg-blue-soft text-blue"
                         }`}
                       >
                         {user.tipo}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
                       {new Date(user.fechaRegistro).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           user.estado === "ACTIVO"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                            ? "success-soft text-success"
+                            : "error-soft text-error"
                         }`}
                       >
                         {user.estado}
@@ -370,8 +345,8 @@ export default function UsersView() {
                           onClick={() => handleToggleEstado(user)}
                           className={`p-1.5 rounded-lg transition-colors ${
                             user.estado === "ACTIVO"
-                              ? "text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/30"
-                              : "text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
+                              ? "text-warning hover:bg-warning-soft"
+                              : "text-success hover:bg-success-soft"
                           }`}
                           title={user.estado === "ACTIVO" ? "Desactivar" : "Activar"}
                         >
@@ -383,14 +358,14 @@ export default function UsersView() {
                         </button>
                         <button
                           onClick={() => handleEdit(user)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-primary hover:bg-primary-soft rounded-lg transition-colors"
                           title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(user)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-error hover:bg-error-soft rounded-lg transition-colors"
                           title="Eliminar"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -405,26 +380,25 @@ export default function UsersView() {
         </div>
       </div>
 
-      {/* Paginación */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between bg-white dark:bg-gray-800 px-6 py-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between surface-card px-6 py-3 rounded-xl border border-border-subtle">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 border border-border-default rounded-lg hover:bg-surface-muted text-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             Anterior
           </button>
 
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-secondary">
             Página {page} de {totalPages}
           </span>
 
           <button
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 border border-border-default rounded-lg hover:bg-surface-muted text-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Siguiente
             <ChevronRight className="w-4 h-4" />
@@ -432,7 +406,6 @@ export default function UsersView() {
         </div>
       )}
 
-      {/* Modal de edición */}
       <AdminModal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
@@ -453,7 +426,7 @@ export default function UsersView() {
               type="text"
               value={editForm.nombre || ""}
               onChange={(e) => setEditForm({ ...editForm, nombre: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </FormField>
 
@@ -462,7 +435,7 @@ export default function UsersView() {
               type="email"
               value={editForm.correo || ""}
               onChange={(e) => setEditForm({ ...editForm, correo: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </FormField>
 
@@ -472,7 +445,7 @@ export default function UsersView() {
               value={editForm.rut || ""}
               onChange={(e) => setEditForm({ ...editForm, rut: e.target.value })}
               placeholder="12.345.678-9"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </FormField>
 
@@ -482,7 +455,7 @@ export default function UsersView() {
                 type="tel"
                 value={(editForm as UpdatePostulanteDto).telefono || ""}
                 onChange={(e) => setEditForm({ ...editForm, telefono: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </FormField>
           )}
@@ -491,7 +464,7 @@ export default function UsersView() {
             <select
               value={editForm.estado || "ACTIVO"}
               onChange={(e) => setEditForm({ ...editForm, estado: e.target.value as "ACTIVO" | "INACTIVO" })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="ACTIVO">Activo</option>
               <option value="INACTIVO">Inactivo</option>
@@ -500,7 +473,6 @@ export default function UsersView() {
         </div>
       </AdminModal>
 
-      {/* Modal de confirmación de eliminación */}
       <ConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

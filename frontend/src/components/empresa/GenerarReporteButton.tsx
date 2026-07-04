@@ -124,7 +124,7 @@ export default function GenerarReporteButton({
             ${
               generando
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg"
+                : "primary-bg hover:primary-bg-hover shadow-md hover:shadow-lg"
             }
           `}
         >
@@ -145,8 +145,9 @@ export default function GenerarReporteButton({
         {!generando && (
           <button
             onClick={() => setMostrarOpciones(!mostrarOpciones)}
-            className="px-4 py-3 border-2 border-purple-600 text-purple-600 rounded-lg
-                     hover:bg-purple-50 transition-colors font-semibold"
+            className="px-4 py-3 border-2 border-primary text-primary rounded-lg
+                     hover:primary-soft transition-colors font-semibold"
+            aria-label="Opciones de generación"
           >
             ⚙️
           </button>
@@ -155,27 +156,27 @@ export default function GenerarReporteButton({
 
       {/* Opciones avanzadas */}
       {mostrarOpciones && !generando && (
-        <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4 space-y-3">
-          <h4 className="font-semibold text-purple-900 text-sm">
+        <div className="primary-soft border border-border-subtle rounded-lg p-4 space-y-3">
+          <h4 className="font-semibold text-primary-soft-text text-sm">
             Opciones de generación
           </h4>
           <div className="space-y-2">
             <button
               onClick={() => handleGenerarReporte(false)}
-              className="w-full text-left px-4 py-2 bg-white rounded-lg border border-purple-200
-                       hover:bg-purple-100 transition-colors text-sm"
+              className="w-full text-left px-4 py-2 surface-card rounded-lg border border-border-subtle
+                       hover:surface-hover transition-colors text-sm"
             >
-              <div className="font-medium text-purple-900">Top 10 candidatos</div>
+              <div className="font-medium text-primary">Top 10 candidatos</div>
               <div className="text-xs text-gray-600">
                 Reporte con los 10 mejores candidatos
               </div>
             </button>
             <button
               onClick={() => handleGenerarReporte(true)}
-              className="w-full text-left px-4 py-2 bg-white rounded-lg border border-purple-200
-                       hover:bg-purple-100 transition-colors text-sm"
+              className="w-full text-left px-4 py-2 surface-card rounded-lg border border-border-subtle
+                       hover:surface-hover transition-colors text-sm"
             >
-              <div className="font-medium text-purple-900">
+              <div className="font-medium text-primary">
                 Todos los candidatos
               </div>
               <div className="text-xs text-gray-600">

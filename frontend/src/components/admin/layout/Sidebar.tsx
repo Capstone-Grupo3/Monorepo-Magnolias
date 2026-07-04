@@ -48,7 +48,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 surface-card dark:border-border-strong text-primary dark:text-white h-screen transition-all duration-300 ease-in-out z-50 border-r border-subtle 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -69,11 +69,11 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
         <Link href="/admin/dashboard">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-2">
-               <Shield className="w-8 h-8 text-brand-500" />
-               <span className="text-xl font-bold text-gray-800 dark:text-white">Magnolias Admin</span>
+              <Shield className="w-8 h-8 primary" />
+              <span className="text-xl font-bold text-primary dark:text-white">Magnolias Admin</span>
             </div>
           ) : (
-            <Shield className="w-8 h-8 text-brand-500" />
+            <Shield className="w-8 h-8 primary" />
           )}
         </Link>
       </div>
@@ -83,7 +83,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h2
-                  className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  className={`mb-4 text-xs uppercase flex leading-[20px] text-muted ${
                     !isExpanded && !isHovered
                       ? "lg:justify-center"
                       : "justify-start"
@@ -100,6 +100,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                     <li key={menuIndex}>
                       <button
                         onClick={() => setActiveTab(menuItem.id)}
+                        aria-label={menuItem.label}
                         className={`menu-item group w-full ${
                           activeTab === menuItem.id ? "menu-item-active" : "menu-item-inactive"
                         } ${

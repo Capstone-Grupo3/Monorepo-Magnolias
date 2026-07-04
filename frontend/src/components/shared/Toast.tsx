@@ -36,43 +36,43 @@ export function useToast() {
   return context;
 }
 
-// Configuración de estilos por tipo
+// Configuración de estilos por tipo usando utilidades semánticas
 const toastConfig = {
   success: {
     icon: CheckCircle,
-    bgColor: "bg-gradient-to-r from-green-50 to-emerald-50",
-    borderColor: "border-green-200",
-    iconColor: "text-green-500",
-    titleColor: "text-green-800",
-    messageColor: "text-green-600",
-    progressColor: "bg-green-500",
+    bg: "success-soft",
+    border: "border-success",
+    iconColor: "success",
+    titleColor: "success",
+    messageColor: "success",
+    progressColor: "success",
   },
   error: {
     icon: XCircle,
-    bgColor: "bg-gradient-to-r from-red-50 to-rose-50",
-    borderColor: "border-red-200",
-    iconColor: "text-red-500",
-    titleColor: "text-red-800",
-    messageColor: "text-red-600",
-    progressColor: "bg-red-500",
+    bg: "error-soft",
+    border: "border-error",
+    iconColor: "error",
+    titleColor: "error",
+    messageColor: "error",
+    progressColor: "error",
   },
   warning: {
     icon: AlertTriangle,
-    bgColor: "bg-gradient-to-r from-amber-50 to-yellow-50",
-    borderColor: "border-amber-200",
-    iconColor: "text-amber-500",
-    titleColor: "text-amber-800",
-    messageColor: "text-amber-600",
-    progressColor: "bg-amber-500",
+    bg: "warning-soft",
+    border: "border-warning",
+    iconColor: "warning",
+    titleColor: "warning",
+    messageColor: "warning",
+    progressColor: "warning",
   },
   info: {
     icon: Info,
-    bgColor: "bg-gradient-to-r from-blue-50 to-sky-50",
-    borderColor: "border-blue-200",
-    iconColor: "text-blue-500",
-    titleColor: "text-blue-800",
-    messageColor: "text-blue-600",
-    progressColor: "bg-blue-500",
+    bg: "primary-soft",
+    border: "border-primary",
+    iconColor: "primary",
+    titleColor: "primary",
+    messageColor: "primary",
+    progressColor: "primary",
   },
 };
 
@@ -97,7 +97,7 @@ function ToastItem({
       className={`
         relative overflow-hidden
         w-full max-w-sm
-        ${config.bgColor} ${config.borderColor}
+        ${config.bg} ${config.border}
         border rounded-xl shadow-lg
         backdrop-blur-sm
       `}
@@ -126,9 +126,10 @@ function ToastItem({
             onClick={() => onRemove(toast.id)}
             className={`
               shrink-0 p-1 rounded-lg
-              ${config.messageColor} hover:bg-white/50
+              ${config.messageColor} hover:surface-hover
               transition-colors duration-200
             `}
+            aria-label="Cerrar notificación"
           >
             <X size={18} />
           </button>

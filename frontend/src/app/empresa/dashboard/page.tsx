@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Building2,
   Briefcase,
@@ -17,16 +17,12 @@ import {
   Unlock,
 } from "lucide-react";
 
-// Importar tipos centralizados
 import { PostulacionDetalle } from "@/types";
 
-// Importar hook personalizado
 import { useEmpresaDashboard } from "@/hooks/useEmpresaDashboard";
 
-// Importar utilidades
 import { getEstadoColor } from "@/lib/formatters";
 
-// Importar componentes compartidos
 import {
   DashboardHeader,
   StatCard,
@@ -38,14 +34,21 @@ import EmailVerificationBanner from "@/components/shared/EmailVerificationBanner
 import GenerarReporteButton from "@/components/empresa/GenerarReporteButton";
 
 export default function DashboardEmpresaPage() {
-  // Hook de notificaciones toast
   const toast = useToast();
 
-  // Estado para verificación de email
-  const [emailVerificado, setEmailVerificado] = useState(true);
-  const [userEmail, setUserEmail] = useState("");
+  const [emailVerificado, setEmailVerificado] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("emailVerificado") === "true";
+    }
+    return true;
+  });
+  const [userEmail, setUserEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userEmail") || "";
+    }
+    return "";
+  });
 
-  // Usar hook personalizado para toda la lógica de datos
   const {
     empresa,
     cargos,
@@ -57,23 +60,11 @@ export default function DashboardEmpresaPage() {
     refresh,
   } = useEmpresaDashboard();
 
-  // Verificar estado de email al cargar
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const verificado = localStorage.getItem("emailVerificado") === "true";
-      const email = localStorage.getItem("userEmail") || "";
-      setEmailVerificado(verificado);
-      setUserEmail(email);
-    }
-  }, []);
-
-  // Estados locales de UI
   const [activeTab, setActiveTab] = useState<
     "cargos" | "postulaciones" | "crear" | "perfil"
   >("cargos");
   const [postulacionesFiltradas, setPostulacionesFiltradas] = useState<PostulacionDetalle[]>([]);
 
-  // Estado para crear cargo
   const [nuevoCargo, setNuevoCargo] = useState({
     titulo: "",
     descripcion: "",
@@ -136,7 +127,7 @@ export default function DashboardEmpresaPage() {
       if (response.ok) {
         toast.success(
           `Cargo ${nuevoEstado === "CERRADA" ? "cerrado" : "reabierto"}`,
-          nuevoEstado === "CERRADA" 
+          nuevoEstado === "CERRADA"
             ? "Ya puedes generar el reporte final de este cargo."
             : "El cargo está activo para recibir postulaciones."
         );
@@ -160,23 +151,19 @@ export default function DashboardEmpresaPage() {
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/postulaciones/cargo/${cargoId}`,
-        {
-          headers,
-        }
+        { headers }
       );
 
       if (response.ok) {
         const data = await response.json();
-        
-        // Encontrar el cargo en la lista de cargos
+
         const cargo = cargos.find(c => c.id === cargoId);
-        
-        // Enriquecer las postulaciones con información del cargo si no viene del backend
+
         const postulacionesEnriquecidas = data.map((p: any) => ({
           ...p,
-          cargo: p.cargo || cargo // Usar cargo del backend si existe, sino usar el de la lista local
+          cargo: p.cargo || cargo
         }));
-        
+
         setPostulacionesFiltradas(postulacionesEnriquecidas);
         setActiveTab("postulaciones");
       }
@@ -292,7 +279,6 @@ export default function DashboardEmpresaPage() {
       if (response.ok) {
         const estadoTexto = nuevoEstado === "SELECCIONADO" ? "seleccionada" : nuevoEstado.toLowerCase();
         toast.success("Estado actualizado", `La postulación ha sido ${estadoTexto}.`);
-        // Recargar todas las postulaciones
         refresh();
       } else {
         toast.error("Error", "No se pudo actualizar el estado de la postulación.");
@@ -316,7 +302,7 @@ export default function DashboardEmpresaPage() {
   const cargosActivos = cargos.filter((c) => c.activo).length;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-orange-50">
+    <div className="min-h-screen surface-page">
       <DashboardHeader
         icon={Building2}
         title="Portal de Empresa"
@@ -324,55 +310,52 @@ export default function DashboardEmpresaPage() {
         actions={<LogoutButton onLogout={handleLogout} />}
       />
 
-      {/* Email Verification Banner */}
       {!emailVerificado && userEmail && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <EmailVerificationBanner userEmail={userEmail} userType="empresa" />
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="bg-white border-b border-slate-100 shadow-xs">
+      <div className="surface-card border-b border-border-subtle">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <StatCard
               title="Cargos Activos"
               value={cargosActivos}
               icon={Briefcase}
-              color="orange"
+              color="primary"
             />
             <StatCard
               title="Pendientes"
               value={postulacionesPendientes}
               icon={Clock}
-              color="yellow"
+              color="warning"
             />
             <StatCard
               title="Aprobadas"
               value={postulacionesAprobadas}
               icon={CheckCircle}
-              color="green"
+              color="success"
             />
             <StatCard
               title="Total Postulaciones"
               value={postulaciones.length}
               icon={Users}
-              color="blue"
+              color="primary"
             />
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 shadow-xs">
+      <div className="surface-card border-b border-border-subtle">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <button
               onClick={() => setActiveTab("cargos")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "cargos"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -384,8 +367,8 @@ export default function DashboardEmpresaPage() {
               onClick={() => setActiveTab("postulaciones")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "postulaciones"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -397,8 +380,8 @@ export default function DashboardEmpresaPage() {
               onClick={() => setActiveTab("crear")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "crear"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -410,8 +393,8 @@ export default function DashboardEmpresaPage() {
               onClick={() => setActiveTab("perfil")}
               className={`py-4 px-2 border-b-2 font-semibold transition-all ${
                 activeTab === "perfil"
-                  ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-slate-600 hover:text-slate-800 hover:border-slate-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-secondary hover:text-primary hover:border-border-default"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -423,18 +406,16 @@ export default function DashboardEmpresaPage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Mis Cargos Tab */}
         {activeTab === "cargos" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-2xl font-bold text-primary dark:text-white">
                 Mis Cargos ({cargos.length})
               </h2>
               <button
                 onClick={() => setActiveTab("crear")}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                className="flex items-center gap-2 px-4 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-all"
               >
                 <Plus size={20} />
                 Nuevo Cargo
@@ -445,21 +426,21 @@ export default function DashboardEmpresaPage() {
               {cargos.map((cargo) => (
                 <div
                   key={cargo.id}
-                  className="bg-white rounded-xl shadow-xs border p-6 hover:shadow-sm transition-all"
+                  className="surface-card rounded-xl border border-border-subtle p-6 hover:shadow-sm transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-800">
+                        <h3 className="text-xl font-bold text-primary dark:text-white">
                           {cargo.titulo}
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
                             cargo.estado === "CERRADA"
-                              ? "bg-red-100 text-red-800"
+                              ? "error-soft text-error"
                               : cargo.estado === "EN_PROCESO"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-green-100 text-green-800"
+                                ? "warning-soft text-warning"
+                                : "success-soft text-success"
                           }`}
                         >
                           {cargo.estado === "CERRADA" ? (
@@ -481,11 +462,11 @@ export default function DashboardEmpresaPage() {
                         </span>
                       </div>
 
-                      <p className="text-gray-600 mb-4 line-clamp-2">
+                      <p className="text-secondary mb-4 line-clamp-2">
                         {cargo.descripcion}
                       </p>
 
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex flex-wrap gap-4 text-sm text-secondary">
                         <div className="flex items-center gap-1">
                           <MapPin size={16} />
                           {cargo.ubicacion}
@@ -502,7 +483,7 @@ export default function DashboardEmpresaPage() {
                         </div>
                         <button
                           onClick={() => fetchPostulacionesByCargo(cargo.id)}
-                          className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+                          className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
                           title="Ver postulaciones"
                         >
                           <Users size={16} />
@@ -512,15 +493,19 @@ export default function DashboardEmpresaPage() {
                     </div>
 
                     <div className="flex gap-2 ml-4">
-                      {/* Botón para Cerrar/Abrir Cargo */}
                       {(cargo._count?.postulaciones || 0) > 0 && (
                         <button
                           onClick={() => handleCerrarCargo(cargo.id, cargo.estado)}
                           className={`p-2 rounded-lg transition-all ${
                             cargo.estado === "CERRADA"
-                              ? "text-green-600 hover:bg-green-50"
-                              : "text-orange-600 hover:bg-orange-50"
+                              ? "text-success hover:bg-success-soft"
+                              : "text-primary hover:bg-primary-soft"
                           }`}
+                          aria-label={
+                            cargo.estado === "CERRADA"
+                              ? "Reabrir cargo"
+                              : "Cerrar cargo para generar reporte"
+                          }
                           title={
                             cargo.estado === "CERRADA"
                               ? "Reabrir cargo"
@@ -536,14 +521,16 @@ export default function DashboardEmpresaPage() {
                       )}
                       <button
                         onClick={() => fetchPostulacionesByCargo(cargo.id)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                        className="p-2 text-primary hover:bg-primary-soft rounded-lg transition-all"
+                        aria-label="Ver Postulaciones"
                         title="Ver Postulaciones"
                       >
                         <Users size={20} />
                       </button>
                       <button
                         onClick={() => handleDeleteCargo(cargo.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-2 text-error hover:bg-error-soft rounded-lg transition-all"
+                        aria-label="Eliminar cargo"
                         title="Eliminar"
                       >
                         <Trash2 size={20} />
@@ -551,9 +538,8 @@ export default function DashboardEmpresaPage() {
                     </div>
                   </div>
 
-                  {/* Sección de Reportes */}
                   {(cargo._count?.postulaciones || 0) > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="mt-4 pt-4 border-t border-border-subtle">
                       <GenerarReporteButton
                         cargoId={cargo.id}
                         cargoTitulo={cargo.titulo}
@@ -567,16 +553,16 @@ export default function DashboardEmpresaPage() {
 
               {cargos.length === 0 && (
                 <div className="text-center py-12">
-                  <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  <Briefcase className="w-16 h-16 text-muted mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-primary dark:text-white mb-2">
                     No tienes cargos publicados
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-secondary mb-4">
                     Crea tu primer cargo para empezar a recibir postulaciones
                   </p>
                   <button
                     onClick={() => setActiveTab("crear")}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                    className="px-6 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-all"
                   >
                     Crear Cargo
                   </button>
@@ -586,17 +572,16 @@ export default function DashboardEmpresaPage() {
           </div>
         )}
 
-        {/* Postulaciones Tab */}
         {activeTab === "postulaciones" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-2xl font-bold text-primary dark:text-white">
                 Postulaciones Recibidas ({postulacionesFiltradas.length > 0 ? postulacionesFiltradas.length : postulaciones.length})
               </h2>
               {postulacionesFiltradas.length > 0 && (
                 <button
                   onClick={() => setPostulacionesFiltradas([])}
-                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                  className="text-sm text-primary hover:text-primary/80 underline"
                 >
                   Ver todas las postulaciones
                 </button>
@@ -607,32 +592,32 @@ export default function DashboardEmpresaPage() {
               {(postulacionesFiltradas.length > 0 ? postulacionesFiltradas : postulaciones).map((postulacion) => (
                 <div
                   key={postulacion.id}
-                  className="bg-white rounded-xl shadow-xs border p-6"
+                  className="surface-card rounded-xl border border-border-subtle p-6"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-800">
+                        <h3 className="text-xl font-bold text-primary dark:text-white">
                           {postulacion.postulante?.nombre || "Postulante"}
                         </h3>
                         {postulacion.puntajeIa && (
-                          <div className="flex items-center gap-1 px-3 py-1 bg-blue-50 rounded-full">
-                            <TrendingUp size={16} className="text-blue-600" />
-                            <span className="text-sm font-bold text-blue-600">
+                          <div className="flex items-center gap-1 px-3 py-1 primary-soft rounded-full">
+                            <TrendingUp size={16} className="text-primary" />
+                            <span className="text-sm font-bold text-primary">
                               {postulacion.puntajeIa}% match
                             </span>
                           </div>
                         )}
                       </div>
 
-                      <p className="text-gray-600 mb-3">
+                      <p className="text-secondary mb-3">
                         Cargo:{" "}
-                        <span className="font-medium">
+                        <span className="font-semibold">
                           {postulacion.cargo?.titulo || "No especificado"}
                         </span>
                       </p>
 
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                      <div className="flex flex-wrap gap-4 text-sm text-secondary mb-4">
                         <div>{postulacion.postulante?.correo}</div>
                         {postulacion.postulante?.telefono && (
                           <div>{postulacion.postulante.telefono}</div>
@@ -651,7 +636,7 @@ export default function DashboardEmpresaPage() {
                           href={postulacion.postulante.linkedinUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline text-sm"
+                          className="text-primary hover:underline text-sm"
                         >
                           Ver perfil en LinkedIn →
                         </a>
@@ -668,7 +653,7 @@ export default function DashboardEmpresaPage() {
                   </div>
 
                   {postulacion.estado === "PENDIENTE" && (
-                    <div className="flex gap-3 pt-4 border-t">
+                    <div className="flex gap-3 pt-4 border-t border-border-subtle">
                       <button
                         onClick={() =>
                           handleCambiarEstadoPostulacion(
@@ -676,7 +661,7 @@ export default function DashboardEmpresaPage() {
                             "SELECCIONADO"
                           )
                         }
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-success text-white rounded-lg hover:opacity-90 transition-all"
                       >
                         <CheckCircle size={20} />
                         Aprobar
@@ -688,7 +673,7 @@ export default function DashboardEmpresaPage() {
                             "Rechazado"
                           )
                         }
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-error text-white rounded-lg hover:opacity-90 transition-all"
                       >
                         <XCircle size={20} />
                         Rechazar
@@ -700,11 +685,11 @@ export default function DashboardEmpresaPage() {
 
               {(postulacionesFiltradas.length === 0 && postulaciones.length === 0) && (
                 <div className="text-center py-12">
-                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  <Users className="w-16 h-16 text-muted mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-primary dark:text-white mb-2">
                     No hay postulaciones aún
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-secondary">
                     Las postulaciones aparecerán aquí cuando los candidatos
                     apliquen a tus cargos
                   </p>
@@ -714,19 +699,18 @@ export default function DashboardEmpresaPage() {
           </div>
         )}
 
-        {/* Crear Cargo Tab */}
         {activeTab === "crear" && (
           <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            <h2 className="text-2xl font-bold text-primary dark:text-white mb-6">
               Crear Nuevo Cargo
             </h2>
 
             <form
               onSubmit={handleCrearCargo}
-              className="bg-white rounded-xl shadow-xs border p-6 space-y-6"
+              className="surface-card rounded-xl border border-border-subtle p-6 space-y-6"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   Título del Cargo *
                 </label>
                 <input
@@ -736,13 +720,13 @@ export default function DashboardEmpresaPage() {
                   onChange={(e) =>
                     setNuevoCargo({ ...nuevoCargo, titulo: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Ej: Desarrollador Full Stack"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   Descripción *
                 </label>
                 <textarea
@@ -755,14 +739,14 @@ export default function DashboardEmpresaPage() {
                       descripcion: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Describe las responsabilidades y requisitos del puesto..."
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Ubicación *
                   </label>
                   <input
@@ -775,13 +759,13 @@ export default function DashboardEmpresaPage() {
                         ubicacion: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="Ej: Santiago, Chile"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Salario (CLP)
                   </label>
                   <input
@@ -793,7 +777,7 @@ export default function DashboardEmpresaPage() {
                         salario: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                     placeholder="1500000"
                   />
                 </div>
@@ -801,7 +785,7 @@ export default function DashboardEmpresaPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Tipo de Contrato *
                   </label>
                   <select
@@ -813,19 +797,18 @@ export default function DashboardEmpresaPage() {
                         tipoContrato: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="FULL_TIME">Tiempo Completo</option>
                     <option value="PART_TIME">Medio Tiempo</option>
                     <option value="PROJECT">Por Proyecto</option>
                     <option value="FREELANCE">Freelance</option>
                     <option value="PRACTICA">Práctica</option>
-                    <option value="FREELANCE">Freelance</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Modalidad *
                   </label>
                   <select
@@ -837,7 +820,7 @@ export default function DashboardEmpresaPage() {
                         modalidad: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary focus:border-transparent"
                   >
                     <option value="PRESENCIAL">Presencial</option>
                     <option value="REMOTO">Remoto</option>
@@ -847,7 +830,7 @@ export default function DashboardEmpresaPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   Requisitos
                 </label>
                 <textarea
@@ -859,7 +842,7 @@ export default function DashboardEmpresaPage() {
                       requisitos: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Lista los requisitos principales del puesto..."
                 />
               </div>
@@ -867,14 +850,14 @@ export default function DashboardEmpresaPage() {
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-all"
+                  className="flex-1 primary-bg text-white py-3 rounded-lg font-medium hover:primary-bg-hover transition-all"
                 >
                   Publicar Cargo
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab("cargos")}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all"
+                  className="px-6 py-3 border border-border-default text-secondary rounded-lg font-medium hover:bg-surface-muted transition-all"
                 >
                   Cancelar
                 </button>
@@ -883,58 +866,57 @@ export default function DashboardEmpresaPage() {
           </div>
         )}
 
-        {/* Perfil Tab */}
         {activeTab === "perfil" && empresa && (
           <div className="max-w-3xl space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-primary dark:text-white">
               Perfil de la Empresa
             </h2>
 
-            <div className="bg-white rounded-xl shadow-xs border p-6">
+            <div className="surface-card rounded-xl border border-border-subtle p-6">
               <div className="flex items-start gap-6 mb-6">
-                <div className="w-24 h-24 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Building2 className="w-12 h-12 text-blue-600" />
+                <div className="w-24 h-24 primary-soft rounded-xl flex items-center justify-center">
+                  <Building2 className="w-12 h-12 text-primary" />
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  <h3 className="text-2xl font-bold text-primary dark:text-white mb-2">
                     {empresa.nombre}
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-secondary mb-4">
                     {empresa.descripcion || "Sin descripción"}
                   </p>
-                  <p className="text-sm text-gray-600">{empresa.correo}</p>
+                  <p className="text-sm text-secondary">{empresa.correo}</p>
                 </div>
               </div>
 
-              <div className="pt-6 border-t">
-                <h4 className="text-lg font-bold text-gray-800 mb-4">
+              <div className="pt-6 border-t border-border-subtle">
+                <h4 className="text-lg font-bold text-primary dark:text-white mb-4">
                   Estadísticas
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-center p-4 primary-soft rounded-xl">
+                    <div className="text-3xl font-bold text-primary">
                       {cargos.length}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Cargos</div>
+                    <div className="text-sm text-secondary mt-1">Cargos</div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-3xl font-bold text-green-600">
+                  <div className="text-center p-4 success-soft rounded-xl">
+                    <div className="text-3xl font-bold text-success">
                       {cargosActivos}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Activos</div>
+                    <div className="text-sm text-secondary mt-1">Activos</div>
                   </div>
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <div className="text-3xl font-bold text-yellow-600">
+                  <div className="text-center p-4 warning-soft rounded-xl">
+                    <div className="text-3xl font-bold text-warning">
                       {postulacionesPendientes}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Pendientes</div>
+                    <div className="text-sm text-secondary mt-1">Pendientes</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-3xl font-bold text-purple-600">
+                  <div className="text-center p-4 primary-soft rounded-xl">
+                    <div className="text-3xl font-bold text-primary">
                       {postulaciones.length}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Total</div>
+                    <div className="text-sm text-secondary mt-1">Total</div>
                   </div>
                 </div>
               </div>

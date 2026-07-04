@@ -38,9 +38,9 @@ const TIPOS_CONTRATO = [
 ];
 
 const ESTADOS = [
-  { value: "ACTIVA", label: "Activa", color: "bg-green-100 text-green-800" },
-  { value: "CERRADA", label: "Cerrada", color: "bg-red-100 text-red-800" },
-  { value: "PAUSADA", label: "Pausada", color: "bg-yellow-100 text-yellow-800" },
+  { value: "ACTIVA", label: "Activa", color: "success-soft text-success" },
+  { value: "CERRADA", label: "Cerrada", color: "error-soft text-error" },
+  { value: "PAUSADA", label: "Pausada", color: "warning-soft text-warning" },
 ];
 
 export default function CargosView() {
@@ -52,19 +52,16 @@ export default function CargosView() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  // Filtros
   const [search, setSearch] = useState("");
   const [estadoFilter, setEstadoFilter] = useState("");
   const [empresaFilter, setEmpresaFilter] = useState<number | "">("");
 
-  // Modales
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedCargo, setSelectedCargo] = useState<Cargo | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Formulario
   const [form, setForm] = useState<any>({
     idEmpresa: 0,
     titulo: "",
@@ -251,7 +248,7 @@ export default function CargosView() {
   };
 
   const getEstadoStyle = (estado: string) => {
-    return ESTADOS.find((e) => e.value === estado)?.color || "bg-gray-100 text-gray-800 dark:text-white";
+    return ESTADOS.find((e) => e.value === estado)?.color || "bg-gray-100 text-gray-800";
   };
 
   const getTipoContratoLabel = (tipo: string) => {
@@ -265,18 +262,17 @@ export default function CargosView() {
   if (loading && cargos.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Filtros */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+      <div className="surface-card rounded-xl border border-border-subtle p-4">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
+            <label className="block text-sm font-medium text-secondary mb-1">Buscar</label>
             <div className="relative">
               <input
                 type="text"
@@ -284,18 +280,18 @@ export default function CargosView() {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Buscar por título o descripción..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full pl-10 pr-4 py-2 border border-border-default rounded-lg bg-transparent text-primary placeholder-muted focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted" />
             </div>
           </div>
 
           <div className="w-40">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
+            <label className="block text-sm font-medium text-secondary mb-1">Estado</label>
             <select
               value={estadoFilter}
               onChange={(e) => setEstadoFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
             >
               <option value="">Todos</option>
               {ESTADOS.map((e) => (
@@ -305,11 +301,11 @@ export default function CargosView() {
           </div>
 
           <div className="w-48">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Empresa</label>
+            <label className="block text-sm font-medium text-secondary mb-1">Empresa</label>
             <select
               value={empresaFilter}
               onChange={(e) => setEmpresaFilter(e.target.value ? Number(e.target.value) : "")}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
             >
               <option value="">Todas</option>
               {empresas.map((e) => (
@@ -321,21 +317,21 @@ export default function CargosView() {
           <div className="flex gap-2">
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+              className="px-4 py-2 primary-bg text-white rounded-lg hover:primary-bg-hover transition-colors flex items-center gap-2"
             >
               <Search className="w-4 h-4" />
               Buscar
             </button>
             <button
               onClick={handleExport}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              className="px-4 py-2 bg-success text-white rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Exportar
             </button>
             <button
               onClick={handleCreate}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Nuevo
@@ -343,7 +339,7 @@ export default function CargosView() {
             <button
               onClick={loadCargos}
               disabled={loading}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 flex items-center gap-2"
+              className="px-4 py-2 border border-border-default rounded-lg hover:bg-surface-muted text-secondary transition-colors flex items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             </button>
@@ -351,103 +347,101 @@ export default function CargosView() {
         </div>
       </div>
 
-      {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Briefcase className="w-5 h-5 text-blue-600" />
+            <div className="p-2 primary-soft rounded-lg">
+              <Briefcase className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Cargos</p>
-              <p className="text-xl font-bold">{total}</p>
+              <p className="text-sm text-muted">Total Cargos</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{total}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Play className="w-5 h-5 text-green-600" />
+            <div className="p-2 success-soft rounded-lg">
+              <Play className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Activos</p>
-              <p className="text-xl font-bold">{cargos.filter((c) => c.estado === "ACTIVA").length}</p>
+              <p className="text-sm text-muted">Activos</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{cargos.filter((c) => c.estado === "ACTIVA").length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Pause className="w-5 h-5 text-yellow-600" />
+            <div className="p-2 warning-soft rounded-lg">
+              <Pause className="w-5 h-5 text-warning" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Pausados</p>
-              <p className="text-xl font-bold">{cargos.filter((c) => c.estado === "PAUSADA").length}</p>
+              <p className="text-sm text-muted">Pausados</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{cargos.filter((c) => c.estado === "PAUSADA").length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border p-4">
+        <div className="surface-card rounded-xl border border-border-subtle p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <XCircle className="w-5 h-5 text-red-600" />
+            <div className="p-2 error-soft rounded-lg">
+              <XCircle className="w-5 h-5 text-error" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Cerrados</p>
-              <p className="text-xl font-bold">{cargos.filter((c) => c.estado === "CERRADA").length}</p>
+              <p className="text-sm text-muted">Cerrados</p>
+              <p className="text-xl font-bold text-primary dark:text-white">{cargos.filter((c) => c.estado === "CERRADA").length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border overflow-hidden">
+      <div className="surface-card rounded-xl border border-border-subtle overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+          <table className="min-w-full divide-y divide-border-subtle">
+            <thead className="surface-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cargo</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Empresa</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ubicación</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Modalidad</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contrato</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Salario</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Postulantes</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Cargo</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Empresa</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Ubicación</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Modalidad</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Contrato</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Salario</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Postulantes</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-border-subtle">
               {cargos.map((cargo) => (
-                <tr key={cargo.id} className="hover:bg-gray-50 dark:bg-gray-700">
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{cargo.id}</td>
+                <tr key={cargo.id} className="hover:bg-surface-muted transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-muted">{cargo.id}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-purple-600" />
-                      <span className="font-medium text-gray-900 dark:text-white">{cargo.titulo}</span>
+                      <Briefcase className="w-4 h-4 text-primary" />
+                      <span className="font-semibold text-primary dark:text-white">{cargo.titulo}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">{cargo.empresa.nombre}</span>
+                      <Building2 className="w-4 h-4 text-muted" />
+                      <span className="text-secondary">{cargo.empresa.nombre}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-1 text-muted">
                       <MapPin className="w-3 h-3" />
                       {cargo.ubicacion || "N/A"}
                     </div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary">
                     {getModalidadLabel(cargo.modalidad || "")}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary">
                     {getTipoContratoLabel(cargo.tipoContrato || "")}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <DollarSign className="w-3 h-3" />
+                    <div className="flex items-center gap-1 text-secondary">
+                      <DollarSign className="w-3 h-3 text-muted" />
                       {cargo.salarioEstimado
                         ? `$${cargo.salarioEstimado.toLocaleString()}`
                         : "No especificado"}
@@ -457,7 +451,7 @@ export default function CargosView() {
                     <select
                       value={cargo.estado}
                       onChange={(e) => handleChangeEstado(cargo, e.target.value)}
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getEstadoStyle(cargo.estado)}`}
+                      className={`px-2 py-1 text-xs font-semibold rounded-full ${getEstadoStyle(cargo.estado)}`}
                     >
                       {ESTADOS.map((e) => (
                         <option key={e.value} value={e.value}>{e.label}</option>
@@ -465,23 +459,23 @@ export default function CargosView() {
                     </select>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <Users className="w-4 h-4" />
-                      <span className="font-medium">{cargo.totalPostulaciones}</span>
+                    <div className="flex items-center gap-1 text-secondary">
+                      <Users className="w-4 h-4 text-muted" />
+                      <span className="font-semibold">{cargo.totalPostulaciones}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(cargo)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                        className="p-1.5 text-primary hover:bg-primary-soft rounded transition-colors"
                         title="Editar"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(cargo)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                        className="p-1.5 text-error hover:bg-error-soft rounded transition-colors"
                         title="Eliminar"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -494,27 +488,26 @@ export default function CargosView() {
           </table>
         </div>
 
-        {/* Paginación */}
-        <div className="px-4 py-3 border-t flex items-center justify-between">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="px-4 py-3 border-t border-border-subtle flex items-center justify-between">
+          <div className="text-sm text-muted">
             Mostrando {(page - 1) * 25 + 1} - {Math.min(page * 25, total)} de {total} cargos
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-3 py-1 border rounded hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 border border-border-default rounded hover:bg-surface-muted text-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               Anterior
             </button>
-            <span className="px-3 py-1 text-gray-600">
+            <span className="px-3 py-1 text-secondary">
               Página {page} de {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-3 py-1 border rounded hover:bg-gray-50 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="px-3 py-1 border border-border-default rounded hover:bg-surface-muted text-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition-colors"
             >
               Siguiente
               <ChevronRight className="w-4 h-4" />
@@ -523,7 +516,6 @@ export default function CargosView() {
         </div>
       </div>
 
-      {/* Modal Crear */}
       <AdminModal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
@@ -536,7 +528,7 @@ export default function CargosView() {
             <select
               value={form.idEmpresa}
               onChange={(e) => setForm({ ...form, idEmpresa: Number(e.target.value) })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             >
               <option value="">Seleccionar empresa</option>
@@ -551,7 +543,7 @@ export default function CargosView() {
               type="text"
               value={form.titulo}
               onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             />
           </FormField>
@@ -561,7 +553,7 @@ export default function CargosView() {
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
               rows={4}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             />
           </FormField>
@@ -572,7 +564,7 @@ export default function CargosView() {
                 type="text"
                 value={form.ubicacion}
                 onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
                 required
               />
             </FormField>
@@ -581,7 +573,7 @@ export default function CargosView() {
               <select
                 value={form.modalidad}
                 onChange={(e) => setForm({ ...form, modalidad: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               >
                 {MODALIDADES.map((m) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
@@ -595,7 +587,7 @@ export default function CargosView() {
               <select
                 value={form.tipoContrato}
                 onChange={(e) => setForm({ ...form, tipoContrato: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               >
                 {TIPOS_CONTRATO.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -608,7 +600,7 @@ export default function CargosView() {
                 type="number"
                 value={form.salarioEstimado || ""}
                 onChange={(e) => setForm({ ...form, salarioEstimado: e.target.value ? Number(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
                 placeholder="Ej: 1500000"
               />
             </FormField>
@@ -619,14 +611,13 @@ export default function CargosView() {
               value={form.requisitos}
               onChange={(e) => setForm({ ...form, requisitos: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               placeholder="Describe los requisitos del cargo..."
             />
           </FormField>
         </div>
       </AdminModal>
 
-      {/* Modal Editar */}
       <AdminModal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
@@ -640,7 +631,7 @@ export default function CargosView() {
               type="text"
               value={form.titulo}
               onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             />
           </FormField>
@@ -650,7 +641,7 @@ export default function CargosView() {
               value={form.descripcion}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
               rows={4}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               required
             />
           </FormField>
@@ -661,7 +652,7 @@ export default function CargosView() {
                 type="text"
                 value={form.ubicacion}
                 onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               />
             </FormField>
 
@@ -669,7 +660,7 @@ export default function CargosView() {
               <select
                 value={form.modalidad}
                 onChange={(e) => setForm({ ...form, modalidad: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               >
                 {MODALIDADES.map((m) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
@@ -683,7 +674,7 @@ export default function CargosView() {
               <select
                 value={form.tipoContrato}
                 onChange={(e) => setForm({ ...form, tipoContrato: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               >
                 {TIPOS_CONTRATO.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
@@ -696,7 +687,7 @@ export default function CargosView() {
                 type="number"
                 value={form.salarioEstimado || ""}
                 onChange={(e) => setForm({ ...form, salarioEstimado: e.target.value ? Number(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
               />
             </FormField>
           </div>
@@ -705,7 +696,7 @@ export default function CargosView() {
             <select
               value={form.estado}
               onChange={(e) => setForm({ ...form, estado: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
             >
               {ESTADOS.map((e) => (
                 <option key={e.value} value={e.value}>{e.label}</option>
@@ -718,13 +709,12 @@ export default function CargosView() {
               value={form.requisitos}
               onChange={(e) => setForm({ ...form, requisitos: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-border-default rounded-lg bg-transparent text-primary focus:ring-2 focus:ring-primary"
             />
           </FormField>
         </div>
       </AdminModal>
 
-      {/* Modal Eliminar */}
       <ConfirmModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
@@ -738,6 +728,3 @@ export default function CargosView() {
     </div>
   );
 }
-
-
-

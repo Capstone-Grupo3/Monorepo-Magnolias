@@ -60,57 +60,60 @@ export default function VacanteCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-6 cursor-pointer border border-gray-200 hover:border-blue-400"
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); } }}
+      role="button"
+      tabIndex={0}
+      className="surface-card rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-6 cursor-pointer border border-border-subtle hover:border-primary"
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-800 mb-1">{titulo}</h3>
-          <p className="text-gray-600 font-medium">{empresaNombre}</p>
+          <h3 className="text-xl font-bold text-primary dark:text-white mb-1">{titulo}</h3>
+          <p className="text-secondary font-medium">{empresaNombre}</p>
         </div>
         {estado === "ACTIVO" && (
-          <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+          <span className="success-soft text-xs font-semibold px-3 py-1 rounded-full">
             Activo
           </span>
         )}
       </div>
 
       {/* Descripción */}
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{descripcion}</p>
+      <p className="text-secondary text-sm mb-4 line-clamp-2">{descripcion}</p>
 
       {/* Metadata */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {ubicacion && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <MapPin size={16} className="text-blue-500" />
+          <div className="flex items-center gap-2 text-sm text-secondary">
+            <MapPin size={16} className="text-primary" />
             <span>{ubicacion}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Briefcase size={16} className="text-blue-500" />
+        <div className="flex items-center gap-2 text-sm text-secondary">
+          <Briefcase size={16} className="text-primary" />
           <span>{getModalidadLabel(modalidad)}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Clock size={16} className="text-blue-500" />
+        <div className="flex items-center gap-2 text-sm text-secondary">
+          <Clock size={16} className="text-primary" />
           <span>{getTipoContratoLabel(tipo_contrato)}</span>
         </div>
 
         {formatSalario() && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <DollarSign size={16} className="text-blue-500" />
+          <div className="flex items-center gap-2 text-sm text-secondary">
+            <DollarSign size={16} className="text-primary" />
             <span>{formatSalario()}</span>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-        <span className="text-xs text-gray-500">
+      <div className="flex justify-between items-center pt-4 border-t border-border-subtle">
+        <span className="text-xs text-muted">
           {formatFecha(fecha_publicacion)}
         </span>
-        <button className="text-blue-600 font-medium text-sm hover:text-blue-700 transition-colors">
+        <button className="text-primary hover:text-primary-hover font-medium text-sm transition-colors">
           Ver detalles →
         </button>
       </div>

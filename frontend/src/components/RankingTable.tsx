@@ -16,7 +16,7 @@ export default function RankingTable({
     if (position === 2) return <Medal className="w-6 h-6 text-gray-400" />;
     if (position === 3) return <Award className="w-6 h-6 text-orange-600" />;
     return (
-      <span className="w-6 h-6 flex items-center justify-center text-gray-500 font-semibold">
+      <span className="w-6 h-6 flex items-center justify-center text-muted font-semibold">
         {position}
       </span>
     );
@@ -24,12 +24,12 @@ export default function RankingTable({
 
   if (postulantes.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8 text-center">
-        <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+      <div className="surface-card rounded-lg shadow-md p-8 text-center">
+        <User className="w-16 h-16 text-muted mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-primary dark:text-white mb-2">
           No hay postulaciones aún
         </h3>
-        <p className="text-gray-500">
+        <p className="text-secondary">
           Cuando los postulantes postulen, aparecerán aquí con su ranking de IA.
         </p>
       </div>
@@ -37,11 +37,11 @@ export default function RankingTable({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="surface-card rounded-lg shadow-md overflow-hidden">
       {/* Header */}
-      <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-4">
+      <div className="primary-bg px-6 py-4">
         <h2 className="text-xl font-bold text-white">Ranking de postulantes</h2>
-        <p className="text-blue-100 text-sm mt-1">
+        <p className="text-brand-100 text-sm mt-1">
           Evaluación automática por IA • {postulantes.length} postulaciones
         </p>
       </div>
@@ -49,21 +49,21 @@ export default function RankingTable({
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="surface-muted border-b border-border-subtle">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                 Posición
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                 Postulante
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                 Puntaje IA
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                 Fecha Postulación
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
@@ -72,8 +72,11 @@ export default function RankingTable({
             {postulantes.map((Postulante, index) => (
               <tr
                 key={Postulante.id}
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
+                className="hover:surface-hover transition-colors cursor-pointer"
                 onClick={() => onSelectPostulante?.(Postulante)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onSelectPostulante?.(Postulante); } }}
+                tabIndex={0}
+                role="button"
               >
                 {/* Posición */}
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -85,10 +88,10 @@ export default function RankingTable({
                 {/* Postulante */}
                 <td className="px-6 py-4">
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">
+                    <p className="text-sm font-semibold text-primary dark:text-white">
                       {Postulante.nombre_completo}
                     </p>
-                    <p className="text-xs text-gray-500">{Postulante.email}</p>
+                    <p className="text-xs text-muted">{Postulante.email}</p>
                   </div>
                 </td>
 
@@ -106,7 +109,7 @@ export default function RankingTable({
                 </td>
 
                 {/* Fecha */}
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
                   {formatDateShort(Postulante.fecha_postulacion)}
                 </td>
 
@@ -117,7 +120,7 @@ export default function RankingTable({
                       e.stopPropagation();
                       onSelectPostulante?.(Postulante);
                     }}
-                    className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors"
+                    className="text-primary hover:text-primary-hover font-medium text-sm transition-colors"
                   >
                     Ver Perfil →
                   </button>
@@ -129,8 +132,8 @@ export default function RankingTable({
       </div>
 
       {/* Footer Legend */}
-      <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        <div className="flex items-center gap-6 text-xs text-gray-600">
+      <div className="surface-muted px-6 py-4 border-t border-border-subtle">
+        <div className="flex items-center gap-6 text-xs text-secondary">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             <span>Excelente (80-100)</span>
